@@ -11,6 +11,6 @@ namespace LeMarconnes.Models
         // een accommodationtype heeft een lijst van meerdere accommodaties
         public List<Accommodation> Accommodations { get; set; } = new List<Accommodation>();
         // een accommodatietype heeft voor elk accommodatie in de lijst een tarief
-        public List<Tarrif> Tarrifs { get; set; } = new List<Tarrif>();
+        public List<Tariff> Tariffs { get; set; } = new List<Tariff>();
     }
 }

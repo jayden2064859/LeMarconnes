@@ -13,6 +13,9 @@ namespace LeMarconnes.Models
         public bool IsActive { get; set; }
         public DateTime RegistrationDate { get; set; }
 
+        // foreign key
+        public int? CustomerId { get; set; }
+
         // een account kan gekoppeld zijn aan een klant, maar dat hoeft niet altijd het geval te zijn. Customer moet dus nullable zijn
         public Customer? Customer { get; set; }
 

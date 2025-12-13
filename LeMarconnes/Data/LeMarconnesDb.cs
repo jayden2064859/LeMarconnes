@@ -57,7 +57,15 @@ namespace LeMarconnes.Data
                 .WithMany() // deze blijft leeg, want customer verwijst niet terug naar account (klanten moeten ook telefonisch/op locatie kunnen reserveren waarbij ze geen account nodig hebben)
                 .HasForeignKey(a => a.CustomerId)
                 .IsRequired(false); // dit maakt het nullable
-            
+
+            modelBuilder.Entity<Reservation>()
+                .Property(r => r.TotalPrice)
+                .HasPrecision(10, 2);  // max 10 karakters, maar dat is meer dan genoeg in dit geval
+
+            modelBuilder.Entity<Tariff>()
+                .Property(t => t.Price)
+                .HasPrecision(10, 2);  
+
             // constraints
 
             // de einddatum van een reservering moet later dan de startdatum zijn
@@ -73,10 +81,7 @@ namespace LeMarconnes.Data
                 "DogsCount >= 0");
 
 
+
         }
-
-
-
-
     }
 }

@@ -14,7 +14,7 @@ namespace LeMarconnes.Models
         public bool HasElectricity { get; set; }
         public int? ElectricityDays { get; set; }
         public decimal TotalPrice { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = "Gereserveerd"; 
         public DateTime RegistrationDate { get; set; }
 
         // foreign keys voor DB access

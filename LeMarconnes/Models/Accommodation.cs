@@ -8,7 +8,7 @@ namespace LeMarconnes.Models
         public int AccommodationId { get; set; }
         public string PlaceNumber { get; set; }
         public int Capacity { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = "Beschikbaar"; // initialiseren op beschikbaar
         public AccommodationType AccommodationType { get; set; }
         public List<Reservation>Reservations { get; set; }
 
@@ -20,5 +20,11 @@ namespace LeMarconnes.Models
 
         }
 
+      
+        public void CheckCapacity(int totalPersons)
+        {
+            // niet meer personen dan capaciteitslimiet van accommodatie
+            //(AdultsCount + Children0_7Count + Children7_12Count) <= Accommodation.Capacity");
+        }
     }
 }

@@ -14,8 +14,16 @@ namespace LeMarconnes.Data
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Tariff> Tariffs { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            string connection = @"Server=(localdb)\mssqllocaldb;Database=LeMarconnesDB;Trusted_Connection=True;";
+            optionsBuilder.UseSqlServer(connection);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+
             // customer - reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Customer) // een reservation heeft precies 1 customer
@@ -49,9 +57,25 @@ namespace LeMarconnes.Data
                 .WithMany() // deze blijft leeg, want customer verwijst niet terug naar account (klanten moeten ook telefonisch/op locatie kunnen reserveren waarbij ze geen account nodig hebben)
                 .HasForeignKey(a => a.CustomerId)
                 .IsRequired(false); // dit maakt het nullable
+            
+            // constraints
+
+            // de einddatum van een reservering moet later dan de startdatum zijn
+            modelBuilder.Entity<Reservation>()
+                .HasCheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
+
+            // minstens 1 volwassene nodig voor een reservering. aantal kinderen en honden kan 0 zijn
+            modelBuilder.Entity<Reservation>()
+                .HasCheckConstraint("CHK_ValidCounts",
+                "AdultsCount >= 1 AND " +
+                "Children0_7Count >= 0 AND " +
+                "Children7_12Count >= 0 AND " +
+                "DogsCount >= 0");
 
 
         }
+
+
 
 
     }

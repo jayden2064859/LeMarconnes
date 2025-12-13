@@ -6,6 +6,9 @@ namespace LeMarconnes.Data
 {
     public class LeMarconnesDb : DbContext // We gebruiken inheritance om de bestaande methods van Dbcontext te gebruiken 
     {
+        // constructor voor dependency injection
+        public LeMarconnesDb(DbContextOptions<LeMarconnesDb> options) : base(options) { }  // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
+
         // initialise alle models die aan de db toegevoegd moeten worden
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<AccommodationType> AccommodationsTypes { get; set; }
@@ -14,12 +17,9 @@ namespace LeMarconnes.Data
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Tariff> Tariffs { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            string connection = @"Server=(localdb)\mssqllocaldb;Database=LeMarconnesDB;Trusted_Connection=True;";
-            optionsBuilder.UseSqlServer(connection);
-        }
 
+
+        // OnModelCreating is standaard een override method, omdat we van de method van de parent class DbContext lenen.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

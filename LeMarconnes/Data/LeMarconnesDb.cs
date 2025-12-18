@@ -23,6 +23,11 @@ namespace LeMarconnes.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
+            modelBuilder.Entity<AccommodationType>().HasData(
+                new AccommodationType { AccommodationTypeId = 1, Name = "Camping" },
+                new AccommodationType { AccommodationTypeId = 2, Name = "Hotel" }
+            );
+
 
             // customer - reservation
             modelBuilder.Entity<Reservation>()

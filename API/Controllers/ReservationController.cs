@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LeMarconnes.Data;
 using LeMarconnes.Models;
-using LeMarconnes.Data;
+using LeMarconnes.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -48,6 +49,15 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
+
+            // haal tarieven op
+            var tariffs = await _context.Tariffs
+                .Where(t => t.AccommodationTypeId == reservation.Accommodation.AccommodationTypeId)
+                .ToListAsync();
+
+            // gebruik calculator service om totalprice te berekenen
+            reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(reservation, tariffs);
+
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 

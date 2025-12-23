@@ -1,5 +1,7 @@
 ﻿using LeMarconnes.Models;
+using LeMarconnes.Services;
 using Microsoft.Identity.Client;
+using System.Text.Json.Serialization;
 
 namespace LeMarconnes.Models
 {
@@ -24,37 +26,19 @@ namespace LeMarconnes.Models
         public int CustomerId { get; set; }
         public int AccommodationId { get; set; }
 
-        // navigation properties 
+        // navigation properties (relaties in klassendiagram)
+        [JsonIgnore]
         public Customer Customer { get; set; }  // elke reservering is gekoppeld aan 1 klant
+        [JsonIgnore]
         public Accommodation Accommodation { get; set; }  // elke reservering is gekoppeld aan een specifieke accommodatie
 
 
-        // constructor
-        public Reservation(Customer customer, Accommodation accommodation, DateTime startDate, DateTime endDate, int adultsCount, 
-            int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays)
+        // constructors
+        public Reservation() // lege constructor voor EF om objecten aan te maken
         {
-
-            StartDate = startDate;
-            EndDate = endDate;
-            AdultsCount = adultsCount;
-            Children0_7Count = children0_7Count;
-            Children7_12Count = children7_12Count;
-            DogsCount = dogsCount;
-            HasElectricity = hasElectricity;
-            ElectricityDays = hasElectricity ? electricityDays : null; // wordt automatisch null als hasElectricity false is
-
-            Customer = customer;
-            CustomerId = customer.CustomerId; //fk
-            Accommodation = accommodation;
-            AccommodationId = accommodation.AccommodationId; //fk
             
-
-            // default waarden
-            Status = "Gereserveerd";
-            RegistrationDate = DateTime.Now; 
         }
-
-
+       
         // methods
         public int GetNumberOfNights() 
         {

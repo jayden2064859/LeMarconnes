@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeMarconnes.Migrations
 {
-    [DbContext(typeof(LeMarconnesDb))]
+    [DbContext(typeof(CampingDbContext))]
     [Migration("20251218205254_AddStaticData")]
     partial class AddStaticData
     {

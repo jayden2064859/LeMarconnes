@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeMarconnes.Migrations
 {
-    [DbContext(typeof(LeMarconnesDb))]
+    [DbContext(typeof(CampingDbContext))]
     [Migration("20251214004001_AddReservationStatusTrigger")]
     partial class AddReservationStatusTrigger
     {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeMarconnes.Migrations
 {
-    [DbContext(typeof(LeMarconnesDb))]
+    [DbContext(typeof(CampingDbContext))]
     partial class LeMarconnesDbModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

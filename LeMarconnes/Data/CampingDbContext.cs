@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeMarconnes.Data
 {
-    public class LeMarconnesDb : DbContext // We gebruiken inheritance om de bestaande methods van Dbcontext te gebruiken 
+    public class CampingDbContext : DbContext // We gebruiken inheritance om de bestaande methods van Dbcontext te gebruiken 
     {
-        // constructor voor dependency injection
-        public LeMarconnesDb(DbContextOptions<LeMarconnesDb> options) : base(options) { }  // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
+        // lege constructor voor dependency injection
+        public CampingDbContext(DbContextOptions<CampingDbContext> options) : base(options) // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
+        {
+        
+        }  
 
         // initialise alle models die aan de db toegevoegd moeten worden
         public DbSet<Accommodation> Accommodations { get; set; }
@@ -18,6 +21,12 @@ namespace LeMarconnes.Data
         public DbSet<Tariff> Tariffs { get; set; }
 
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(
+                "Server=(localdb)\\mssqllocaldb;Database=LeMarconnesDB;Trusted_Connection=True;");
+        }
+
 
         // OnModelCreating is standaard een override method, omdat we van de method van de parent class DbContext lenen.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,6 +35,16 @@ namespace LeMarconnes.Data
             modelBuilder.Entity<AccommodationType>().HasData(
                 new AccommodationType { AccommodationTypeId = 1, Name = "Camping" },
                 new AccommodationType { AccommodationTypeId = 2, Name = "Hotel" }
+            );
+
+            modelBuilder.Entity<Tariff>().HasData(
+                new Tariff { TariffId = 1, Type = "Campingplaats", Price = 7.50m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 2, Type = "Volwassene", Price = 6.00m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 3, Type = "Kind_0_7", Price = 4.00m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 4, Type = "Kind_7_12", Price = 5.00m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 5, Type = "Hond", Price = 2.50m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 6, Type = "Electriciteit", Price = 7.50m, AccommodationTypeId = 1 },
+                new Tariff { TariffId = 7, Type = "Toeristenbelasting", Price = 0.25m, AccommodationTypeId = 1 }
             );
 
 

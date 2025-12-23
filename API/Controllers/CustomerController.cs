@@ -9,9 +9,9 @@ namespace API.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly LeMarconnesDb _context;
+        private readonly CampingDbContext _context;
 
-        public CustomerController(LeMarconnesDb context)
+        public CustomerController(CampingDbContext context)
         {
             _context = context;
         }

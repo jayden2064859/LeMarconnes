@@ -1,5 +1,6 @@
 ﻿using LeMarconnes.Models;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace LeMarconnes.Models
 {
@@ -9,7 +10,18 @@ namespace LeMarconnes.Models
         public int AccountId { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
-        public string Role { get; set; }
+        public enum Role
+        {
+            [Display(Name = "Klant")]
+            Customer = 0,
+
+            [Display(Name = "Medewerker")]
+            Employee = 1,
+
+            [Display(Name = "Beheerder")]
+            Admin = 2
+
+        }
         public bool IsActive { get; set; }
         public DateTime RegistrationDate { get; set; }
 

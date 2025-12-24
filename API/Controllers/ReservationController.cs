@@ -11,9 +11,9 @@ namespace API.Controllers
     [ApiController]
     public class ReservationController : ControllerBase
     {
-        private readonly LeMarconnesDb _context;
+        private readonly CampingDbContext _context;
         
-        public ReservationController(LeMarconnesDb context)
+        public ReservationController(CampingDbContext context)
         {
             _context = context;  
         }
@@ -49,14 +49,38 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
+            // specifieke accommodation ophalen
+            var accommodation = await _context.Accommodations
+                .Include(a => a.AccommodationType)
+                .FirstOrDefaultAsync(a => a.AccommodationId == reservation.AccommodationId);
+
+            if (accommodation == null)
+                return BadRequest($"Accommodatie met ID {reservation.AccommodationId} niet gevonden");
+
+            // specifieke customer ophalen 
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == reservation.CustomerId);
+
+            if (customer == null)
+                return BadRequest($"Klant met ID {reservation.CustomerId} niet gevonden");
 
             // haal tarieven op
             var tariffs = await _context.Tariffs
-                .Where(t => t.AccommodationTypeId == reservation.Accommodation.AccommodationTypeId)
+                .Where(t => t.AccommodationTypeId == accommodation.AccommodationTypeId)
                 .ToListAsync();
 
-            // gebruik calculator service om totalprice te berekenen
+            
+            reservation.Status = "Gereserveerd";
+            reservation.RegistrationDate = DateTime.Now;
             reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(reservation, tariffs);
+
+            // validatie
+            if (reservation.AdultsCount < 1)
+                return BadRequest("Minstens 1 volwassene vereist");
+
+            if (reservation.EndDate <= reservation.StartDate)
+                return BadRequest("Einddatum moet na startdatum liggen");
+
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();

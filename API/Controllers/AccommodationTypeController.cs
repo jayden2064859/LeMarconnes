@@ -9,9 +9,9 @@ namespace API.Controllers
     [ApiController]
     public class AccommodationTypeController : ControllerBase
     {
-        private readonly LeMarconnesDb _context;
+        private readonly CampingDbContext _context;
 
-        public AccommodationTypeController(LeMarconnesDb context)
+        public AccommodationTypeController(CampingDbContext context)
         {
             _context = context;
         }

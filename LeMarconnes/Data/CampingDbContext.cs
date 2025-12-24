@@ -48,33 +48,36 @@ namespace LeMarconnes.Data
             );
 
 
-            // customer - reservation
+            // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Customer) // een reservation heeft precies 1 customer
                 .WithMany(c => c.Reservations) // een customer kan meerdere reservations hebben
                 .HasForeignKey(r => r.CustomerId);
+                
 
-            // reservation - accommodation
+            // reservation 1..* - 1..* accommodation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Accommodation) // een reservation heeft precies 1 accommodatie eraan gekoppelt
                 .WithMany(a => a.Reservations) // een accommodatie kan meerdere reservations in totaal hebben 
-                .HasForeignKey(r => r.AccommodationId); 
+                .HasForeignKey(r => r.AccommodationId);
+              
 
 
-           // accommodation - accommodationtype
+           // accommodation 0..* - 1 accommodationtype
             modelBuilder.Entity<Accommodation>()
                 .HasOne(a => a.AccommodationType) // een accommodatie heeft precies 1 accommodatietype (1=camping, 2=gite, 3=hotel)
                 .WithMany(at => at.Accommodations) //een accommodatietype kan meerdere accommodaties bevatten (bijv de camping bevat accommodaties 1A, 2B, en 3C)
                 .HasForeignKey(a => a.AccommodationTypeId);
 
 
-            // tariff - accommodatietype
+            // tariff 0..* - 1 accommodatietype
             modelBuilder.Entity<Tariff>() 
                 .HasOne(t => t.AccommodationType) // een tarief heeft precies 1 accommodatietype (bijv het tarief voor campingplaats hoort specifiek bij accommodatietype 1 (camping)
                 .WithMany(at => at.Tariffs) // een accommodatietype kan meerdere tarieven bevatten
-                .HasForeignKey(t => t.AccommodationTypeId);
+                .HasForeignKey(t => t.AccommodationTypeId)
+                .OnDelete(DeleteBehavior.Cascade); // als een accommodatietype verwijderd wordt, worden alle bijbehorende tarieven ook verwijderd
 
-
+            // account 0..1 - 0..1 customer
             // account kan een customer hebben, maar hoeft niet. (Bijv medewerker, admin, eigenaar)
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Customer) // een account kan precies 1 customer hebben

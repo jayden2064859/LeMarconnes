@@ -42,17 +42,18 @@ namespace API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount([FromBody] AccountCreateRequest request)
+        public async Task<ActionResult<Account>> PostAccount(int customerId, string username, string plainPassword)
         {
-            var customer = await _context.Customers.FindAsync(request.CustomerId);
+            var customer = await _context.Customers.FindAsync(customerId);
             if (customer == null)
                 return BadRequest("Customer bestaat niet");
 
-
+            // plainPassword wordt hier gehashed
             var hasher = new PasswordHasher<Account>();
-            var passwordHash = hasher.HashPassword(null, request.PlainPassword);
+            var passwordHash = hasher.HashPassword(null, plainPassword);
 
-            var account = new Account(request.Username, passwordHash, customer);
+            // hashed wachtwoord wordt opgeslagen in plaats van plainpassword
+            var account = new Account(username, passwordHash, customer);
 
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
@@ -61,14 +62,6 @@ namespace API.Controllers
                 new { id = account.AccountId },
                 account);
         }
-
-        public class AccountCreateRequest
-        {
-            public int CustomerId { get; set; }
-            public string Username { get; set; }
-            public string PlainPassword { get; set; }
-        }
-
 
         // PUT: api/account
         [HttpPut("{id}")]

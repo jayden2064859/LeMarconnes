@@ -42,26 +42,23 @@ namespace API.Controllers
         }
 
         [HttpPost]
-
-
-        // [FromBody] Customer customer betekent: Haal de data uit de HTTP request body en zet die om naar een C# object.
-        public async Task<ActionResult<Customer>> PostCustomer([FromBody] Customer customer)
+        public async Task<ActionResult<Customer>> PostCustomer(string firstName, string lastName, string phone, string email, string? infix = null)
         {
 
-            if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+            if (await _context.Customers.AnyAsync(c => c.Email == email))
                 return BadRequest("Email is al geregistreerd");
 
-            if (await _context.Customers.AnyAsync(c => c.Phone == customer.Phone))
+            if (await _context.Customers.AnyAsync(c => c.Phone == phone))
                 return BadRequest("Telefoonnummer is al geregistreerd");
 
 
-            // er bestaat dus al een customer object, en die kunnen we direct gebruiken om een nieuwe customer aan te maken met de custom constructor 
+            // constructor in customer class gebruiken om object aan te maken
             var newCustomer = new Customer(
-            customer.FirstName,
-            customer.LastName,
-            customer.Email,
-            customer.Phone,
-            customer.Infix
+                firstName,
+                lastName,
+                phone,
+                email,
+                infix
             );
 
            _context.Customers.Add(newCustomer);

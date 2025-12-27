@@ -1,12 +1,16 @@
 using Azure.Identity;
 using ClassLibrary.Data;
 using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace LeMarconnes.Controllers
@@ -33,14 +37,30 @@ namespace LeMarconnes.Controllers
         [HttpPost]
         public IActionResult CreateAccount(string username, string password, string confirmPassword)
         {
+
             if (password != confirmPassword)
             {
-                ModelState.AddModelError("", "Wachtwoorden komen niet overeen");
+                TempData["Error"] = "Wachtwoorden komen niet overeen";
                 return View();
             }
 
-            HttpContext.Session.SetString("RegisterUsername", username);
-            HttpContext.Session.SetString("RegisterPassword", password);
+            // LINQ om alle parameters in 1 keer te valideren
+            var requiredFields = new[] {username, password, confirmPassword };
+            if (requiredFields.Any(string.IsNullOrWhiteSpace))
+            {
+                TempData["Error"] = "Vul alle velden in";
+                return View("CreateAccount");
+            }
+
+            try
+            {
+                HttpContext.Session.SetString("RegisterUsername", username);
+                HttpContext.Session.SetString("RegisterPassword", password);
+            }
+            catch
+            {
+                throw new ArgumentException("Er is iets misgegaan tijdens het opslaan van accountgegevens");
+            }
 
             return RedirectToAction("CreateCustomer");
         }
@@ -57,6 +77,7 @@ namespace LeMarconnes.Controllers
         public async Task<IActionResult> CreateCustomer(string firstName, string lastName, string email,
                                                 string phone, string address, string? infix = null)
         {
+
             var username = HttpContext.Session.GetString("RegisterUsername");
             var password = HttpContext.Session.GetString("RegisterPassword");
 
@@ -65,8 +86,6 @@ namespace LeMarconnes.Controllers
                 TempData["Error"] = "Registratiesessie verlopen. Probeer opnieuw.";
                 return View("CreateAccount");
             }
-
-
 
             Customer customer = null;
 
@@ -83,12 +102,23 @@ namespace LeMarconnes.Controllers
                     infix
                 });
 
+                var requiredFields = new[] { firstName, lastName, email, phone, address };
+                if (requiredFields.Any(string.IsNullOrWhiteSpace))
+                {
+                    TempData["Error"] = "Vul alle verplichte velden in";
+                    return View("CreateCustomer");
+                }
+
                 if (!customerResponse.IsSuccessStatusCode)
                 {
                     var errorMsg = await customerResponse.Content.ReadAsStringAsync();
-                    TempData["Error"] = $"Fout: {errorMsg}";
+                    // niet de specifieke error direct tonen aan de gebruiker
+                    TempData["Error"] = "Er ging iets fout tijdens het opslaan van klantgegevens. Probeer opnieuw";
+                    // specifieke error wordt wel intern gelogd
+                    Console.WriteLine($"Fout: {errorMsg}");
                     return View("CreateCustomer");
                 }
+
 
                 customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
             }

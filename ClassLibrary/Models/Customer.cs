@@ -10,7 +10,6 @@ namespace ClassLibrary.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public string Address { get; set; }
         public DateTime RegistrationDate { get; set; }
 
         // navigation properties
@@ -18,7 +17,7 @@ namespace ClassLibrary.Models
 
 
         // constructors
-        public Customer(string firstName, string lastName, string email, string phone, string address, string? infix = null)
+        public Customer(string firstName, string lastName, string email, string phone, string? infix = null)
         {
 
             if (string.IsNullOrWhiteSpace(firstName))
@@ -33,14 +32,11 @@ namespace ClassLibrary.Models
             if (string.IsNullOrWhiteSpace(phone))
                 throw new ArgumentException("Telefoonnummer is verplicht", nameof(phone));
 
-            if (string.IsNullOrWhiteSpace(address))
-                throw new ArgumentException("Adres is verplicht", nameof(address));
 
             FirstName = firstName;
             LastName = lastName;
             Email = email;
             Phone = phone;
-            Address = address;
             Infix = infix;
             RegistrationDate = DateTime.Now;
         }

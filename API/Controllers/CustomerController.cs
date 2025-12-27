@@ -61,7 +61,6 @@ namespace API.Controllers
             customer.LastName,
             customer.Email,
             customer.Phone,
-            customer.Address,
             customer.Infix
             );
 

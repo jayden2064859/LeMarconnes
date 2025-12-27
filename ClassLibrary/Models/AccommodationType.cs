@@ -1,6 +1,6 @@
-﻿using LeMarconnes.Models;
+﻿using ClassLibrary.Models;
 
-namespace LeMarconnes.Models
+namespace ClassLibrary.Models
 {
     public class AccommodationType
     {

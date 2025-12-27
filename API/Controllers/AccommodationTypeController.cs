@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using LeMarconnes.Models;
-using LeMarconnes.Data;
+using ClassLibrary.Models;
+using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
@@ -67,7 +67,7 @@ namespace API.Controllers
             }
 
             _context.Entry(accommodationType).State = EntityState.Modified;
-            await _context.SaveChangesAsync();  // Geen try-catch meer
+            await _context.SaveChangesAsync(); 
 
             return NoContent();
         }

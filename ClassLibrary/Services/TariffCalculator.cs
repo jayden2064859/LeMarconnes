@@ -1,9 +1,9 @@
-﻿using LeMarconnes.Models;
+﻿using ClassLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LeMarconnes.Services
+namespace ClassLibrary.Services
 {
     public static class TariffCalculator
     {

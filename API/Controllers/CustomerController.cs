@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using LeMarconnes.Models;
-using LeMarconnes.Data;
+﻿using Azure.Core;
+using ClassLibrary.Data;
+using ClassLibrary.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
@@ -41,12 +42,33 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
-        {
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, customer);
+
+        // [FromBody] Customer customer betekent: Haal de data uit de HTTP request body en zet die om naar een C# object.
+        public async Task<ActionResult<Customer>> PostCustomer([FromBody] Customer customer)
+        {
+
+            if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+                return BadRequest("Email is al geregistreerd");
+
+            if (await _context.Customers.AnyAsync(c => c.Phone == customer.Phone))
+                return BadRequest("Telefoonnummer is al geregistreerd");
+
+
+            // er bestaat dus al een customer object, en die kunnen we direct gebruiken om een nieuwe customer aan te maken met de custom constructor 
+            var newCustomer = new Customer(
+            customer.FirstName,
+            customer.LastName,
+            customer.Email,
+            customer.Phone,
+            customer.Address,
+            customer.Infix
+            );
+
+           _context.Customers.Add(newCustomer);
+           await _context.SaveChangesAsync();
+
+           return CreatedAtAction("GetCustomer",new { id = newCustomer.CustomerId }, newCustomer);                        
         }
 
         // PUT: api/customer

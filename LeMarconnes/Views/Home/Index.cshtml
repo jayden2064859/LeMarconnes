@@ -1,8 +1,34 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welkom bij Le Marconnès!";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="container mt-5">
+    <div class="row justify-content-center text-center">
+        <div class="col-md-6">
+
+            <h1 class="display-4">Welkom bij Camping Le Marconnès</h1>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        Log in om je reserveringen te bekijken of een nieuwe te maken.
+                    </h5>
+                    <a href="@Url.Action("Login", "Home")" class="btn btn-success">
+                        Inloggen
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Nog geen account?</h5>
+                    <a href="@Url.Action("CreateAccount", "Home")" class="btn btn-primary">
+                        Registreren
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>

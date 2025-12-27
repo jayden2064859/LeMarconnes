@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LeMarconnes.Migrations
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace ClassLibrary.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -72,7 +74,7 @@ namespace LeMarconnes.Migrations
                     TariffId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     AccommodationTypeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -94,7 +96,7 @@ namespace LeMarconnes.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountRole = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: true)
@@ -123,11 +125,10 @@ namespace LeMarconnes.Migrations
                     DogsCount = table.Column<int>(type: "int", nullable: false),
                     HasElectricity = table.Column<bool>(type: "bit", nullable: false),
                     ElectricityDays = table.Column<int>(type: "int", nullable: true),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    AccommodationId = table.Column<int>(type: "int", nullable: false)
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -135,18 +136,64 @@ namespace LeMarconnes.Migrations
                     table.CheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
                     table.CheckConstraint("CHK_ValidCounts", "AdultsCount >= 1 AND Children0_7Count >= 0 AND Children7_12Count >= 0 AND DogsCount >= 0");
                     table.ForeignKey(
-                        name: "FK_Reservations_Accommodations_AccommodationId",
-                        column: x => x.AccommodationId,
-                        principalTable: "Accommodations",
-                        principalColumn: "AccommodationId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Reservations_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
                         principalColumn: "CustomerId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "AccommodationReservation",
+                columns: table => new
+                {
+                    AccommodationsAccommodationId = table.Column<int>(type: "int", nullable: false),
+                    ReservationsReservationId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccommodationReservation", x => new { x.AccommodationsAccommodationId, x.ReservationsReservationId });
+                    table.ForeignKey(
+                        name: "FK_AccommodationReservation_Accommodations_AccommodationsAccommodationId",
+                        column: x => x.AccommodationsAccommodationId,
+                        principalTable: "Accommodations",
+                        principalColumn: "AccommodationId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AccommodationReservation_Reservations_ReservationsReservationId",
+                        column: x => x.ReservationsReservationId,
+                        principalTable: "Reservations",
+                        principalColumn: "ReservationId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AccommodationsTypes",
+                columns: new[] { "AccommodationTypeId", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Camping" },
+                    { 2, "Hotel" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Tariffs",
+                columns: new[] { "TariffId", "AccommodationTypeId", "Price", "Type" },
+                values: new object[,]
+                {
+                    { 1, 1, 7.50m, "Campingplaats" },
+                    { 2, 1, 6.00m, "Volwassene" },
+                    { 3, 1, 4.00m, "Kind_0_7" },
+                    { 4, 1, 5.00m, "Kind_7_12" },
+                    { 5, 1, 2.50m, "Hond" },
+                    { 6, 1, 7.50m, "Electriciteit" },
+                    { 7, 1, 0.25m, "Toeristenbelasting" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccommodationReservation_ReservationsReservationId",
+                table: "AccommodationReservation",
+                column: "ReservationsReservationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accommodations_AccommodationTypeId",
@@ -156,12 +203,9 @@ namespace LeMarconnes.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_CustomerId",
                 table: "Accounts",
-                column: "CustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reservations_AccommodationId",
-                table: "Reservations",
-                column: "AccommodationId");
+                column: "CustomerId",
+                unique: true,
+                filter: "[CustomerId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_CustomerId",
@@ -178,10 +222,10 @@ namespace LeMarconnes.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "AccommodationReservation");
 
             migrationBuilder.DropTable(
-                name: "Reservations");
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Tariffs");
@@ -190,10 +234,13 @@ namespace LeMarconnes.Migrations
                 name: "Accommodations");
 
             migrationBuilder.DropTable(
-                name: "Customers");
+                name: "Reservations");
 
             migrationBuilder.DropTable(
                 name: "AccommodationsTypes");
+
+            migrationBuilder.DropTable(
+                name: "Customers");
         }
     }
 }

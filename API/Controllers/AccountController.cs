@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using LeMarconnes.Models;
-using LeMarconnes.Data;
+﻿using ClassLibrary.Data;
+using ClassLibrary.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
@@ -41,13 +42,33 @@ namespace API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(Account account)
+        public async Task<ActionResult<Account>> PostAccount([FromBody] AccountCreateRequest request)
         {
+            var customer = await _context.Customers.FindAsync(request.CustomerId);
+            if (customer == null)
+                return BadRequest("Customer bestaat niet");
+
+
+            var hasher = new PasswordHasher<Account>();
+            var passwordHash = hasher.HashPassword(null, request.PlainPassword);
+
+            var account = new Account(request.Username, passwordHash, customer);
+
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAccount", new { id = account.AccountId }, account);
+            return CreatedAtAction("GetAccount",
+                new { id = account.AccountId },
+                account);
         }
+
+        public class AccountCreateRequest
+        {
+            public int CustomerId { get; set; }
+            public string Username { get; set; }
+            public string PlainPassword { get; set; }
+        }
+
 
         // PUT: api/account
         [HttpPut("{id}")]

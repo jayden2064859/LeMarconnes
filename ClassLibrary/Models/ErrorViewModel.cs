@@ -1,4 +1,4 @@
-namespace LeMarconnes.Models
+namespace ClassLibrary.Models
 {
     public class ErrorViewModel
     {

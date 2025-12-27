@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using LeMarconnes.Models;
-using LeMarconnes.Data;
+using ClassLibrary.Models;
+using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers

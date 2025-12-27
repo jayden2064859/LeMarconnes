@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Account aanmaken";
+}
+
+<div class="container mt-5">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mb-3">← Terug</a>
+
+    <h2 class="text-center mb-4">Stap 1: Account aanmaken</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="CreateAccount" method="post">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Account gegevens</h5>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Gebruikersnaam *</label>
+                            <input type="text" id="username" name="username" class="form-control" required>
+                            <div class="invalid-feedback">Gebruikersnaam is verplicht</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Wachtwoord *</label>
+                            <input type="password" id="password" name="password" class="form-control" required>
+                            <div class="invalid-feedback">Wachtwoord is verplicht</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Bevestig wachtwoord *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                            <div class="invalid-feedback">Wachtwoorden moeten overeenkomen</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-info-circle"></i>
+                                Na het aanmaken van je account ga je naar stap 2 om je persoonlijke gegevens in te vullen.
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Volgende → Persoonlijke gegevens
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>        
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var password = document.getElementById('password');
+            var confirmPassword = document.getElementById('confirmPassword');
+
+            if (password.value !== confirmPassword.value) {
+                e.preventDefault();
+                alert('Wachtwoorden komen niet overeen!');
+                confirmPassword.focus();
+            }
+        });
+    </script>
+}

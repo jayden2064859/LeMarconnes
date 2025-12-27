@@ -1,16 +1,19 @@
-﻿using LeMarconnes.Models;
+﻿using ClassLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace LeMarconnes.Data
+namespace ClassLibrary.Data
 {
     public class CampingDbContext : DbContext // We gebruiken inheritance om de bestaande methods van Dbcontext te gebruiken 
     {
         // lege constructor voor dependency injection
         public CampingDbContext(DbContextOptions<CampingDbContext> options) : base(options) // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
-        {
-        
-        }  
+        {        
+        }
+
+        public CampingDbContext() 
+        { 
+        }
 
         // initialise alle models die aan de db toegevoegd moeten worden
         public DbSet<Accommodation> Accommodations { get; set; }
@@ -48,21 +51,20 @@ namespace LeMarconnes.Data
             );
 
 
+
             // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Customer) // een reservation heeft precies 1 customer
                 .WithMany(c => c.Reservations) // een customer kan meerdere reservations hebben
                 .HasForeignKey(r => r.CustomerId);
-                
+
 
             // reservation 1..* - 1..* accommodation
             modelBuilder.Entity<Reservation>()
-                .HasOne(r => r.Accommodation) // een reservation heeft precies 1 accommodatie eraan gekoppelt
-                .WithMany(a => a.Reservations) // een accommodatie kan meerdere reservations in totaal hebben 
-                .HasForeignKey(r => r.AccommodationId);
-              
-
-
+                .HasMany(r => r.Accommodations) // een reservation heeft 1 of meer accommodaties 
+                .WithMany(a => a.Reservations); // een accommodatie kan meerdere reservations gehad hebben
+                
+             
            // accommodation 0..* - 1 accommodationtype
             modelBuilder.Entity<Accommodation>()
                 .HasOne(a => a.AccommodationType) // een accommodatie heeft precies 1 accommodatietype (1=camping, 2=gite, 3=hotel)
@@ -79,19 +81,21 @@ namespace LeMarconnes.Data
 
             // account 0..1 - 0..1 customer
             // account kan een customer hebben, maar hoeft niet. (Bijv medewerker, admin, eigenaar)
+            // Een customer hoeft ook niet altijd een account te hebben (bijv telefonisch en op locatie reserveren)
             modelBuilder.Entity<Account>()
-                .HasOne(a => a.Customer) // een account kan precies 1 customer hebben
-                .WithMany() // deze blijft leeg, want customer verwijst niet terug naar account (klanten moeten ook telefonisch/op locatie kunnen reserveren waarbij ze geen account nodig hebben)
-                .HasForeignKey(a => a.CustomerId)
-                .IsRequired(false); // dit maakt het nullable
+                .HasOne(a => a.Customer)
+                .WithOne() // customer gebruikt geen account navigation property (om loops te voorkomen) maar relatie is nog steeds 0..1 - 0..1
+                .HasForeignKey<Account>(a => a.CustomerId)
+                .IsRequired(false); 
 
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.TotalPrice)
-                .HasPrecision(10, 2);  // max 10 karakters, maar dat is meer dan genoeg in dit geval
+                .HasPrecision(10, 2);  // max 10 karakters, dat is meer dan genoeg in dit geval
 
             modelBuilder.Entity<Tariff>()
                 .Property(t => t.Price)
                 .HasPrecision(10, 2);  
+
 
             // constraints
 

@@ -1,7 +1,7 @@
-﻿using LeMarconnes.Models;
+﻿using ClassLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeMarconnes.Models
+namespace ClassLibrary.Models
 {
     public class Accommodation
     {
@@ -9,11 +9,11 @@ namespace LeMarconnes.Models
         public string PlaceNumber { get; set; }
         public int Capacity { get; set; }
         public string Status { get; set; } = "Beschikbaar"; // initialiseren op beschikbaar
-        public AccommodationType AccommodationType { get; set; }
-        public List<Reservation>Reservations { get; set; }
-
-        // foreign key 
         public int AccommodationTypeId { get; set; }
+        public AccommodationType AccommodationType { get; set; }
+        public List<Reservation>Reservations { get; set; } = new List<Reservation>();
+
+           
         // methods
         public void IsAvailable() // wordt bool
         {

@@ -1,6 +1,6 @@
-﻿using LeMarconnes.Data;
-using LeMarconnes.Models;
-using LeMarconnes.Services;
+﻿using ClassLibrary.Data;
+using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +24,8 @@ namespace API.Controllers
         {
             return await _context.Reservations
                 .Include(r => r.Customer)
-                .Include(r => r.Accommodation)
+                .Include(r => r.Accommodations)
+                .ThenInclude(a => a.AccommodationType)
                 .ToListAsync();
         }
 
@@ -34,7 +35,7 @@ namespace API.Controllers
         {
             var reservation = await _context.Reservations
                 .Include(r => r.Customer)
-                .Include(r => r.Accommodation)
+                .Include(r => r.Accommodations)
                 .FirstOrDefaultAsync(r => r.ReservationId == id);
 
             if (reservation == null)
@@ -46,47 +47,47 @@ namespace API.Controllers
         }
 
         // POST: api/Reservation
-        [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
-        {
-            // specifieke accommodation ophalen
-            var accommodation = await _context.Accommodations
-                .Include(a => a.AccommodationType)
-                .FirstOrDefaultAsync(a => a.AccommodationId == reservation.AccommodationId);
+        //[HttpPost]
+        //public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
+        //{
+        //    // specifieke accommodation ophalen
+        //    var accommodation = await _context.Accommodations
+        //        .Include(a => a.AccommodationType)
+        //        .FirstOrDefaultAsync(a => a.AccommodationId == reservation.AccommodationId);
 
-            if (accommodation == null)
-                return BadRequest($"Accommodatie met ID {reservation.AccommodationId} niet gevonden");
+        //    if (accommodation == null)
+        //        return BadRequest($"Accommodatie met ID {reservation.AccommodationId} niet gevonden");
 
-            // specifieke customer ophalen 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == reservation.CustomerId);
+        //    // specifieke customer ophalen 
+        //    var customer = await _context.Customers
+        //        .FirstOrDefaultAsync(c => c.CustomerId == reservation.CustomerId);
 
-            if (customer == null)
-                return BadRequest($"Klant met ID {reservation.CustomerId} niet gevonden");
+        //    if (customer == null)
+        //        return BadRequest($"Klant met ID {reservation.CustomerId} niet gevonden");
 
-            // haal tarieven op
-            var tariffs = await _context.Tariffs
-                .Where(t => t.AccommodationTypeId == accommodation.AccommodationTypeId)
-                .ToListAsync();
+        //    // haal tarieven op
+        //    var tariffs = await _context.Tariffs
+        //        .Where(t => t.AccommodationTypeId == accommodation.AccommodationTypeId)
+        //        .ToListAsync();
 
             
-            reservation.Status = "Gereserveerd";
-            reservation.RegistrationDate = DateTime.Now;
-            reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(reservation, tariffs);
+        //    reservation.Status = "Gereserveerd";
+        //    reservation.RegistrationDate = DateTime.Now;
+        //    reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(reservation, tariffs);
 
-            // validatie
-            if (reservation.AdultsCount < 1)
-                return BadRequest("Minstens 1 volwassene vereist");
+        //    // validatie
+        //    if (reservation.AdultsCount < 1)
+        //        return BadRequest("Minstens 1 volwassene vereist");
 
-            if (reservation.EndDate <= reservation.StartDate)
-                return BadRequest("Einddatum moet na startdatum liggen");
+        //    if (reservation.EndDate <= reservation.StartDate)
+        //        return BadRequest("Einddatum moet na startdatum liggen");
 
 
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
+        //    _context.Reservations.Add(reservation);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReservation", new { id = reservation.ReservationId }, reservation);
-        }
+        //    return CreatedAtAction("GetReservation", new { id = reservation.ReservationId }, reservation);
+        //}
 
         // PUT: api/Reservation/{id}
         [HttpPut("{id}")]

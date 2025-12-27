@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeMarconnes", "LeMarconnes\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{78A45C36-F2C7-4580-9955-27B0DC90433C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "ClassLibrary\ClassLibrary.csproj", "{2A9D3192-C8B6-44E9-9033-44D661663892}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{78A45C36-F2C7-4580-9955-27B0DC90433C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78A45C36-F2C7-4580-9955-27B0DC90433C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78A45C36-F2C7-4580-9955-27B0DC90433C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A9D3192-C8B6-44E9-9033-44D661663892}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A9D3192-C8B6-44E9-9033-44D661663892}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A9D3192-C8B6-44E9-9033-44D661663892}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A9D3192-C8B6-44E9-9033-44D661663892}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

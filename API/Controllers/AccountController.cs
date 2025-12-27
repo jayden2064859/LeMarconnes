@@ -1,4 +1,5 @@
 ﻿using ClassLibrary.Data;
+using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -42,18 +43,21 @@ namespace API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(int customerId, string username, string plainPassword)
+        public async Task<ActionResult<Account>> PostAccount([FromBody] CreateAccountDTO dto)
         {
-            var customer = await _context.Customers.FindAsync(customerId);
+            var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
                 return BadRequest("Customer bestaat niet");
 
-            // plainPassword wordt hier gehashed
+            // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();
-            var passwordHash = hasher.HashPassword(null, plainPassword);
+            var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
 
-            // hashed wachtwoord wordt opgeslagen in plaats van plainpassword
-            var account = new Account(username, passwordHash, customer);
+            // constructor gebruiken om account object aan te maken
+            var account = new Account(
+                dto.Username, 
+                passwordHash, 
+                customer);
 
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
@@ -62,6 +66,7 @@ namespace API.Controllers
                 new { id = account.AccountId },
                 account);
         }
+
 
         // PUT: api/account
         [HttpPut("{id}")]

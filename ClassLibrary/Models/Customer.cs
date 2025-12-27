@@ -42,6 +42,7 @@ namespace ClassLibrary.Models
         }
         public Customer()
         {
+            RegistrationDate = DateTime.Now;
         }
 
         // methods

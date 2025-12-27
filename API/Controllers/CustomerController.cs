@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using ClassLibrary.Data;
+using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,23 +43,23 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(string firstName, string lastName, string phone, string email, string? infix = null)
+        public async Task<ActionResult<Customer>> PostCustomer([FromBody] CreateCustomerDTO dto)
         {
 
-            if (await _context.Customers.AnyAsync(c => c.Email == email))
+            if (await _context.Customers.AnyAsync(c => c.Email == dto.Email))
                 return BadRequest("Email is al geregistreerd");
 
-            if (await _context.Customers.AnyAsync(c => c.Phone == phone))
+            if (await _context.Customers.AnyAsync(c => c.Phone == dto.Phone))
                 return BadRequest("Telefoonnummer is al geregistreerd");
 
 
             // constructor in customer class gebruiken om object aan te maken
             var newCustomer = new Customer(
-                firstName,
-                lastName,
-                phone,
-                email,
-                infix
+                dto.FirstName,
+                dto.LastName,
+                dto.Email,
+                dto.Phone,
+                dto.Infix
             );
 
            _context.Customers.Add(newCustomer);

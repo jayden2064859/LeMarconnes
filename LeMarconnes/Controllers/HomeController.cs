@@ -1,6 +1,7 @@
 using Azure.Identity;
 using ClassLibrary.Data;
 using ClassLibrary.Models;
+using ClassLibrary.DTOs;
 using ClassLibrary.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Json;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -75,82 +77,78 @@ namespace LeMarconnes.Controllers
 
         [HttpPost]
         public async Task<IActionResult> CreateCustomer(string firstName, string lastName, string email,
-                                                string phone, string address, string? infix = null)
+                                                string phone, string? infix = null)
         {
 
+            // opgeslagen username en password van de vorige pagina uit de session ophalen
             var username = HttpContext.Session.GetString("RegisterUsername");
             var password = HttpContext.Session.GetString("RegisterPassword");
-
+            
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 TempData["Error"] = "Registratiesessie verlopen. Probeer opnieuw.";
                 return View("CreateAccount");
             }
 
-            Customer customer = null;
+            // checken of all required parameters geldig zijn 
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phone))
+            {
+                TempData["Error"] = "Vul alle verplichte velden in";
+                return View("CreateCustomer");
+            }
+
 
             // 1. customer aanmaken
-            try
+
+            var customerDto = new CreateCustomerDTO
             {
-                var customerResponse = await _httpClient.PostAsJsonAsync("/api/Customer", new
-                {
-                    firstName,
-                    lastName,
-                    email,
-                    phone,
-                    address,
-                    infix
-                });
-
-                var requiredFields = new[] { firstName, lastName, email, phone, address };
-                if (requiredFields.Any(string.IsNullOrWhiteSpace))
-                {
-                    TempData["Error"] = "Vul alle verplichte velden in";
-                    return View("CreateCustomer");
-                }
-
-                if (!customerResponse.IsSuccessStatusCode)
-                {
-                    var errorMsg = await customerResponse.Content.ReadAsStringAsync();
-                    // niet de specifieke error direct tonen aan de gebruiker
-                    TempData["Error"] = "Er ging iets fout tijdens het opslaan van klantgegevens. Probeer opnieuw";
-                    // specifieke error wordt wel intern gelogd
-                    Console.WriteLine($"Fout: {errorMsg}");
-                    return View("CreateCustomer");
-                }
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Phone = phone,
+                Infix = infix
+            };
 
 
-                customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
+            var customerResponse = await _httpClient.PostAsJsonAsync("/api/Customer", customerDto);
+
+            if (!customerResponse.IsSuccessStatusCode)
+            {
+                var errorMsg = await customerResponse.Content.ReadAsStringAsync();
+                // niet de specifieke error direct tonen aan de gebruiker
+                TempData["Error"] = "Er ging iets fout tijdens het opslaan van klantgegevens. Probeer opnieuw";
+                // specifieke error wordt wel intern gelogd
+                Console.WriteLine($"Fout: {errorMsg}");
+                return View("CreateCustomer");
             }
-            catch (Exception ex)
+
+            var customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
+
+            if (customer == null)
             {
-                TempData["Error"] = $"Fout: {ex.Message}";
+                TempData["Error"] = "Kon klant niet ophalen na aanmaak";
                 return View("CreateCustomer");
             }
 
             // 2. account aanmaken
-            try
-            {
-                var accountResponse = await _httpClient.PostAsJsonAsync("/api/Account", new
-                {
-                    customerId = customer.CustomerId,
-                    username,
-                    plainPassword = password
-                });
 
-                if (!accountResponse.IsSuccessStatusCode)
-                {
-                    // rollback customer als account niet aangemaakt wordt
-                     await _httpClient.DeleteAsync($"/api/Customer/{customer.CustomerId}");
-
-                    var errorMsg = await accountResponse.Content.ReadAsStringAsync();
-                    TempData["Error"] = $"Fout bij aanmaken account: {errorMsg}";
-                    return View("CreateCustomer");
-                }
-            }
-            catch (Exception ex)
+            var accountDto = new CreateAccountDTO
             {
-                TempData["Error"] = $"Fout bij aanmaken account: {ex.Message}";
+                CustomerId = customer.CustomerId,
+                Username = username,
+                PlainPassword = password
+            };
+
+            var accountResponse = await _httpClient.PostAsJsonAsync("/api/Account", accountDto);
+
+            if (!accountResponse.IsSuccessStatusCode)
+            {
+                // rollback customer als account niet aangemaakt wordt
+                await _httpClient.DeleteAsync($"/api/Customer/{customer.CustomerId}");
+
+                var errorMsg = await accountResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = $"Fout bij aanmaken account: {errorMsg}";
                 return View("CreateCustomer");
             }
 

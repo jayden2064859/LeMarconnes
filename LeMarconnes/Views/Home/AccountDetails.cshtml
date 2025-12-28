@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Account gegevens";
+
+    // user data ophalen uit session
+    var username = Context.Session.GetString("Username");
+    var firstName = Context.Session.GetString("FirstName");
+    var lastName = Context.Session.GetString("LastName");
+    var userRole = Context.Session.GetString("AccountRole");
+    var email = Context.Session.GetString("Email");
+    var phone = Context.Session.GetString("Phone");
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-person-circle fs-4 me-2"></i>
+            <h5 class="mb-0">Accountgegevens</h5>
+        </div>
+        <div class="card-body">
+            <hr />
+
+            <div class="mb-3">
+                <strong>Account rol:</strong><br />
+                <span class="badge custom-purple">@userRole</span>
+            </div>
+
+            <hr />
+
+            <div class="mb-3">
+                <strong>Voornaam:</strong><br />
+                <span>@firstName</span>
+            </div>
+
+            <hr />
+
+            <div class="mb-3">
+                <strong>Achternaam:</strong><br />
+                <span>@lastName</span>
+            </div>
+
+            <hr />
+
+            <div class="mb-3">
+                <strong>E-mail:</strong><br />
+                <span>@email</span>
+            </div>
+
+            <hr />
+
+            <div class="mb-3">
+                <strong>Telefoonnummer:</strong><br />
+                <span>@phone</span>
+            </div>
+
+            <hr />
+        </div>
+        <div class="card-footer text-end">
+        </div>
+    </div>
+</div>

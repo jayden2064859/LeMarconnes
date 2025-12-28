@@ -274,6 +274,18 @@ namespace LeMarconnes.Controllers
             return RedirectToAction("Index", "Home"); 
         }
 
+        [HttpGet]
+        public IActionResult AccountDetails()
+        {
+           // redirect naar loginpagina als bijv sessie is verlopen (data van die specifieke user is dan niet meer beschikbaar)
+            if (HttpContext.Session.GetInt32("AccountId") == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            return View("AccountDetails");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

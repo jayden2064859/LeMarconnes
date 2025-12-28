@@ -1,15 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Le Marconnès";
 
-    // session data ophalen
+    // user data ophalen uit session
     var username = Context.Session.GetString("Username");
     var firstName = Context.Session.GetString("FirstName");
-    var lastName = Context.Session.GetString("LastName");
-    var accountId = Context.Session.GetInt32("AccountId");
-    var userRole = Context.Session.GetString("AccountRole");
-    var email = Context.Session.GetString("Email");
-    var phone = Context.Session.GetString("Phone");
-    var customerId = Context.Session.GetInt32("CustomerId");
 }
 
 <div class="container mt-5">

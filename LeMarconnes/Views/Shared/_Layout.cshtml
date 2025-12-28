@@ -35,7 +35,7 @@
                                 <ul class="dropdown-menu">
                                     <li>
                                         <a class="dropdown-item"
-                                           asp-controller="Reservation"
+                                           asp-controller="Home"
                                            asp-action="Index">
                                             Mijn reserveringen
                                         </a>
@@ -43,9 +43,8 @@
 
                                     <li>
                                         <a class="dropdown-item"
-                                           asp-controller="Customer"
-                                           asp-action="Details"
-                                           asp-route-id="@Context.Session.GetInt32("CustomerId")">
+                                           asp-controller="Home"
+                                           asp-action="AccountDetails">
                                             Mijn gegevens
                                         </a>
                                     </li>

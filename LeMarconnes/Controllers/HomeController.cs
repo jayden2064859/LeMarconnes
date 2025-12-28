@@ -100,7 +100,11 @@ namespace LeMarconnes.Controllers
 
 
             // 1. customer aanmaken
+            // customer moet als eerst aangemaakt worden, zodat het customer object teruggegeven kan worden voordat het account object wordt aangemaakt.
+            // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze gelinked kan worden met het account object.
 
+            // dto wordt gebruikt om de data op te slaan. Deze dto wordt naar de API controller gestuurd,
+            // waar de data van de dto wordt gebruikt om met de constructor het object aan te maken
             var customerDto = new CreateCustomerDTO
             {
                 FirstName = firstName,
@@ -115,11 +119,7 @@ namespace LeMarconnes.Controllers
 
             if (!customerResponse.IsSuccessStatusCode)
             {
-                var errorMsg = await customerResponse.Content.ReadAsStringAsync();
-                // niet de specifieke error direct tonen aan de gebruiker
-                TempData["Error"] = "Er ging iets fout tijdens het opslaan van klantgegevens. Probeer opnieuw";
-                // specifieke error wordt wel intern gelogd
-                Console.WriteLine($"Fout: {errorMsg}");
+                TempData["Error"] = await customerResponse.Content.ReadAsStringAsync();
                 return View("CreateCustomer");
             }
 
@@ -156,6 +156,8 @@ namespace LeMarconnes.Controllers
             HttpContext.Session.Remove("RegisterPassword");
 
             TempData["Success"] = "Registratie voltooid! Je kunt nu inloggen.";
+            ViewBag.RedirectUrl = Url.Action("Index", "Home");
+            ViewBag.RedirectDelay = 5;
             return View("CreateCustomer");
         }
 

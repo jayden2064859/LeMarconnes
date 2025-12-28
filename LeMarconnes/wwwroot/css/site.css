@@ -20,3 +20,15 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.btn-custom {
+    background-color: #3973ac;
+    border-color: #3973ac;
+    color: white; 
+}
+
+    .btn-custom:hover {
+        background-color: #264d73;
+        border-color: #264d73;
+        color: white;
+    }

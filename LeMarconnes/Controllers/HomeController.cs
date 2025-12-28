@@ -183,6 +183,90 @@ namespace LeMarconnes.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> Login(string username, string password)
+        {
+            bool loggedIn = false;
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["Error"] = "Vul alle velden in";
+                return View("Login");
+            }
+
+            var loginDto = new LoginDTO
+            {
+                Username = username,
+                Password = password
+            };
+
+            try
+            {
+                var loginResponse = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
+
+                if (!loginResponse.IsSuccessStatusCode)
+                {
+                    var error = await loginResponse.Content.ReadAsStringAsync();
+                    TempData["Error"] = error ?? "Ongeldige inloggegevens";
+                    return View("Login");
+                }
+
+                
+                var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
+
+                if (loginResult == null)
+                {
+                    TempData["Error"] = "Er ging iets mis bij het inloggen";
+                    return View("Login");
+                }
+
+                // sla gebruikersgegevens op in session
+                HttpContext.Session.SetInt32("AccountId", loginResult.AccountId);
+                HttpContext.Session.SetString("Username", loginResult.Username);
+                HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
+
+                // haal klantgegevens op alleen als account met een customer gelinked is (dus niet voor medewerker/admin accounts)
+                if (loginResult.CustomerId.HasValue)
+                {
+                    HttpContext.Session.SetInt32("CustomerId", loginResult.CustomerId.Value);
+                    HttpContext.Session.SetString("FirstName", loginResult.FirstName);
+                    HttpContext.Session.SetString("LastName", loginResult.LastName);
+                    HttpContext.Session.SetString("Phone", loginResult.Phone);
+                    HttpContext.Session.SetString("Email", loginResult.Email);
+                }
+                
+                // user groeten 
+                if (loginResult.FirstName != null)
+                {
+                    TempData["Success"] = $"Welkom, {loginResult.FirstName}!";
+                }
+                else
+                {
+                    TempData["Success"] = $"Welkom, {loginResult.Username}";
+                }
+
+                loggedIn = true;
+
+                // redirect naar reservation page
+                return RedirectToAction("Index", "Home");
+              
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Er is iets fout gegaan tijdens inloggen [check Console voor details]";
+                Console.WriteLine($"Error: {ex.Message}");
+                return View("Login");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Home"); 
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

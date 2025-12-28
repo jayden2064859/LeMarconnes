@@ -32,3 +32,21 @@ body {
         border-color: #264d73;
         color: white;
     }
+
+.custom-green {
+    background-color: #3E8056;
+    border-color: #3E8056;
+    color: white;
+}
+
+.custom-blue {
+    background-color:#354C69; 
+    border-color: #354C69;
+    color: white
+}
+
+.custom-purple {
+    background-color: #735394;
+    border-color: #735394;
+    color: white
+}

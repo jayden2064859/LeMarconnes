@@ -24,7 +24,7 @@ namespace ClassLibrary.Models
         public void CheckCapacity(int totalPersons)
         {
             // niet meer personen dan capaciteitslimiet van accommodatie
-            //(AdultsCount + Children0_7Count + Children7_12Count) <= Accommodation.Capacity");
+           
         }
     }
 }

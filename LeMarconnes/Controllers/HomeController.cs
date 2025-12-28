@@ -179,7 +179,7 @@ namespace LeMarconnes.Controllers
             HttpContext.Session.Remove("RegisterUsername");
             HttpContext.Session.Remove("RegisterPassword");
        
-            TempData["Success"] = "Registratie voltooid! Je kunt nu inloggen.";
+            TempData["LoginSuccess"] = "Registratie voltooid! Je kunt nu inloggen.";
             return View("CreateCustomer");
         }
 

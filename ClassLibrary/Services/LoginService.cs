@@ -1,4 +1,5 @@
 ﻿using ClassLibrary.DTOs;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,6 @@ namespace ClassLibrary.Services
             }
             return true;
         }
-
-
     }
 }
 

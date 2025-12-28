@@ -60,7 +60,7 @@ namespace API.Controllers
                 dto.Email,
                 dto.Phone,
                 dto.Infix
-            );
+            );  
 
            _context.Customers.Add(newCustomer);
            await _context.SaveChangesAsync();

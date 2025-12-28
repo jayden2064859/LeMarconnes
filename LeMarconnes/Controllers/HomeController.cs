@@ -208,32 +208,29 @@ namespace LeMarconnes.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
-            bool loggedIn = false;
-
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            // checken of beide username en password fields zijn ingevuld
+            bool requiredFields = LoginService.RequiredFields(username, password);
+            if (!requiredFields)
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("Login");
             }
 
-            var loginDto = new LoginDTO
-            {
-                Username = username,
-                Password = password
-            };
+            // dto aanmaken via de login service method
+            var loginDto = LoginService.CreateNewLoginDTO(username, password);
 
             try
             {
+                // loginDto naar api sturen, en de response daarvan in loginResponse var zetten 
                 var loginResponse = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
 
                 if (!loginResponse.IsSuccessStatusCode)
                 {
-                    var error = await loginResponse.Content.ReadAsStringAsync();
-                    TempData["Error"] = error ?? "Ongeldige inloggegevens";
+                    TempData["Error"] = "Ongeldige invoer";
                     return View("Login");
                 }
 
-                
+                // loginResponse lezen 
                 var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
 
                 if (loginResult == null)
@@ -257,19 +254,8 @@ namespace LeMarconnes.Controllers
                     HttpContext.Session.SetString("Email", loginResult.Email);
                 }
                 
-                // user groeten 
-                if (loginResult.FirstName != null)
-                {
-                    TempData["Success"] = $"Welkom, {loginResult.FirstName}!";
-                }
-                else
-                {
-                    TempData["Success"] = $"Welkom, {loginResult.Username}";
-                }
 
-                loggedIn = true;
-
-                // redirect naar reservation page
+               // redirect terug naar homepage 
                 return RedirectToAction("Index", "Home");
               
             }

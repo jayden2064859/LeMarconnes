@@ -57,7 +57,7 @@ namespace ClassLibrary.Services
         // ervoor zorgen dat elke username minimaal 4 karakters is
         public static bool ValidUsernameLength(string username)
         {
-            if (username.Length <= 3)
+            if (username.Length <= 3 || username.Length > 20)
             {
                 return false;
             }
@@ -73,6 +73,8 @@ namespace ClassLibrary.Services
             }
             return true;
         }
+
+
 
 
 

@@ -26,6 +26,7 @@ namespace ClassLibrary.Services
             };
         }
 
+       
         public static bool AccountInfoReceived(string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))

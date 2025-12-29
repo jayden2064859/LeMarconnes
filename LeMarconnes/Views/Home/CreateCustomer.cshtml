@@ -52,10 +52,12 @@
                                 else if (TempData["LoginSuccess"] != null)
                                 {
                                     <div class="alert alert-success">
-                                        @TempData["Success"]
+                                        @TempData["LoginSuccess"]
+                                        <p><a asp-action="Login" class="text-decoration-none fw-bold">
+                                            ← Ga naar login page
+                                        </a></p>
                                     </div>
-                                }                                   
-                                }
+                                }                                                                  
                                 else
                                 {
                                     <div class="alert alert-info">

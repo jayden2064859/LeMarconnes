@@ -39,6 +39,12 @@ body {
     color: white;
 }
 
+    .custom-green:hover {
+        background-color: #426B52;
+        border-color: #426B52;
+        color: white;
+    }
+
 .custom-blue {
     background-color:#354C69; 
     border-color: #354C69;

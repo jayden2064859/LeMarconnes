@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -20,11 +21,23 @@ namespace ClassLibrary.Services
                 PlainPassword = plainPassword
             };
         }
-        public static bool ValidatePassword(string password, string confirmPassword)
+        public static bool DoPasswordsMatch(string password, string confirmPassword)
         {
+            // wachtwoord inputs moeten matchen
             if (password != confirmPassword)
             {
                 return false;
+            }
+            return true;
+        }
+
+        public static bool ValidPasswordLength(string password)
+        {
+            // minimaal 4 karakters
+            if (password.Length <= 3)
+            {
+                return false;
+
             }
             return true;
         }
@@ -39,6 +52,7 @@ namespace ClassLibrary.Services
             }
             return true;
         }
+
 
         // ervoor zorgen dat elke username minimaal 4 karakters is
         public static bool ValidUsernameLength(string username)
@@ -59,6 +73,8 @@ namespace ClassLibrary.Services
             }
             return true;
         }
+
+
 
 
     };

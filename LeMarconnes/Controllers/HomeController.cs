@@ -37,15 +37,23 @@ namespace LeMarconnes.Controllers
 
  
         [HttpPost]
-        public IActionResult CreateAccount(string username, string password, string confirmPassword)
+        public  async Task<IActionResult> CreateAccount(string username, string password, string confirmPassword)
         {
             // service gebruiken om te checken of wachtwoorden overeenkomen
-            bool doPasswordsMatch = CreateAccountService.ValidatePassword(password, confirmPassword);
+            bool doPasswordsMatch = CreateAccountService.DoPasswordsMatch(password, confirmPassword);
 
             if (!doPasswordsMatch)
             {
                 TempData["Error"] = "Wachtwoorden komen niet overeen";
-                return View();
+                return View("CreateAccount");
+            }
+
+            bool validPasswordLength = CreateAccountService.ValidPasswordLength(password);
+
+            if (!validPasswordLength)
+            {
+                TempData["Error"] = "Wachtwoord moet minimaal 4 karakters zijn";
+                return View("CreateAccount");
             }
 
             // checken of alle velden zijn ingevuld
@@ -74,6 +82,14 @@ namespace LeMarconnes.Controllers
                 return View("CreateAccount");
             }
 
+            var checkResponse = await _httpClient.GetAsync($"/api/Account/exists/{username}");
+
+            if (checkResponse.IsSuccessStatusCode)
+            {
+                // api geeft 200 OK terug als username bestaat
+                TempData["Error"] = "Gebruikersnaam is al in gebruik";
+                return View("CreateAccount");
+            }
 
             // username en wachtwoord worden opgeslagen in de session als alle service methods true teruggeven (true=valid input)
             try
@@ -147,11 +163,12 @@ namespace LeMarconnes.Controllers
 
             if (!customerResponse.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Er is iets foutgegaan tijdens het versturen van klantgegevens";
+                var error = await customerResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = error;
                 return View("CreateCustomer");
             }
 
-            // api response lezen 
+            // api response (customer object) lezen als response succesvol is
             var customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
 
             if (customer == null)
@@ -168,10 +185,13 @@ namespace LeMarconnes.Controllers
 
             if (!accountResponse.IsSuccessStatusCode)
             {
+
+                var error = await accountResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = error;
+
                 // rollback customer als account niet aangemaakt wordt
                 await _httpClient.DeleteAsync($"/api/Customer/{customer.CustomerId}");
-           
-                TempData["Error"] = "Er ging iets fout tijdens het aanmaken van je account";
+                       
                 return View("CreateCustomer");
             }
 
@@ -180,7 +200,7 @@ namespace LeMarconnes.Controllers
             HttpContext.Session.Remove("RegisterPassword");
        
             TempData["LoginSuccess"] = "Registratie voltooid! Je kunt nu inloggen.";
-            return View("CreateCustomer");
+            return RedirectToAction("CreateCustomer");
         }
 
 
@@ -226,7 +246,7 @@ namespace LeMarconnes.Controllers
 
                 if (!loginResponse.IsSuccessStatusCode)
                 {
-                    TempData["Error"] = "Ongeldige invoer";
+                    TempData["Error"] = "Ongeldige inloggegevens";
                     return View("Login");
                 }
 

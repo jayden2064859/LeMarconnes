@@ -93,7 +93,7 @@ namespace ClassLibrary.Migrations
                 {
                     AccountId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AccountRole = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -205,6 +205,12 @@ namespace ClassLibrary.Migrations
                 column: "CustomerId",
                 unique: true,
                 filter: "[CustomerId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Accounts_Username",
+                table: "Accounts",
+                column: "Username",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_CustomerId",

@@ -50,7 +50,7 @@ namespace ClassLibrary.Data
                 new Tariff { TariffId = 7, Type = "Toeristenbelasting", Price = 0.25m, AccommodationTypeId = 1 }
             );
 
-
+            // relaties en FKs
 
             // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()
@@ -94,10 +94,15 @@ namespace ClassLibrary.Data
 
             modelBuilder.Entity<Tariff>()
                 .Property(t => t.Price)
-                .HasPrecision(10, 2);  
+                .HasPrecision(10, 2);
 
 
             // constraints
+
+            // elke username moet uniek zijn
+            modelBuilder.Entity<Account>()
+             .HasIndex(a => a.Username)
+             .IsUnique();
 
             // de einddatum van een reservering moet later dan de startdatum zijn
             modelBuilder.Entity<Reservation>()

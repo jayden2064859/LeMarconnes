@@ -121,13 +121,16 @@ namespace ClassLibrary.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("AccountId");
 
                     b.HasIndex("CustomerId")
                         .IsUnique()
                         .HasFilter("[CustomerId] IS NOT NULL");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });

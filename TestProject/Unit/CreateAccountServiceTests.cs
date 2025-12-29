@@ -5,7 +5,7 @@ namespace TestProject.Unit
 {
     public class CreateAccountServiceTests
     {
-        // UTC-09: Valideer gebruikersnaam lengte (te kort)
+        // UTC-14: Valideer gebruikersnaam lengte (te kort)
         [Fact]
         public void ValidUsernameLength_TooShort_ReturnsFalse()
         {
@@ -14,7 +14,7 @@ namespace TestProject.Unit
             Assert.False(result);
         }
 
-        // UTC-10: Valideer gebruikersnaam lengte (geldig)
+        // UTC-15: Valideer gebruikersnaam lengte (geldig)
         [Fact]
         public void ValidUsernameLength_Valid_ReturnsTrue()
         {
@@ -23,7 +23,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-11: Valideer gebruikersnaam lengte (te lang)
+        // UTC-16: Valideer gebruikersnaam lengte (te lang)
         [Fact]
         public void ValidUsernameLength_TooLong_ReturnsFalse()
         {
@@ -32,7 +32,7 @@ namespace TestProject.Unit
             Assert.False(result);
         }
 
-        // UTC-12: Valideer gebruikersnaam karakters (ongeldig)
+        // UTC-17: Valideer gebruikersnaam karakters (ongeldig)
         [Fact]
         public void ValidUsernameChars_WithSpecialChars_ReturnsFalse()
         {
@@ -41,7 +41,7 @@ namespace TestProject.Unit
             Assert.False(result);
         }
 
-        // UTC-13: Valideer gebruikersnaam karakters (geldig)
+        // UTC-18: Valideer gebruikersnaam karakters (geldig)
         [Fact]
         public void ValidUsernameChars_OnlyLettersAndDigits_ReturnsTrue()
         {
@@ -50,7 +50,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-14: Valideer gebruikersnaam verplicht veld
+        // UTC-19: Valideer gebruikersnaam verplicht veld
         [Fact]
         public void ValidateFields_EmptyUsername_ReturnsFalse()
         {
@@ -62,7 +62,7 @@ namespace TestProject.Unit
             Assert.False(result);
         }
 
-        // UTC-15: Valideer gebruikersnaam lengte (maximum 20)
+        // UTC-20: Valideer gebruikersnaam lengte (maximum 20)
         [Fact]
         public void ValidUsernameLength_MaxLength_ReturnsTrue()
         {
@@ -71,7 +71,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-16: Valideer wachtwoord lengte (minimum)
+        // UTC-21: Valideer wachtwoord lengte (minimum)
         [Fact]
         public void ValidPasswordLength_Minimum_ReturnsTrue()
         {
@@ -80,7 +80,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-17: Valideer wachtwoord bevestiging (matching)
+        // UTC-22: Valideer wachtwoord bevestiging (matching)
         [Fact]
         public void DoPasswordsMatch_MatchingPasswords_ReturnsTrue()
         {
@@ -88,7 +88,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-18: Valideer wachtwoord bevestiging (niet matching)
+        // UTC-23: Valideer wachtwoord bevestiging (niet matching)
         [Fact]
         public void DoPasswordsMatch_NonMatchingPasswords_ReturnsFalse()
         {
@@ -96,7 +96,7 @@ namespace TestProject.Unit
             Assert.False(result);
         }
 
-        // UTC-19: Valideer alle velden (geldige input)
+        // UTC-24: Valideer alle velden (geldige input)
         [Fact]
         public void ValidateFields_AllFieldsValid_ReturnsTrue()
         {
@@ -109,7 +109,7 @@ namespace TestProject.Unit
             Assert.True(result);
         }
 
-        // UTC-20: Valideer wachtwoord lengte (te kort)
+        // UTC-25: Valideer wachtwoord lengte (te kort)
         [Fact]
         public void ValidPasswordLength_TooShort_ReturnsFalse()
         {

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(CampingDbContext))]
-    [Migration("20251227231353_InitialCreate")]
+    [Migration("20251229022036_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -124,13 +124,16 @@ namespace ClassLibrary.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("AccountId");
 
                     b.HasIndex("CustomerId")
                         .IsUnique()
                         .HasFilter("[CustomerId] IS NOT NULL");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });

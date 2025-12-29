@@ -41,6 +41,22 @@ namespace API.Controllers
             return account;
         }
 
+        // GET: api/account/exists/{username}
+        [HttpGet("exists/{username}")]
+        public async Task<IActionResult> CheckUsernameExists(string username)
+        {
+            var exists = await _context.Accounts.AnyAsync(a => a.Username == username);
+
+            if (exists)
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         // POST: api/account
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount([FromBody] CreateAccountDTO dto)
@@ -48,6 +64,7 @@ namespace API.Controllers
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
                 return BadRequest("Customer bestaat niet");
+
 
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();
@@ -103,6 +120,7 @@ namespace API.Controllers
         {
             return _context.Accounts.Any(e => e.AccountId == id);
         }
+
 
         // DELETE: api/account
         [HttpDelete("{id}")]

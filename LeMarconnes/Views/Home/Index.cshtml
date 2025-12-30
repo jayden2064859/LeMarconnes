@@ -6,6 +6,13 @@
     var firstName = Context.Session.GetString("FirstName");
 }
 
+@if (TempData["ReservationSuccess"] != null)
+{   
+    <div class="alert alert-success">
+    @TempData["ReservationSuccess"]
+    </div>
+}
+
 <div class="container mt-5">
     <div class="text-center mb-5" style="padding: 15px;">
         @if (!string.IsNullOrEmpty(Context.Session.GetString("FirstName")))

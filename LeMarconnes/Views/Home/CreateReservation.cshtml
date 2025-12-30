@@ -1,0 +1,95 @@
+﻿@{
+	ViewData["Title"] = "Reservation";
+
+}
+
+<div>
+	<a href="@Url.Action("Index", "Home")" class="t-button">Terug </a>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="padding-top: 50px;">Stap 2/2: Persoonlijke gegevens</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <form asp-action="CreateReservation" method="post">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">Voornaam *</label>
+                                    <input type="text" id="firstName" name="firstName" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="infix" class="form-label">Tussenvoegsel</label>
+                                    <input type="text" id="infix" name="infix" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Achternaam *</label>
+                            <input type="text" id="lastName" name="lastName" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" id="email" name="email" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Telefoonnummer *</label>
+                            <input type="tel" id="phone" name="phone" class="form-control">
+                        </div>
+
+                        <div>
+
+                            <div>
+                                <i class="bi bi-shield-check"></i>
+                                @if (TempData["Error"] != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @TempData["Error"]
+                                    </div>
+                                }
+                                else if (TempData["LoginSuccess"] != null)
+                                {
+                                    <div class="alert alert-success">
+                                        @TempData["LoginSuccess"]
+                                        <p>
+                                            <a asp-action="Login" class="text-decoration-none fw-bold">
+                                                ← Ga naar login page
+                                            </a>
+                                        </p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-shield-check"></i>
+                                        Je gegevens worden veilig opgeslagen en worden alleen gebruikt voor reserveringsinfo.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="CreateAccount" class="btn btn-secondary">
+                                ← Terug
+                            </a>
+                            <button type="submit" class="btn btn-custom w-10">
+                                Registratie voltooien
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -82,9 +82,9 @@ namespace LeMarconnes.Controllers
                 return View("CreateAccount");
             }
 
-            var checkResponse = await _httpClient.GetAsync($"/api/Account/exists/{username}");
+            var accountResponse = await _httpClient.GetAsync($"/api/Account/exists/{username}");
 
-            if (checkResponse.IsSuccessStatusCode)
+            if (accountResponse.IsSuccessStatusCode)
             {
                 // api geeft 200 OK terug als username bestaat
                 TempData["Error"] = "Gebruikersnaam is al in gebruik";
@@ -203,6 +203,73 @@ namespace LeMarconnes.Controllers
             return RedirectToAction("CreateCustomer");
         }
 
+        [HttpGet]
+        public IActionResult CreateReservation()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateReservation(List<int> accommodationIds, DateTime startDate, DateTime endDate, int adultsCount,
+            int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
+        {
+            // customer id uit sessie ophalen
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+            if (!customerId.HasValue)
+            {
+                return RedirectToAction("Login");
+            } 
+
+            // service methods gebruiken voor business rules check
+
+            bool validDates = CreateReservationService.ValidateReservationDates(startDate, endDate);
+            if (!validDates)
+            {
+                TempData["Error"] = "Einddatum moet later dan startdatum zijn";
+                return RedirectToAction("CreateReservation");
+            }
+
+            bool validAdultCount = CreateReservationService.ValidateAdultCounts(adultsCount);
+            if (!validAdultCount)
+            {
+                TempData["Error"] = "Minimaal 1 volwassene nodig voor een reservering";
+                return RedirectToAction("CreateReservation");
+            }
+
+            bool validAccommodationCount = CreateReservationService.ValidateAccommodationIds(accommodationIds);
+            if (!validAccommodationCount)
+            {
+                TempData["Error"] = "Minimaal 1 accommodatie nodig voor een reservering";
+                return RedirectToAction("CreateReservation");
+            }
+
+            if (hasElectricity)
+            {
+                bool validElectricityDaysInput = CreateReservationService.ValidateElectricity(electricityDays);
+                if (!validElectricityDaysInput)
+                {
+                    TempData["Error"] = "Als je voor elektriciteit heb gekozen moet je minimaal 1 dag kiezen";
+                    return RedirectToAction("CreateReservation");
+                }
+            }
+
+            // dto aanmaken met de user input als data
+            var reservationDto = CreateReservationService.CreateNewReservationDTO(customerId.Value, accommodationIds, startDate, endDate, adultsCount, children0_7Count,
+                                                                                  children7_12Count, dogsCount, hasElectricity, electricityDays);
+
+            // reservationDTO naar api sturen en de response meteen ophalen
+            var reservationResponse = await _httpClient.PostAsJsonAsync("/api/Reservation", reservationDto);
+
+            if (!reservationResponse.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Er is iets misgegaan tijdens aanmaken van je reservering";
+                return RedirectToAction("CreateReservation");
+            }
+
+            TempData["Success"] = "Reservering succesvol aangemaakt!";
+            return RedirectToAction("Index");
+
+        }
 
         public IActionResult Index()
         {
@@ -210,11 +277,6 @@ namespace LeMarconnes.Controllers
         }
 
         public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        public IActionResult Reservation()
         {
             return View();
         }

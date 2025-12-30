@@ -32,21 +32,12 @@ namespace ClassLibrary.Models
         // constructors
         public Reservation() // parameterloze constructor (nodig voor EF)
         {            
-            Status = "Gereserveerd";
-            RegistrationDate = DateTime.Now;
         }
         
         // main constructor voor aanmaken van reservering 
         public Reservation(int customerId, DateTime startDate, DateTime endDate,  int adultsCount, 
             int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
         {
-            if (endDate <= startDate)           
-            throw new ArgumentException("Einddatum moet na startdatum zijn");
-            
-
-            if (adultsCount < 1)           
-            throw new ArgumentException("Er moet minimaal 1 volwassene zijn");
-            
 
             if (customerId <= 0)
             throw new ArgumentException("Invalid customer");

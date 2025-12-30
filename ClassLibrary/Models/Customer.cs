@@ -51,6 +51,14 @@ namespace ClassLibrary.Models
 
         }
 
+        public void AddReservation(Reservation reservation)
+        {
+            Reservations.Add(reservation);
+            reservation.CustomerId = CustomerId; 
+        }
+
+
+        // reservation history inzien voor specifieke klant
         public List<Reservation> GetAllReservations()
         {
             return Reservations.ToList();

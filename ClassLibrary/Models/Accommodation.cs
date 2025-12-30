@@ -20,6 +20,10 @@ namespace ClassLibrary.Models
 
         }
 
+        public void AddReservation(Reservation reservation)
+        {
+            Reservations.Add(reservation);
+        }
       
         public void CheckCapacity(int totalPersons)
         {

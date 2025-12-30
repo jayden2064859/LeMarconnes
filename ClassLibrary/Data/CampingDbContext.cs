@@ -108,13 +108,9 @@ namespace ClassLibrary.Data
             modelBuilder.Entity<Reservation>()
                 .HasCheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
 
-            // minstens 1 volwassene nodig voor een reservering. aantal kinderen en honden kan 0 zijn
+            // minstens 1 volwassene nodig voor een reservering
             modelBuilder.Entity<Reservation>()
-                .HasCheckConstraint("CHK_ValidCounts",
-                "AdultsCount >= 1 AND " +
-                "Children0_7Count >= 0 AND " +
-                "Children7_12Count >= 0 AND " +
-                "DogsCount >= 0");
+                .HasCheckConstraint("CHK_ValidCounts", "AdultsCount >= 1");
 
 
 

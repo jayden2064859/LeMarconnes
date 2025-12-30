@@ -1,4 +1,5 @@
 ﻿using ClassLibrary.Data;
+using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -46,48 +47,94 @@ namespace API.Controllers
             return reservation;
         }
 
-        // POST: api/Reservation
-        //[HttpPost]
-        //public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
-        //{
-        //    // specifieke accommodation ophalen
-        //    var accommodation = await _context.Accommodations
-        //        .Include(a => a.AccommodationType)
-        //        .FirstOrDefaultAsync(a => a.AccommodationId == reservation.AccommodationId);
+        // POST: api/reservation
+        [HttpPost]
+        public async Task<ActionResult<Reservation>> PostReservation([FromBody] CreateReservationDTO dto)
+        {
+            // specifieke customer ophalen 
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == dto.CustomerId);
 
-        //    if (accommodation == null)
-        //        return BadRequest($"Accommodatie met ID {reservation.AccommodationId} niet gevonden");
+            if (customer == null)
+            {
+                return BadRequest($"Klant met ID {dto.CustomerId} niet gevonden");
+            }
+                
+            // alle accommodaties ophalen
+            var accommodations = await _context.Accommodations
+                .Include(a => a.AccommodationType)
+                .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
+                .ToListAsync();
 
-        //    // specifieke customer ophalen 
-        //    var customer = await _context.Customers
-        //        .FirstOrDefaultAsync(c => c.CustomerId == reservation.CustomerId);
-
-        //    if (customer == null)
-        //        return BadRequest($"Klant met ID {reservation.CustomerId} niet gevonden");
-
-        //    // haal tarieven op
-        //    var tariffs = await _context.Tariffs
-        //        .Where(t => t.AccommodationTypeId == accommodation.AccommodationTypeId)
-        //        .ToListAsync();
-
+            if (accommodations.Count == 0)
+            {
+                return BadRequest("Geen geldige accommodaties gevonden");
+            }
             
-        //    reservation.Status = "Gereserveerd";
-        //    reservation.RegistrationDate = DateTime.Now;
-        //    reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(reservation, tariffs);
 
-        //    // validatie
-        //    if (reservation.AdultsCount < 1)
-        //        return BadRequest("Minstens 1 volwassene vereist");
+            if (accommodations.Count != dto.AccommodationIds.Count)
+            {
+                return BadRequest("Niet alle accommodaties konden worden gevonden");
+            }
 
-        //    if (reservation.EndDate <= reservation.StartDate)
-        //        return BadRequest("Einddatum moet na startdatum liggen");
+            // check of accommodaties beschikbaar zijn voor de gekozen periode
+            var overlappingReservations = await _context.Reservations
+                .Include(r => r.Accommodations)
+                .Where(r => (r.Status == "Gereserveerd" || r.Status == "Actief") && // zowel gereserveerde als actieve reserveringen
+                           r.Accommodations.Any(a => dto.AccommodationIds.Contains(a.AccommodationId)) &&
+                           !(r.EndDate <= dto.StartDate || r.StartDate >= dto.EndDate))
+                .ToListAsync();
 
+            if (overlappingReservations.Any())
+            {
+                var conflicterendeAccommodaties = overlappingReservations
+                    .SelectMany(r => r.Accommodations)
+                    .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
+                    .Select(a => a.AccommodationId)
+                    .Distinct()
+                    .ToList();
 
-        //    _context.Reservations.Add(reservation);
-        //    await _context.SaveChangesAsync();
+                return BadRequest($"Deze accommodaties zijn momenteel niet beschikbaar op de gekozen datums: {conflicterendeAccommodaties}");
+            }
 
-        //    return CreatedAtAction("GetReservation", new { id = reservation.ReservationId }, reservation);
-        //}
+            // haal tarieven op voor camping 
+            var tariffs = await _context.Tariffs
+                .Where(t => t.AccommodationTypeId == 1)
+                .ToListAsync();
+
+            // maak nieuwe reservering aan met constructor
+            var reservation = new Reservation(
+                dto.CustomerId,
+                dto.StartDate,
+                dto.EndDate,
+                dto.AdultsCount,
+                dto.Children0_7Count,
+                dto.Children7_12Count,
+                dto.DogsCount,
+                dto.HasElectricity,
+                dto.ElectricityDays
+            );
+
+            // voeg accommodaties toe aan de reservering
+            foreach (var accommodation in accommodations)
+            {
+                reservation.AddAccommodation(accommodation);
+            }
+
+            // bereken totale prijs
+            reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(
+                reservation,
+                tariffs,
+                accommodations.Count
+            );
+
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetReservation",
+                new { id = reservation.ReservationId },
+                reservation);
+        }
 
         // PUT: api/Reservation/{id}
         [HttpPut("{id}")]

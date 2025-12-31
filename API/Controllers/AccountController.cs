@@ -20,7 +20,7 @@ namespace API.Controllers
 
         // GET: api/account
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        public async Task<ActionResult<List<Account>>> GetAccounts()
         {
             return await _context.Accounts
             .ToListAsync();

@@ -10,7 +10,6 @@ namespace ClassLibrary.Data
         public CampingDbContext(DbContextOptions<CampingDbContext> options) : base(options) // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
         {        
         }
-
         public CampingDbContext() 
         { 
         }
@@ -34,12 +33,15 @@ namespace ClassLibrary.Data
         // OnModelCreating is standaard een override method, omdat we van de method van de parent class DbContext lenen.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
 
+            // db seeden met (static) accommodatietypes
             modelBuilder.Entity<AccommodationType>().HasData(
                 new AccommodationType { AccommodationTypeId = 1, Name = "Camping" },
                 new AccommodationType { AccommodationTypeId = 2, Name = "Hotel" }
             );
 
+            // db seeden met camping tarieven 
             modelBuilder.Entity<Tariff>().HasData(
                 new Tariff { TariffId = 1, Type = "Campingplaats", Price = 7.50m, AccommodationTypeId = 1 },
                 new Tariff { TariffId = 2, Type = "Volwassene", Price = 6.00m, AccommodationTypeId = 1 },
@@ -49,6 +51,32 @@ namespace ClassLibrary.Data
                 new Tariff { TariffId = 6, Type = "Electriciteit", Price = 7.50m, AccommodationTypeId = 1 },
                 new Tariff { TariffId = 7, Type = "Toeristenbelasting", Price = 0.25m, AccommodationTypeId = 1 }
             );
+
+            // db seeden met accommodaties
+            modelBuilder.Entity<Accommodation>().HasData(
+                new Accommodation { AccommodationId = 1, PlaceNumber = "1A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1,},
+                new Accommodation { AccommodationId = 2, PlaceNumber = "2A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
+                new Accommodation { AccommodationId = 3, PlaceNumber = "3A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
+                new Accommodation { AccommodationId = 4, PlaceNumber = "4A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },                               
+                new Accommodation { AccommodationId = 5, PlaceNumber = "5A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, }
+            );
+
+            // database moet string opslaan ipv int for enum waarden (duidelijker voor medewerkers om direct 'Beschikbaar' te lezen ipv '0'
+            modelBuilder.Entity<Accommodation>()
+                .Property(a => a.CurrentStatus)
+                .HasConversion<string>()
+                .HasMaxLength(11);
+
+            modelBuilder.Entity<Account>()
+                .Property(a => a.AccountRole)
+                .HasConversion<string>()
+                .HasMaxLength(8);
+
+            modelBuilder.Entity<Reservation>()
+                .Property(a => a.CurrentStatus)
+                .HasConversion<string>()
+                .HasMaxLength(12);
+
 
             // relaties en FKs
 
@@ -107,11 +135,10 @@ namespace ClassLibrary.Data
             // de einddatum van een reservering moet later dan de startdatum zijn
             modelBuilder.Entity<Reservation>()
                 .HasCheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
-
+                                                
             // minstens 1 volwassene nodig voor een reservering
             modelBuilder.Entity<Reservation>()
                 .HasCheckConstraint("CHK_ValidCounts", "AdultsCount >= 1");
-
 
 
         }

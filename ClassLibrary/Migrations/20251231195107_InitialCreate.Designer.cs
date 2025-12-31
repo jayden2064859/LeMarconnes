@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(CampingDbContext))]
-    [Migration("20251229022036_InitialCreate")]
+    [Migration("20251231195107_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -54,11 +54,12 @@ namespace ClassLibrary.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<string>("PlaceNumber")
+                    b.Property<string>("CurrentStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("PlaceNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -67,6 +68,48 @@ namespace ClassLibrary.Migrations
                     b.HasIndex("AccommodationTypeId");
 
                     b.ToTable("Accommodations");
+
+                    b.HasData(
+                        new
+                        {
+                            AccommodationId = 1,
+                            AccommodationTypeId = 1,
+                            Capacity = 6,
+                            CurrentStatus = "Beschikbaar",
+                            PlaceNumber = "1A"
+                        },
+                        new
+                        {
+                            AccommodationId = 2,
+                            AccommodationTypeId = 1,
+                            Capacity = 6,
+                            CurrentStatus = "Beschikbaar",
+                            PlaceNumber = "2A"
+                        },
+                        new
+                        {
+                            AccommodationId = 3,
+                            AccommodationTypeId = 1,
+                            Capacity = 6,
+                            CurrentStatus = "Beschikbaar",
+                            PlaceNumber = "3A"
+                        },
+                        new
+                        {
+                            AccommodationId = 4,
+                            AccommodationTypeId = 1,
+                            Capacity = 6,
+                            CurrentStatus = "Beschikbaar",
+                            PlaceNumber = "4A"
+                        },
+                        new
+                        {
+                            AccommodationId = 5,
+                            AccommodationTypeId = 1,
+                            Capacity = 6,
+                            CurrentStatus = "Beschikbaar",
+                            PlaceNumber = "5A"
+                        });
                 });
 
             modelBuilder.Entity("ClassLibrary.Models.AccommodationType", b =>
@@ -106,8 +149,10 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
 
-                    b.Property<int>("AccountRole")
-                        .HasColumnType("int");
+                    b.Property<string>("AccountRole")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
@@ -190,6 +235,11 @@ namespace ClassLibrary.Migrations
                     b.Property<int>("Children7_12Count")
                         .HasColumnType("int");
 
+                    b.Property<string>("CurrentStatus")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
@@ -211,10 +261,6 @@ namespace ClassLibrary.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
@@ -227,7 +273,7 @@ namespace ClassLibrary.Migrations
                         {
                             t.HasCheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
 
-                            t.HasCheckConstraint("CHK_ValidCounts", "AdultsCount >= 1 AND Children0_7Count >= 0 AND Children7_12Count >= 0 AND DogsCount >= 0");
+                            t.HasCheckConstraint("CHK_ValidCounts", "AdultsCount >= 1");
                         });
                 });
 

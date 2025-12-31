@@ -18,7 +18,7 @@ namespace API.Controllers
 
         // GET: api/tariff
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tariff>>> GetTariffs()
+        public async Task<ActionResult<List<Tariff>>> GetTariffs()
         {
             return await _context.Tariffs
             .ToListAsync();

@@ -1,0 +1,96 @@
+﻿@{
+    ViewData["Title"] = "Reservering - Stap 3: Details";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Reservering - Stap 3: Details invullen</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="CreateReservation3" method="post">
+                        <!-- personen -->
+                        <div class="mb-4">
+                            <h5>Aantal personen</h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Volwassenen (18+) *</label>
+                                    <input type="number" name="adultsCount" min="1" max="10"
+                                           value="2" class="form-control"/>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Kinderen 0-7 jaar</label>
+                                    <input type="number" name="children0_7Count" min="0" max="10"
+                                           value="0" class="form-control" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Kinderen 7-12 jaar</label>
+                                    <input type="number" name="children7_12Count" min="0" max="10"
+                                           value="0" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- extras -->
+                        <div class="mb-4">
+                            <h5>Extra's</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Honden (max. 3)</label>
+                                    <input type="number" id="dogsCount" name="dogsCount"
+                                           min="0" max="3" value="0" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="hasElectricity" name="hasElectricity" value="true"
+                                           onchange="toggleElectricityDays()" />
+                                    <label class="form-check-label" for="hasElectricity">
+                                        Elektriciteit gewenst
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="electricityDaysGroup" style="display: none;" class="mb-3">
+                                <label class="form-label">Aantal dagen elektriciteit</label>
+                                <input type="number" id="electricityDays" name="electricityDays"
+                                       min="1" value="1" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("CreateReservation2")" class="btn btn-outline-secondary">
+                                ← Terug
+                            </a>
+                            <button type="submit" class="btn custom-green">
+                                Reservering plaatsen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleElectricityDays() {
+        const group = document.getElementById('electricityDaysGroup');
+        const checkbox = document.getElementById('hasElectricity');
+        group.style.display = checkbox.checked ? 'block' : 'none';
+
+        if (checkbox.checked) {
+            document.getElementById('electricityDays').required = true;
+        } else {
+            document.getElementById('electricityDays').required = false;
+        }
+    }
+</script>

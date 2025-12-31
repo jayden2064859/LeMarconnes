@@ -20,7 +20,7 @@ namespace API.Controllers
 
         // GET: api/customer
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
             return await _context.Customers
             .ToListAsync();

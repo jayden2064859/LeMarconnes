@@ -18,7 +18,7 @@ namespace API.Controllers
 
         // GET: api/accommodationType
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AccommodationType>>> GetAccommodationTypes()
+        public async Task<ActionResult<List<AccommodationType>>> GetAccommodationTypes()
         {
             return await _context.AccommodationsTypes
             .ToListAsync();

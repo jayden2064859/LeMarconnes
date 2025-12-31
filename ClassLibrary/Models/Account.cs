@@ -12,13 +12,8 @@ namespace ClassLibrary.Models
         public Role AccountRole { get; set; }
         public enum Role
         {
-            [Display(Name = "Klant")]
             Customer = 0,
-
-            [Display(Name = "Medewerker")]
             Employee = 1,
-
-            [Display(Name = "Beheerder")]
             Admin = 2
 
         }

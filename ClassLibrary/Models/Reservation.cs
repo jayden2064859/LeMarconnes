@@ -20,7 +20,14 @@ namespace ClassLibrary.Models
         public bool HasElectricity { get; set; }
         public int? ElectricityDays { get; set; }
         public decimal TotalPrice { get; set; }
-        public string Status { get; set; }
+        public ReservationStatus CurrentStatus { get; set; } = Reservation.ReservationStatus.Gereserveerd; // initialiseer nieuwe reserveringen op 'gereserveerd'
+
+        public enum ReservationStatus
+        {
+            Gereserveerd = 0,
+            Actief = 1,
+            Verlopen = 2
+        }
         public DateTime RegistrationDate { get; set; }
 
       
@@ -52,7 +59,7 @@ namespace ClassLibrary.Models
             HasElectricity = hasElectricity;
             ElectricityDays = electricityDays;
 
-            Status = "Gereserveerd";
+            CurrentStatus = Reservation.ReservationStatus.Gereserveerd;
             RegistrationDate = DateTime.Now;
         
         }

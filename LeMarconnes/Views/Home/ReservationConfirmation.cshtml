@@ -1,0 +1,72 @@
+﻿@model ClassLibrary.ViewModels.ReservationConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Reservering Bevestiging";
+}
+
+<h2>Reservering Bevestigd</h2>
+
+@if (TempData["ReservationSuccess"] != null)
+{
+    <div style="color: green; margin-bottom: 20px;">
+        @TempData["ReservationSuccess"]
+    </div>
+}
+
+<table style="width: 50%; border-collapse: collapse;">
+    <tr>
+        <th style="text-align: left; padding: 5px;">Klantnaam</th>
+        <td style="padding: 5px;">@Model.FullName</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Startdatum</th>
+        <td style="padding: 5px;">@Model.StartDate.ToString("yyyy-MM-dd")</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Einddatum</th>
+        <td style="padding: 5px;">@Model.EndDate.ToString("yyyy-MM-dd")</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Aantal nachten</th>
+        <td style="padding: 5px;">@( (Model.EndDate - Model.StartDate).Days )</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Volwassenen</th>
+        <td style="padding: 5px;">@Model.AdultsCount</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Kinderen 0-7 jaar</th>
+        <td style="padding: 5px;">@Model.Children0_7Count</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Kinderen 7-12 jaar</th>
+        <td style="padding: 5px;">@Model.Children7_12Count</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Honden</th>
+        <td style="padding: 5px;">@Model.DogsCount</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Elektriciteit</th>
+        <td style="padding: 5px;">@(Model.HasElectricity ? "Ja" : "Nee")</td>
+    </tr>
+    @if (Model.HasElectricity && Model.ElectricityDays.HasValue)
+    {
+        <tr>
+            <th style="text-align: left; padding: 5px;">Aantal dagen stroom</th>
+            <td style="padding: 5px;">@Model.ElectricityDays</td>
+        </tr>
+    }
+    <tr>
+        <th style="text-align: left; padding: 5px;">Accommodaties</th>
+        <td style="padding: 5px;">@string.Join(", ", Model.AccommodationPlaceNumbers)</td>
+    </tr>
+    <tr>
+        <th style="text-align: left; padding: 5px;">Totaalprijs</th>
+        <td style="padding: 5px;">€@Model.TotalPrice.ToString("0.00")</td>
+    </tr>
+</table>
+
+<div style="margin-top: 20px;">
+    <a href="@Url.Action("Index", "Home")">Terug naar Home</a>
+</div>

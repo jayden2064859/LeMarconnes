@@ -1,9 +1,11 @@
 ﻿using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using ClassLibrary.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,7 +33,36 @@ namespace ClassLibrary.Services
             };
         }
 
- 
+        // max 2 accommodations (campingplekken) in totaal voor een reservering
+        public static bool ValidAccommodationCount(List<int> accommodationList)
+        {
+            if (accommodationList.Count > 2)
+            {
+                return false;
+            }
+            return true;
+        }
+        
+
+        // specifiek checken of start- en einddatum zijn ingevoerd
+        public static bool ValidDateInput(DateTime startDate, DateTime endDate)
+        {
+            if (startDate == default || endDate == default)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        // alle verplichte velden ingevuld
+        public static bool ValidateAllRequiredFields(DateTime startDate, DateTime endDate, List<int>accommodationIds, int adultsCount, 
+            int children0_7Count, int children7_12Count, int dogsCount)
+        {
+            // logica
+            return true;
+
+        }
+
         // einddatum mag niet eerder dan startdatum zijn
         public static bool ValidateReservationDates(DateTime startDate, DateTime endDate)
         {
@@ -71,6 +102,7 @@ namespace ClassLibrary.Services
             }
             return true;
         }
+
     }
 }
 

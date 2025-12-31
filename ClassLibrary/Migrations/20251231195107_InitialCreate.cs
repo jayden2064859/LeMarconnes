@@ -52,7 +52,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PlaceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CurrentStatus = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
                     AccommodationTypeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -95,7 +95,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountRole = table.Column<int>(type: "int", nullable: false),
+                    AccountRole = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: true)
@@ -125,7 +125,7 @@ namespace ClassLibrary.Migrations
                     HasElectricity = table.Column<bool>(type: "bit", nullable: false),
                     ElectricityDays = table.Column<int>(type: "int", nullable: true),
                     TotalPrice = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CurrentStatus = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -133,7 +133,7 @@ namespace ClassLibrary.Migrations
                 {
                     table.PrimaryKey("PK_Reservations", x => x.ReservationId);
                     table.CheckConstraint("CHK_EndAfterStart", "EndDate > StartDate");
-                    table.CheckConstraint("CHK_ValidCounts", "AdultsCount >= 1 AND Children0_7Count >= 0 AND Children7_12Count >= 0 AND DogsCount >= 0");
+                    table.CheckConstraint("CHK_ValidCounts", "AdultsCount >= 1");
                     table.ForeignKey(
                         name: "FK_Reservations_Customers_CustomerId",
                         column: x => x.CustomerId,
@@ -173,6 +173,18 @@ namespace ClassLibrary.Migrations
                 {
                     { 1, "Camping" },
                     { 2, "Hotel" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Accommodations",
+                columns: new[] { "AccommodationId", "AccommodationTypeId", "Capacity", "CurrentStatus", "PlaceNumber" },
+                values: new object[,]
+                {
+                    { 1, 1, 6, "Beschikbaar", "1A" },
+                    { 2, 1, 6, "Beschikbaar", "2A" },
+                    { 3, 1, 6, "Beschikbaar", "3A" },
+                    { 4, 1, 6, "Beschikbaar", "4A" },
+                    { 5, 1, 6, "Beschikbaar", "5A" }
                 });
 
             migrationBuilder.InsertData(

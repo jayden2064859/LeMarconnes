@@ -18,13 +18,13 @@ namespace API.Controllers
 
         // GET: api/accommodation
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Accommodation>>> GetAccommodations()
+        public async Task<ActionResult<List<Accommodation>>> GetAccommodations()
         {
             return await _context.Accommodations
             .ToListAsync();
         }
 
-        // GET: api/accommodation/{id}
+        // GET: api/accommodation/{id} 
         [HttpGet("{id}")]
         public async Task<ActionResult<Accommodation>> GetAccommodation(int id)
         {
@@ -37,6 +37,30 @@ namespace API.Controllers
             }
 
             return accommodation;
+        }
+
+        // GET: /api/Accommodation/availabe-for-dates
+        [HttpGet("available-for-dates")]
+        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate)
+        {
+            // vind alle accommodaties die niet bezet zijn in de gekozen periode
+            var occupiedAccommodationIds = await _context.Reservations
+                .Include(r => r.Accommodations)
+                .Where(r => r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
+                           !(r.EndDate <= startDate || r.StartDate >= endDate))
+                .SelectMany(r => r.Accommodations.Select(a => a.AccommodationId))
+                .Distinct()
+                .ToListAsync();
+
+            // alle beschikbare accommodaties die niet bezet zijn
+            var availableAccommodations = await _context.Accommodations
+                .Where(a => a.AccommodationTypeId == 1 &&
+                           !occupiedAccommodationIds.Contains(a.AccommodationId))
+                .ToListAsync();
+
+            return availableAccommodations;
         }
 
 
@@ -95,7 +119,7 @@ namespace API.Controllers
             return NoContent();
         }
 
-
+      
     }
 }
 

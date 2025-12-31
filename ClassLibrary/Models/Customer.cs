@@ -21,16 +21,16 @@ namespace ClassLibrary.Models
         {
 
             if (string.IsNullOrWhiteSpace(firstName))
-                throw new ArgumentException("Voornaam is verplicht", nameof(firstName));
+                throw new ArgumentException("Voornaam is verplicht");
 
             if (string.IsNullOrWhiteSpace(lastName))
-                throw new ArgumentException("Achternaam is verplicht", nameof(lastName));
+                throw new ArgumentException("Achternaam is verplicht");
 
             if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Email is verplicht", nameof(email));
+                throw new ArgumentException("Email is verplicht");
 
             if (string.IsNullOrWhiteSpace(phone))
-                throw new ArgumentException("Telefoonnummer is verplicht", nameof(phone));
+                throw new ArgumentException("Telefoonnummer is verplicht");
 
 
             FirstName = firstName;
@@ -63,14 +63,23 @@ namespace ClassLibrary.Models
         {
             return Reservations.ToList();
         }
-        public List<Reservation> GetActiveReservations() 
+        
+        // alle reserveringen van klant op halen die nog moeten gebeuren (huidige datum is niet tijdens reserveringsdatum)
+        public List<Reservation> GetUpcomingReservations() 
         {
-            return Reservations.Where(r => r.Status == "Gereserveerd").ToList();
+            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Gereserveerd).ToList();
         }
 
+        // alle reserveringen van klant op halen die op dit moment actief zijn (huidige datum is wel tijdens reserveringsdatum)
+        public List<Reservation> GetActiveReservations()
+        {
+            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Actief).ToList();
+        }
+
+        // Alle reserveringen die verlopen zijn ophalen
         public List<Reservation> GetPastReservations()
         {
-            return Reservations.Where(r => r.Status == "Verlopen").ToList();
+            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Verlopen).ToList();
         }
 
     }

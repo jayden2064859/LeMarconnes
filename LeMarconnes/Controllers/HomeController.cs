@@ -1,8 +1,10 @@
 using Azure.Identity;
 using ClassLibrary.Data;
-using ClassLibrary.Models;
 using ClassLibrary.DTOs;
+using ClassLibrary.Models;
 using ClassLibrary.Services;
+using ClassLibrary.ViewModels;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,58 +27,48 @@ namespace LeMarconnes.Controllers
         public HomeController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7290"); 
+            _httpClient.BaseAddress = new Uri("https://localhost:7290");
         }
 
-       
         [HttpGet]
         public IActionResult CreateAccount()
         {
             return View("CreateAccount");
         }
 
- 
         [HttpPost]
-        public  async Task<IActionResult> CreateAccount(string username, string password, string confirmPassword)
+        public async Task<IActionResult> CreateAccount(string username, string password, string confirmPassword)
         {
             // service gebruiken om te checken of wachtwoorden overeenkomen
-            bool doPasswordsMatch = CreateAccountService.DoPasswordsMatch(password, confirmPassword);
 
-            if (!doPasswordsMatch)
+            if (!CreateAccountService.DoPasswordsMatch(password, confirmPassword))
             {
                 TempData["Error"] = "Wachtwoorden komen niet overeen";
                 return View("CreateAccount");
             }
 
-            bool validPasswordLength = CreateAccountService.ValidPasswordLength(password);
-
-            if (!validPasswordLength)
+            if (!CreateAccountService.ValidPasswordLength(password))
             {
                 TempData["Error"] = "Wachtwoord moet minimaal 4 karakters zijn";
                 return View("CreateAccount");
             }
 
-            // checken of alle velden zijn ingevuld
-            bool validFieldInputs = CreateAccountService.ValidateFields(username, password, confirmPassword);
-
-            if (!validFieldInputs)
+            // checken of alle velden zijn ingevuld        
+            if (!CreateAccountService.ValidateFields(username, password, confirmPassword))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("CreateAccount");
             }
 
-            // checken of username input geldig is
-            bool validUsernameLength = CreateAccountService.ValidUsernameLength(username);
-            
-            if (!validUsernameLength)
+            // checken of username input geldig is                    
+            if (!CreateAccountService.ValidUsernameLength(username))
             {
                 TempData["Error"] = "Gebruikersnaam moet minimaal 4 karakters zijn";
                 return View("CreateAccount");
             }
 
             // checken of username alleen uit geldige tekens bestaat
-            bool validUsernameChars = CreateAccountService.ValidUsernameChars(username);
-            if (!validUsernameChars)
+            if (!CreateAccountService.ValidUsernameChars(username))
             {
                 TempData["Error"] = "Gebruikersnaam kan alleen uit letters en cijfers bestaan";
                 return View("CreateAccount");
@@ -106,8 +98,8 @@ namespace LeMarconnes.Controllers
         }
 
 
-        [HttpGet] 
-        public IActionResult CreateCustomer()
+        [HttpGet]
+        public async Task<IActionResult> CreateCustomer()
         {
 
             return View("CreateCustomer");
@@ -122,32 +114,28 @@ namespace LeMarconnes.Controllers
             var username = HttpContext.Session.GetString("RegisterUsername");
             var password = HttpContext.Session.GetString("RegisterPassword");
 
-            // checken of username en password succesvol uit de session zijn gehaald
-            bool receivedAccountInfo = CreateCustomerService.AccountInfoReceived(username, password);
-            if (!receivedAccountInfo)
+            // checken of username en password succesvol uit de session zijn gehaald     
+            if (!CreateCustomerService.AccountInfoReceived(username, password))
             {
                 TempData["Error"] = "Sessie verlopen. Probeer opnieuw.";
                 return View("CreateAccount");
             }
 
-            // checken of all required parameters geldige invoer hebben (niet null of alleen maar whitespace)
-            bool validInputs = CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone);
-            if (!validInputs)
+            // checken of all required parameters geldige invoer hebben (niet null of alleen maar whitespace)         
+            if (!CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone))
             {
                 TempData["Error"] = "Vul alle verplichte velden in";
                 return View("CreateCustomer");
             }
 
             // checken of email invoer minimaal 1 '@' teken heeft (en maximaal 1)
-            bool validEmail = CreateCustomerService.ValidEmail(email);
-            if (!validEmail)
+            if (!CreateCustomerService.ValidEmail(email))
             {
                 TempData["Error"] = "Ongeldige email";
                 return View("CreateCustomer");
             }
 
-            bool validPhone = CreateCustomerService.ValidatePhone(phone);
-            if (!validPhone)
+            if (!CreateCustomerService.ValidatePhone(phone))
             {
                 TempData["Error"] = "Ongeldig telefoonnummer";
                 return View("CreateCustomer");
@@ -157,7 +145,7 @@ namespace LeMarconnes.Controllers
             // customer moet als eerst aangemaakt worden, zodat het customer object teruggegeven kan worden voordat het account object wordt aangemaakt.
             // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze direct gelinked kan worden met het account object in dezelfde method.
             var customerDto = CreateCustomerService.CreateNewCustomerDTO(firstName, lastName, email, phone, infix);
-           
+
             // dto naar api sturen
             var customerResponse = await _httpClient.PostAsJsonAsync("/api/Customer", customerDto);
 
@@ -191,92 +179,26 @@ namespace LeMarconnes.Controllers
 
                 // rollback customer als account niet aangemaakt wordt
                 await _httpClient.DeleteAsync($"/api/Customer/{customer.CustomerId}");
-                       
+
                 return View("CreateCustomer");
             }
 
             // opgeslagen username en wachtwoord verwijderen uit session (niet meer nodig)
             HttpContext.Session.Remove("RegisterUsername");
             HttpContext.Session.Remove("RegisterPassword");
-       
+
             TempData["LoginSuccess"] = "Registratie voltooid! Je kunt nu inloggen.";
             return RedirectToAction("CreateCustomer");
         }
 
-        [HttpGet]
-        public IActionResult CreateReservation()
+       [HttpGet]
+        public IActionResult ReservationConfirmation()
         {
-            return View();
-        }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateReservation(List<int> accommodationIds, DateTime startDate, DateTime endDate, int adultsCount,
-            int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
-        {
-            // customer id uit sessie ophalen
-            var customerId = HttpContext.Session.GetInt32("CustomerId");
-            if (!customerId.HasValue)
-            {
-                return RedirectToAction("Login");
-            } 
-
-            // service methods gebruiken voor business rules check
-
-            bool validDates = CreateReservationService.ValidateReservationDates(startDate, endDate);
-            if (!validDates)
-            {
-                TempData["Error"] = "Einddatum moet later dan startdatum zijn";
-                return RedirectToAction("CreateReservation");
-            }
-
-            bool validAdultCount = CreateReservationService.ValidateAdultCounts(adultsCount);
-            if (!validAdultCount)
-            {
-                TempData["Error"] = "Minimaal 1 volwassene nodig voor een reservering";
-                return RedirectToAction("CreateReservation");
-            }
-
-            bool validAccommodationCount = CreateReservationService.ValidateAccommodationIds(accommodationIds);
-            if (!validAccommodationCount)
-            {
-                TempData["Error"] = "Minimaal 1 accommodatie nodig voor een reservering";
-                return RedirectToAction("CreateReservation");
-            }
-
-            if (hasElectricity)
-            {
-                bool validElectricityDaysInput = CreateReservationService.ValidateElectricity(electricityDays);
-                if (!validElectricityDaysInput)
-                {
-                    TempData["Error"] = "Als je voor elektriciteit heb gekozen moet je minimaal 1 dag kiezen";
-                    return RedirectToAction("CreateReservation");
-                }
-            }
-
-            // dto aanmaken met de user input als data
-            var reservationDto = CreateReservationService.CreateNewReservationDTO(customerId.Value, accommodationIds, startDate, endDate, adultsCount, children0_7Count,
-                                                                                  children7_12Count, dogsCount, hasElectricity, electricityDays);
-
-            // reservationDTO naar api sturen en de response meteen ophalen
-            var reservationResponse = await _httpClient.PostAsJsonAsync("/api/Reservation", reservationDto);
-
-            if (!reservationResponse.IsSuccessStatusCode)
-            {
-                TempData["Error"] = "Er is iets misgegaan tijdens aanmaken van je reservering";
-                return RedirectToAction("CreateReservation");
-            }
-
-            TempData["Success"] = "Reservering succesvol aangemaakt!";
-            return RedirectToAction("Index");
-
+            return View("ReservationConfirmation");
         }
 
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }
@@ -335,11 +257,11 @@ namespace LeMarconnes.Controllers
                     HttpContext.Session.SetString("Phone", loginResult.Phone);
                     HttpContext.Session.SetString("Email", loginResult.Email);
                 }
-                
 
-               // redirect terug naar homepage 
+
+                // redirect terug naar homepage 
                 return RedirectToAction("Index", "Home");
-              
+
             }
             catch (Exception ex)
             {
@@ -353,13 +275,13 @@ namespace LeMarconnes.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home"); 
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         public IActionResult AccountDetails()
         {
-           // redirect naar loginpagina als bijv sessie is verlopen (data van die specifieke user is dan niet meer beschikbaar)
+            // redirect naar loginpagina als bijv sessie is verlopen (data van die specifieke user is dan niet meer beschikbaar)
             if (HttpContext.Session.GetInt32("AccountId") == null)
             {
                 return RedirectToAction("Login");
@@ -368,11 +290,239 @@ namespace LeMarconnes.Controllers
             return View("AccountDetails");
         }
 
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+
+        // reservering stap 1: datums kiezen
+        [HttpGet]
+        public IActionResult CreateReservation1()
+        {
+            var viewModel = new CreateReservation1ViewModel
+            {
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddDays(1)
+            };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateReservation1(DateTime startDate, DateTime endDate)
+        {
+            // service validaties voor datums
+            if (!CreateReservationService.ValidDateInput(startDate, endDate))
+            {
+                TempData["Error"] = "Voer een geldige start- en einddatum in";
+                return View(new CreateReservation1ViewModel
+                {
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+            }
+
+            if (!CreateReservationService.ValidateReservationDates(startDate, endDate))
+            {
+                TempData["Error"] = "Einddatum moet later dan startdatum zijn";
+                return View(new CreateReservation1ViewModel
+                {
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+            }
+
+            // datums opslaan in session voor volgende stappen
+            HttpContext.Session.SetString("ReservationStartDate", startDate.ToString("yyyy-MM-dd"));
+            HttpContext.Session.SetString("ReservationEndDate", endDate.ToString("yyyy-MM-dd"));
+
+            // doorsturen naar stap 2
+            return RedirectToAction("CreateReservation2");
+
+        }
+
+        // reserveren stap 2: accommodaties kiezen
+        [HttpGet]
+        public async Task<IActionResult> CreateReservation2()
+        {
+            // datums ophalen uit session
+            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
+            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+
+            // checken of sessie verlopen is
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            {
+                TempData["Error"] = "Selecteer eerst de datums";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            // datums terug converten van string naar DateTime
+            DateTime startDate = DateTime.Parse(startDateStr);
+            DateTime endDate = DateTime.Parse(endDateStr);
+
+            // beschikbare accommodaties ophalen met available-for-dates endpoint
+            List<Accommodation> availableAccommodations = new List<Accommodation>();
+            var response = await _httpClient.GetAsync(
+                $"/api/Accommodation/available-for-dates?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                availableAccommodations = await response.Content.ReadFromJsonAsync<List<Accommodation>>();
+            }
+
+            if (!availableAccommodations.Any()) 
+            {
+                TempData["Error"] = "Geen accommodaties beschikbaar voor deze periode";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            var viewModel = new CreateReservation2ViewModel
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                AvailableAccommodations = availableAccommodations
+            };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateReservation2(List<int> accommodationIds)
+        {
+            // datums ophalen uit session voor validatie
+            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
+            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            {
+                TempData["Error"] = "Sessie verlopen. Selecteer opnieuw de datums.";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            // service validatie voor accommodaties
+            if (!CreateReservationService.ValidateAccommodationIds(accommodationIds))
+            {
+                TempData["Error"] = "Selecteer minimaal 1 accommodatie";
+                return RedirectToAction("CreateReservation2");
+            }
+
+            // accommodation Ids opslaan in session (als json string)
+            HttpContext.Session.SetString("ReservationAccommodationIds",
+                System.Text.Json.JsonSerializer.Serialize(accommodationIds));
+
+            
+            return RedirectToAction("CreateReservation3");
+        }
+
+        // reserveren stap 3: personen en extra's
+        [HttpGet]
+        public IActionResult CreateReservation3()
+        {
+            // datum en accommodaties moeten opgehaald worden om sessie validatie uit te voeren
+            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
+            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+            var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
+
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr) || string.IsNullOrEmpty(accommodationIdsStr))
+            {
+                TempData["Error"] = "Sessie verlopen";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateReservation3(int adultsCount, int children0_7Count, int children7_12Count,
+                                                            int dogsCount, bool hasElectricity, int? electricityDays = null)
+        {
+            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
+            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+            var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
+            var customerId = HttpContext.Session.GetInt32("CustomerId");
+
+            // checken of sessie nog actief is
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr) || string.IsNullOrEmpty(accommodationIdsStr))
+            {
+                TempData["Error"] = "Sessie verlopen";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            if (!customerId.HasValue)
+                return RedirectToAction("Login");
+
+            // opgeslagen datum strings weer terug converten naar DateTime
+            DateTime startDate = DateTime.Parse(startDateStr);
+            DateTime endDate = DateTime.Parse(endDateStr);
+
+            // string van accommodationIds terug converten naar List<int>
+            var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);
+
+            // service validaties
+            if (!CreateReservationService.ValidateAdultCounts(adultsCount))
+            {
+                TempData["Error"] = "Minimaal 1 volwassene nodig";
+                return View();
+            }
+
+            if (!CreateReservationService.ValidAccommodationCount(accommodationIds))
+            {
+                TempData["Error"] = "Max 2 campingplekken per reservering";
+                return View();
+            }
+
+            if (hasElectricity && !CreateReservationService.ValidateElectricity(electricityDays))
+            {
+                TempData["Error"] = "Kies minimaal 1 dag voor elektriciteit";
+                return View();
+            }
+
+            if (!hasElectricity)
+            {
+                electricityDays = null;
+            }
+          
+
+            // DTO aanmaken
+            var reservationDto = CreateReservationService.CreateNewReservationDTO(customerId.Value, accommodationIds, startDate, endDate,
+                                                                                  adultsCount, children0_7Count, children7_12Count, dogsCount, hasElectricity, electricityDays);
+
+            // api call om reservation te posten
+            var reservationResponse = await _httpClient.PostAsJsonAsync("/api/Reservation", reservationDto);
+
+            if (!reservationResponse.IsSuccessStatusCode)
+            {
+                var errorText = await reservationResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = $"Fout: {errorText}";
+                return View();
+            }
+
+            var reservationResult = await reservationResponse.Content.ReadFromJsonAsync<ReservationResponseDTO>();
+
+            // session clearen
+            HttpContext.Session.Remove("ReservationStartDate");
+            HttpContext.Session.Remove("ReservationEndDate");
+            HttpContext.Session.Remove("ReservationAccommodationIds");
+
+            // ViewModel voor de volgende pagina aanmaken en vullen met reserveringsdata
+            var viewModel = new ReservationConfirmationViewModel
+            {
+                FirstName = reservationResult.FirstName,
+                Infix = reservationResult.Infix,
+                LastName = reservationResult.LastName,
+                StartDate = reservationResult.StartDate,
+                EndDate = reservationResult.EndDate,
+                AdultsCount = reservationResult.AdultsCount,
+                Children0_7Count = reservationResult.Children0_7Count,
+                Children7_12Count = reservationResult.Children7_12Count,
+                DogsCount = reservationResult.DogsCount,
+                HasElectricity = reservationResult.HasElectricity,
+                ElectricityDays = reservationResult.ElectricityDays,
+                TotalPrice = reservationResult.TotalPrice,
+                AccommodationPlaceNumbers = reservationResult.AccommodationPlaceNumbers
+            };
+
+            return View("ReservationConfirmation", viewModel);
         }
     }
 }

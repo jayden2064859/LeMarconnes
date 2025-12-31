@@ -21,7 +21,7 @@ namespace API.Controllers
 
         // GET: api/reservation
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
+        public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
             return await _context.Reservations
                 .Include(r => r.Customer)
@@ -80,7 +80,7 @@ namespace API.Controllers
             // check of accommodaties beschikbaar zijn voor de gekozen periode
             var overlappingReservations = await _context.Reservations
                 .Include(r => r.Accommodations)
-                .Where(r => (r.Status == "Gereserveerd" || r.Status == "Actief") && // zowel gereserveerde als actieve reserveringen
+                .Where(r => (r.CurrentStatus == Reservation.ReservationStatus.Gereserveerd|| r.CurrentStatus == Reservation.ReservationStatus.Actief) && // zowel gereserveerde als actieve reserveringen
                            r.Accommodations.Any(a => dto.AccommodationIds.Contains(a.AccommodationId)) &&
                            !(r.EndDate <= dto.StartDate || r.StartDate >= dto.EndDate))
                 .ToListAsync();
@@ -115,10 +115,14 @@ namespace API.Controllers
                 dto.ElectricityDays
             );
 
+            // specifiek customer object linken aan reservation
+            reservation.Customer = customer;
+
             // voeg accommodaties toe aan de reservering
             foreach (var accommodation in accommodations)
             {
                 reservation.AddAccommodation(accommodation);
+                accommodation.CurrentStatus = Accommodation.AccommodationStatus.Bezet; // status updaten van elke accommodation die gekoppeld is aan een (niet verlopen) reservering
             }
 
             // bereken totale prijs
@@ -131,9 +135,25 @@ namespace API.Controllers
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReservation",
-                new { id = reservation.ReservationId },
-                reservation);
+            var responseDto = new ReservationResponseDTO
+            {
+                FirstName = reservation.Customer.FirstName,
+                Infix = reservation.Customer.Infix,
+                LastName = reservation.Customer.LastName,
+                StartDate = reservation.StartDate,
+                EndDate = reservation.EndDate,
+                AdultsCount = reservation.AdultsCount,
+                Children0_7Count = reservation.Children0_7Count,
+                Children7_12Count = reservation.Children7_12Count,
+                DogsCount = reservation.DogsCount,
+                HasElectricity = reservation.HasElectricity,
+                ElectricityDays = reservation.ElectricityDays,
+                TotalPrice = reservation.TotalPrice,
+                AccommodationPlaceNumbers = reservation.Accommodations
+                    .Select(a => a.PlaceNumber)
+                    .ToList()
+            };
+            return Ok(responseDto);
         }
 
         // PUT: api/Reservation/{id}

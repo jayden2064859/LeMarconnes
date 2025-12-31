@@ -6,12 +6,6 @@
     var firstName = Context.Session.GetString("FirstName");
 }
 
-@if (TempData["ReservationSuccess"] != null)
-{   
-    <div class="alert alert-success">
-    @TempData["ReservationSuccess"]
-    </div>
-}
 
 <div class="container mt-5">
     <div class="text-center mb-5" style="padding: 15px;">
@@ -43,7 +37,7 @@
                                     Maak gemakkelijk online een nieuwe reservering voor je verblijf bij Le Marconnès
                                 </p>
                             </div>
-                            <a asp-action="Reservation" class="btn custom-green mt-3">
+                            <a asp-action="CreateReservation1" class="btn custom-green mt-3">
                                 <i class="bi bi-person-plus me-2"></i>Reserveer nu
                             </a>
                         </div>

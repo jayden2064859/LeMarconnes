@@ -223,52 +223,37 @@ namespace LeMarconnes.Controllers
             // dto aanmaken via de login service method
             var loginDto = LoginService.CreateNewLoginDTO(username, password);
 
-            try
+
+            // loginDto naar api sturen, en de response daarvan in loginResponse var zetten 
+            var loginResponse = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
+
+            if (!loginResponse.IsSuccessStatusCode)
             {
-                // loginDto naar api sturen, en de response daarvan in loginResponse var zetten 
-                var loginResponse = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
-
-                if (!loginResponse.IsSuccessStatusCode)
-                {
-                    TempData["Error"] = "Ongeldige inloggegevens";
-                    return View("Login");
-                }
-
-                // loginResponse lezen 
-                var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
-
-                if (loginResult == null)
-                {
-                    TempData["Error"] = "Er ging iets mis bij het inloggen";
-                    return View("Login");
-                }
-
-                // sla gebruikersgegevens op in session
-                HttpContext.Session.SetInt32("AccountId", loginResult.AccountId);
-                HttpContext.Session.SetString("Username", loginResult.Username);
-                HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
-
-                // haal klantgegevens op alleen als account met een customer gelinked is (dus niet voor medewerker/admin accounts)
-                if (loginResult.CustomerId.HasValue)
-                {
-                    HttpContext.Session.SetInt32("CustomerId", loginResult.CustomerId.Value);
-                    HttpContext.Session.SetString("FirstName", loginResult.FirstName);
-                    HttpContext.Session.SetString("LastName", loginResult.LastName);
-                    HttpContext.Session.SetString("Phone", loginResult.Phone);
-                    HttpContext.Session.SetString("Email", loginResult.Email);
-                }
-
-
-                // redirect terug naar homepage 
-                return RedirectToAction("Index", "Home");
-
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Er is iets fout gegaan tijdens inloggen [check Console voor details]";
-                Console.WriteLine($"Error: {ex.Message}");
+                TempData["Error"] = "Ongeldige inloggegevens";
                 return View("Login");
             }
+
+            // login response lezen 
+            var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
+
+            if (loginResult == null)
+            {
+                TempData["Error"] = "Er ging iets mis bij het inloggen";
+                return View("Login");
+            }
+
+            // sla username en accountrole op in session (nodig voor de navbar logica)
+            HttpContext.Session.SetString("Username", loginResult.Username);
+            HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
+
+            // customer id opslaan in session (wordt gebruikt voor reserveringen en om te checken of session nog valid is)
+            if (loginResult.CustomerId.HasValue)
+            {
+                HttpContext.Session.SetInt32("CustomerId", loginResult.CustomerId.Value);
+            }
+
+            // redirect terug naar homepage 
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -278,17 +263,7 @@ namespace LeMarconnes.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
-        public IActionResult AccountDetails()
-        {
-            // redirect naar loginpagina als bijv sessie is verlopen (data van die specifieke user is dan niet meer beschikbaar)
-            if (HttpContext.Session.GetInt32("AccountId") == null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            return View("AccountDetails");
-        }
+   
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -33,6 +33,7 @@ namespace ClassLibrary.Services
             };
         }
 
+
         // max 2 accommodations (campingplekken) in totaal voor een reservering
         public static bool ValidAccommodationCount(List<int> accommodationList)
         {

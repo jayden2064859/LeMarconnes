@@ -30,11 +30,12 @@ namespace ClassLibrary.Models
         }
         public DateTime RegistrationDate { get; set; }
 
-      
-        // navigation properties (relaties in klassendiagram)
-        public Customer Customer { get; set; }  // elke reservering is gekoppeld aan 1 klant
+        // customer object is nodig als navigation property
+        public Customer Customer { get; set; }  
+
+        // customerId is nodig voor DB queries
         public int CustomerId { get; set; }
-        public List<Accommodation> Accommodations { get; set; } = new List<Accommodation>(); // elke reservering is gekoppeld aan specifieke accommodaties (minimaal 1, mogelijk meer)
+        public List<Accommodation> Accommodations { get; set; } = new List<Accommodation>(); 
 
         // constructors
         public Reservation() // parameterloze constructor (nodig voor EF)
@@ -74,16 +75,5 @@ namespace ClassLibrary.Models
         {
             Accommodations.Add(accommodation);
         }
-
-        public void Cancel()
-        {
-
-        }
-
-        public void Validate() // wordt bool
-        {
-
-        }
-
     }
 }

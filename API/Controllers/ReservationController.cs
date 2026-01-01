@@ -60,7 +60,7 @@ namespace API.Controllers
                 return BadRequest($"Klant met ID {dto.CustomerId} niet gevonden");
             }
                 
-            // alle accommodaties ophalen
+            // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
                 .Include(a => a.AccommodationType)
                 .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
@@ -75,26 +75,6 @@ namespace API.Controllers
             if (accommodations.Count != dto.AccommodationIds.Count)
             {
                 return BadRequest("Niet alle accommodaties konden worden gevonden");
-            }
-
-            // check of accommodaties beschikbaar zijn voor de gekozen periode
-            var overlappingReservations = await _context.Reservations
-                .Include(r => r.Accommodations)
-                .Where(r => (r.CurrentStatus == Reservation.ReservationStatus.Gereserveerd|| r.CurrentStatus == Reservation.ReservationStatus.Actief) && // zowel gereserveerde als actieve reserveringen
-                           r.Accommodations.Any(a => dto.AccommodationIds.Contains(a.AccommodationId)) &&
-                           !(r.EndDate <= dto.StartDate || r.StartDate >= dto.EndDate))
-                .ToListAsync();
-
-            if (overlappingReservations.Any())
-            {
-                var conflicterendeAccommodaties = overlappingReservations
-                    .SelectMany(r => r.Accommodations)
-                    .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
-                    .Select(a => a.AccommodationId)
-                    .Distinct()
-                    .ToList();
-
-                return BadRequest($"Deze accommodaties zijn momenteel niet beschikbaar op de gekozen datums: {conflicterendeAccommodaties}");
             }
 
             // haal tarieven op voor camping 

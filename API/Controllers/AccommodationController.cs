@@ -43,21 +43,15 @@ namespace API.Controllers
         [HttpGet("available-for-dates")]
         public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(
             [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+            [FromQuery] DateTime endDate) // start en einddatum parameters worden uit de query string gehaald
         {
-            // vind alle accommodaties die niet bezet zijn in de gekozen periode
-            var occupiedAccommodationIds = await _context.Reservations
-                .Include(r => r.Accommodations)
-                .Where(r => r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
-                           !(r.EndDate <= startDate || r.StartDate >= endDate))
-                .SelectMany(r => r.Accommodations.Select(a => a.AccommodationId))
-                .Distinct()
-                .ToListAsync();
-
-            // alle beschikbare accommodaties die niet bezet zijn
             var availableAccommodations = await _context.Accommodations
                 .Where(a => a.AccommodationTypeId == 1 &&
-                           !occupiedAccommodationIds.Contains(a.AccommodationId))
+                    !_context.Reservations.Any(r =>
+                        r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
+                        r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
+                        !(r.EndDate <= startDate || r.StartDate >= endDate)
+                    ))
                 .ToListAsync();
 
             return availableAccommodations;

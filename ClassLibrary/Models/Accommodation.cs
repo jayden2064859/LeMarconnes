@@ -20,11 +20,6 @@ namespace ClassLibrary.Models
 
            
         // methods
-        public void IsAvailable() // wordt bool
-        {
-
-        }
-
         public void AddReservation(Reservation reservation)
         {
             Reservations.Add(reservation);

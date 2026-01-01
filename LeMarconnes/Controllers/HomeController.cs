@@ -242,9 +242,11 @@ namespace LeMarconnes.Controllers
                 return View("Login");
             }
 
-            // sla username en accountrole op in session (nodig voor de navbar logica)
+            // sla gegevens die nodig zijn op in session 
             HttpContext.Session.SetString("Username", loginResult.Username);
             HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
+            HttpContext.Session.SetString("FirstName", loginResult.FirstName);
+
 
             // customer id opslaan in session (wordt gebruikt voor reserveringen en om te checken of session nog valid is)
             if (loginResult.CustomerId.HasValue)
@@ -278,6 +280,7 @@ namespace LeMarconnes.Controllers
         {
             var viewModel = new CreateReservation1ViewModel
             {
+                // default datum waarden op huidige datum zetten 
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today.AddDays(1)
             };
@@ -291,6 +294,7 @@ namespace LeMarconnes.Controllers
             if (!CreateReservationService.ValidDateInput(startDate, endDate))
             {
                 TempData["Error"] = "Voer een geldige start- en einddatum in";
+
                 return View(new CreateReservation1ViewModel
                 {
                     StartDate = startDate,
@@ -328,7 +332,7 @@ namespace LeMarconnes.Controllers
             // checken of sessie verlopen is
             if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
             {
-                TempData["Error"] = "Selecteer eerst de datums";
+                TempData["Error"] = "Sessie verlopen. Selecteer datums opnieuw";
                 return RedirectToAction("CreateReservation1");
             }
 
@@ -346,12 +350,14 @@ namespace LeMarconnes.Controllers
                 availableAccommodations = await response.Content.ReadFromJsonAsync<List<Accommodation>>();
             }
 
+            // checken of de teruggegeven lijst leeg is of niet
             if (!availableAccommodations.Any()) 
             {
                 TempData["Error"] = "Geen accommodaties beschikbaar voor deze periode";
                 return RedirectToAction("CreateReservation1");
             }
 
+            // viewmodel voor deze view aanmaken en vullen met de ontvangen datums (session strings) en accommodation lijst (api response)
             var viewModel = new CreateReservation2ViewModel
             {
                 StartDate = startDate,
@@ -375,11 +381,13 @@ namespace LeMarconnes.Controllers
             }
 
             // service validatie voor accommodaties
-            if (!CreateReservationService.ValidateAccommodationIds(accommodationIds))
+
+            if (!CreateReservationService.ValidateAccommodationCount(accommodationIds))
             {
-                TempData["Error"] = "Selecteer minimaal 1 accommodatie";
-                return RedirectToAction("CreateReservation2");
+                TempData["Error"] = "Minimaal 1, Max 2 campingplekken per reservering";
+                return View();
             }
+
 
             // accommodation Ids opslaan in session (als json string)
             HttpContext.Session.SetString("ReservationAccommodationIds",
@@ -437,12 +445,6 @@ namespace LeMarconnes.Controllers
             if (!CreateReservationService.ValidateAdultCounts(adultsCount))
             {
                 TempData["Error"] = "Minimaal 1 volwassene nodig";
-                return View();
-            }
-
-            if (!CreateReservationService.ValidAccommodationCount(accommodationIds))
-            {
-                TempData["Error"] = "Max 2 campingplekken per reservering";
                 return View();
             }
 

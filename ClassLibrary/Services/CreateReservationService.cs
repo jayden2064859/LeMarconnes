@@ -33,22 +33,21 @@ namespace ClassLibrary.Services
             };
         }
 
-
-        // max 2 accommodations (campingplekken) in totaal voor een reservering
-        public static bool ValidAccommodationCount(List<int> accommodationList)
+        // minimaal 1, max 2 accommodations per reservering
+        public static bool ValidateAccommodationCount(List<int> accommodationList)
         {
-            if (accommodationList.Count > 2)
+            if (accommodationList.Count > 2 || accommodationList.Count <= 0 || accommodationList == null)
             {
                 return false;
             }
             return true;
         }
-        
 
-        // specifiek checken of start- en einddatum zijn ingevoerd
+
+        // begindatum moet minimaal de huidige datum zijn, en de einddatum minimaal een dag later (er wordt per overnachting gerekent) 
         public static bool ValidDateInput(DateTime startDate, DateTime endDate)
         {
-            if (startDate == default || endDate == default)
+            if (startDate < DateTime.Today || endDate < DateTime.Today.AddDays(1))
             {
                 return false;
             }
@@ -84,15 +83,6 @@ namespace ClassLibrary.Services
             return true;
         }
 
-        // minstens 1 accommodation voor een reservering nodig
-        public static bool ValidateAccommodationIds(List<int> accommodationIds)
-        {
-            if (accommodationIds == null || accommodationIds.Count == 0)
-            {
-                return false;
-            }
-            return true;
-        }
 
         // als elektriciteit gekozen is voor een accommodatie, moet het voor minstens 1 dag zijn
         public static bool ValidateElectricity(int? electricityDays)

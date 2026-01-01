@@ -44,17 +44,5 @@ namespace ClassLibrary.Models
         public Account()
         {
         }
-
-        // methods
-        public void Authenticate(string password) //wordt bool
-        {
-
-        }
-
-        public void HasRole(string requiredRole) // wordt bool
-        {
-
-        }
-
     }
 }

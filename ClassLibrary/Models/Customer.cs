@@ -46,41 +46,15 @@ namespace ClassLibrary.Models
         }
 
         // methods
-        public void HasOverlappingReservations() // wordt bool
-        {
-
-        }
-
         public void AddReservation(Reservation reservation)
         {
             Reservations.Add(reservation);
             reservation.CustomerId = CustomerId; 
         }
 
-
-        // reservation history inzien voor specifieke klant
         public List<Reservation> GetAllReservations()
         {
             return Reservations.ToList();
-        }
-        
-        // alle reserveringen van klant op halen die nog moeten gebeuren (huidige datum is niet tijdens reserveringsdatum)
-        public List<Reservation> GetUpcomingReservations() 
-        {
-            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Gereserveerd).ToList();
-        }
-
-        // alle reserveringen van klant op halen die op dit moment actief zijn (huidige datum is wel tijdens reserveringsdatum)
-        public List<Reservation> GetActiveReservations()
-        {
-            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Actief).ToList();
-        }
-
-        // Alle reserveringen die verlopen zijn ophalen
-        public List<Reservation> GetPastReservations()
-        {
-            return Reservations.Where(r => r.CurrentStatus == Reservation.ReservationStatus.Verlopen).ToList();
-        }
-
+        }      
     }
 }

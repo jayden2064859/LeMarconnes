@@ -385,7 +385,7 @@ namespace LeMarconnes.Controllers
             if (!CreateReservationService.ValidateAccommodationCount(accommodationIds))
             {
                 TempData["Error"] = "Minimaal 1, Max 2 campingplekken per reservering";
-                return View();
+                return RedirectToAction("CreateReservation2");
             }
 
 
@@ -411,6 +411,14 @@ namespace LeMarconnes.Controllers
                 TempData["Error"] = "Sessie verlopen";
                 return RedirectToAction("CreateReservation1");
             }
+
+            // strings weer terug converten naar date time omdat datum berekening uitgevoerd moet worden
+            DateTime startDate = DateTime.Parse(startDateStr);
+            DateTime endDate = DateTime.Parse(endDateStr);
+         
+            int numberOfNights = (endDate - startDate).Days;
+            // aantal overnachtingen opslaan in viewbag zodat het in de view gebruikt kan worden
+            ViewBag.NumberOfNights = numberOfNights;
 
             return View();
         }
@@ -444,21 +452,27 @@ namespace LeMarconnes.Controllers
             // service validaties
             if (!CreateReservationService.ValidateAdultCounts(adultsCount))
             {
-                TempData["Error"] = "Minimaal 1 volwassene nodig";
+                TempData["Error"] = "Minimaal 1 volwassene nodig (max 10)";
+                return View();
+            }
+
+            if (!CreateReservationService.ValidateChildrenCount(children0_7Count, children7_12Count))
+            {
+                TempData["Error"] = "Minimaal 0, maximaal 5 kinderen per leeftijdscategorie";
+                return View();
+            }
+
+            if (!CreateReservationService.ValidateDogsCount(dogsCount))
+            {
+                TempData["Error"] = "Minimaal 0, maximaal 3 honden";
                 return View();
             }
 
             int numberOfNights = (endDate - startDate).Days;
 
-            if (hasElectricity && !CreateReservationService.ValidateElectricity(electricityDays, numberOfNights))
+            if (hasElectricity && !CreateReservationService.ValidateElectricityDays(electricityDays, numberOfNights))
             {
-                TempData["Error"] = $"Elektriciteit kan maximaal {numberOfNights} dagen zijn (aantal nachten)";
-                return View();
-            }
-
-            if (hasElectricity && !CreateReservationService.ValidateElectricity(electricityDays))
-            {
-                TempData["Error"] = "Kies minimaal 1 dag voor elektriciteit";
+                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dagen voor elektriciteitsgebruik";
                 return View();
             }
 

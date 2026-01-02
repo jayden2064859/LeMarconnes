@@ -41,7 +41,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label"><strong>Selecteer accommodatie(s) *</strong></label>
-                                <p class="text-muted">Selecteer minimaal 1 accommodatie:</p>
+                                <p class="text-muted">Selecteer minimaal 1 accommodatie (max 2):</p>
 
                                 <div class="row">
                                     @foreach (var a in Model.AvailableAccommodations)
@@ -54,7 +54,6 @@
                                                            id="acc_@a.AccommodationId" />
                                                     <label class="form-check-label" for="acc_@a.AccommodationId">
                                                         <strong>Plaats @a.PlaceNumber</strong><br />
-                                                        <small class="text-muted">Type: @a.AccommodationType</small>
                                                     </label>
                                                 </div>
                                             </div>

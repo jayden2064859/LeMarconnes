@@ -15,7 +15,7 @@ namespace ClassLibrary.Services
     {
         // method die een DTO object aanmaakt
         public static CreateReservationDTO CreateNewReservationDTO(int customerId, List<int> accommodationIds, DateTime startDate,
-            DateTime endDate,int adultsCount, int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
+            DateTime endDate, int adultsCount, int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
         {
             return new CreateReservationDTO
             {
@@ -43,13 +43,20 @@ namespace ClassLibrary.Services
             return true;
         }
 
-        // input voor aantal dagan electriciteitsgebruik kan niet hoger zijn dan aantal overnachtingen
-        public static bool ValidateElectricity(int? electricityDays, int numberOfNights)
+        public static bool ValidateElectricityDays(int? electricityDays, int numberOfNights)
         {
-            if (electricityDays == null || electricityDays.Value < 1 || electricityDays.Value > numberOfNights)
+            // als hasElectricity true is, dan kan de input voor electricitydays niet minder dan 1 zijjn
+            if (electricityDays < 1)
             {
                 return false;
             }
+
+            // input voor aantal dagan electriciteitsgebruik kan niet hoger zijn dan aantal overnachtingen
+            if (electricityDays > numberOfNights)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -64,7 +71,7 @@ namespace ClassLibrary.Services
         }
 
         // alle verplichte velden ingevuld
-        public static bool ValidateAllRequiredFields(DateTime startDate, DateTime endDate, List<int>accommodationIds, int adultsCount, 
+        public static bool ValidateAllRequiredFields(DateTime startDate, DateTime endDate, List<int> accommodationIds, int adultsCount,
             int children0_7Count, int children7_12Count, int dogsCount)
         {
             // logica
@@ -82,24 +89,32 @@ namespace ClassLibrary.Services
             return true;
         }
 
-        // minstens 1 volwassene nodig voor reservering
+        // minstens 1 (max 10) volwassene nodig voor reservering
         public static bool ValidateAdultCounts(int adultsCount)
         {
-            if (adultsCount < 1)
+            if (adultsCount < 1 || adultsCount > 10)
             {
                 return false;
             }
             return true;
         }
 
-
-        // als elektriciteit gekozen is voor een accommodatie, moet het voor minstens 1 dag zijn
-        public static bool ValidateElectricity(int? electricityDays)
-        {    
-            if (electricityDays == null || electricityDays.Value < 1)
+        // geen negatieve inputs voor beide leeftijdscategorieen 
+        public static bool ValidateChildrenCount(int children_07Count, int children7_12Count)
+        {
+            // geen negatieve inputs voor beide, en beide max 5  
+            if (children_07Count < 0 || children7_12Count < 0 || children_07Count > 5 || children7_12Count > 5)
             {
                 return false;
             }
+            return true;
+        }
+
+        // max 3 honden per reservering
+        public static bool ValidateDogsCount(int dogsCount)
+        {
+            if (dogsCount < 0 || dogsCount > 3)
+                return false;
             return true;
         }
 

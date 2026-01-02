@@ -43,6 +43,15 @@ namespace ClassLibrary.Services
             return true;
         }
 
+        // input voor aantal dagan electriciteitsgebruik kan niet hoger zijn dan aantal overnachtingen
+        public static bool ValidateElectricity(int? electricityDays, int numberOfNights)
+        {
+            if (electricityDays == null || electricityDays.Value < 1 || electricityDays.Value > numberOfNights)
+            {
+                return false;
+            }
+            return true;
+        }
 
         // begindatum moet minimaal de huidige datum zijn, en de einddatum minimaal een dag later (er wordt per overnachting gerekent) 
         public static bool ValidDateInput(DateTime startDate, DateTime endDate)

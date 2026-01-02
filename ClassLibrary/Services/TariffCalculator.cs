@@ -27,7 +27,7 @@ namespace ClassLibrary.Services
 
             // campingplaats per nacht × aantal accommodaties
             total = campingPlace * numberOfNights * numberOfAccommodations;
-            
+
 
             // personen per nacht
             total += adult * reservation.AdultsCount * numberOfNights;
@@ -46,12 +46,12 @@ namespace ClassLibrary.Services
                 total += dog * reservation.DogsCount * numberOfNights;
             }
 
-             // electriciteit per accommodatie
-             if (reservation.HasElectricity && reservation.ElectricityDays.HasValue)
-             {
-                 total += electricity * reservation.ElectricityDays.Value * numberOfAccommodations;
-             }
-          
+            // electriciteit per accommodatie
+            if (reservation.HasElectricity && reservation.ElectricityDays.HasValue)
+            {
+                total += electricity * reservation.ElectricityDays.Value * numberOfAccommodations;
+            }
+
             return Math.Round(total, 2);
         }
     }

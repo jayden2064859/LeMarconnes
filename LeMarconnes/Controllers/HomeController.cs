@@ -448,6 +448,14 @@ namespace LeMarconnes.Controllers
                 return View();
             }
 
+            int numberOfNights = (endDate - startDate).Days;
+
+            if (hasElectricity && !CreateReservationService.ValidateElectricity(electricityDays, numberOfNights))
+            {
+                TempData["Error"] = $"Elektriciteit kan maximaal {numberOfNights} dagen zijn (aantal nachten)";
+                return View();
+            }
+
             if (hasElectricity && !CreateReservationService.ValidateElectricity(electricityDays))
             {
                 TempData["Error"] = "Kies minimaal 1 dag voor elektriciteit";
@@ -458,7 +466,6 @@ namespace LeMarconnes.Controllers
             {
                 electricityDays = null;
             }
-          
 
             // DTO aanmaken
             var reservationDto = CreateReservationService.CreateNewReservationDTO(customerId.Value, accommodationIds, startDate, endDate,

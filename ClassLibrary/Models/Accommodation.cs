@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace ClassLibrary.Models
 {
     public class Accommodation
@@ -25,10 +26,5 @@ namespace ClassLibrary.Models
             Reservations.Add(reservation);
         }
       
-        public void CheckCapacity(int totalPersons)
-        {
-            // niet meer personen dan capaciteitslimiet van accommodatie
-           
-        }
     }
 }

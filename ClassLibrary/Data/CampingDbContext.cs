@@ -87,7 +87,7 @@ namespace ClassLibrary.Data
                 .HasForeignKey(r => r.CustomerId);
 
 
-            // reservation 1..* - 1..* accommodation
+            // reservation 0..* - 1..* accommodation
             modelBuilder.Entity<Reservation>()
                 .HasMany(r => r.Accommodations) // een reservation heeft 1 of meer accommodaties 
                 .WithMany(a => a.Reservations); // een accommodatie kan meerdere reservations gehad hebben

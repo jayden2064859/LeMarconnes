@@ -98,6 +98,9 @@ namespace API.Controllers
             // specifiek customer object linken aan reservation
             reservation.Customer = customer;
 
+            // reservation koppelen aan customer
+            customer.AddReservation(reservation);
+
             // voeg accommodaties toe aan de reservering
             foreach (var accommodation in accommodations)
             {

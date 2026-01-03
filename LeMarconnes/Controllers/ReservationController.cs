@@ -191,7 +191,7 @@ namespace LeMarconnes.Controllers
             }
 
             if (!customerId.HasValue)
-                return RedirectToAction("Login");
+                return RedirectToAction("Login", "Login");
 
             // opgeslagen datum strings weer terug converten naar DateTime
             DateTime startDate = DateTime.Parse(startDateStr);
@@ -223,7 +223,7 @@ namespace LeMarconnes.Controllers
 
             if (hasElectricity && !CreateReservationService.ValidateElectricityDays(electricityDays, numberOfNights))
             {
-                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dagen voor elektriciteitsgebruik {startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy}";
+                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dagen voor elektriciteitsgebruik ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
                 return View();
             }
 

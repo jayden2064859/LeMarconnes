@@ -15,7 +15,7 @@
                         <div class="alert alert-danger">@TempData["Error"]</div>
                     }
 
-                    <form asp-action="CreateReservation1" method="post">
+                    <form asp-action="CreateReservation1" asp-controller="Reservation" method="post">
                         <div class="mb-3">
                             <label for="startDate" class="form-label">Startdatum *</label>
                             <input type="date" id="startDate" name="startDate" class="form-control"

@@ -28,9 +28,9 @@ namespace ClassLibrary.Models
         public Account(string username, string passwordHash, Customer customer)
         {
             if (string.IsNullOrWhiteSpace(username))
-                throw new ArgumentException("Gebruikersnaam is verplicht", nameof(username));
+                throw new ArgumentException("Gebruikersnaam is verplicht");
             if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("Wachtwoord hash is verplicht", nameof(passwordHash));
+                throw new ArgumentException("Wachtwoord hash is verplicht");
                     
             Username = username;
             PasswordHash = passwordHash;
@@ -48,6 +48,14 @@ namespace ClassLibrary.Models
             {
                 throw new ArgumentException("Gebruik de customer constructor voor het aanmaken van een klant");
             }
+
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ArgumentException("Gebruikersnaam is verplicht");
+            if (string.IsNullOrWhiteSpace(passwordHash))
+                throw new ArgumentException("Wachtwoord hash is verplicht");
+            if (string.IsNullOrWhiteSpace(role.ToString()))
+                throw new ArgumentException("Accountrol is verplicht");
+
 
             Username = username;
             PasswordHash = passwordHash;

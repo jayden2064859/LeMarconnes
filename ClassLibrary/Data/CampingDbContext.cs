@@ -30,7 +30,7 @@ namespace ClassLibrary.Data
         }
 
 
-        // OnModelCreating is standaard een override method, omdat we van de method van de parent class DbContext lenen.
+        // OnModelCreating is standaard een override method, omdat we de parent class DbContext gebruiken
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             

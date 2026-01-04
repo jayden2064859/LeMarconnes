@@ -71,9 +71,10 @@ namespace API.Controllers
             var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
 
             // constructor gebruiken om account object aan te maken
+
             var account = new Account(
-                dto.Username, 
-                passwordHash, 
+                dto.Username,
+                passwordHash,
                 customer);
 
             _context.Accounts.Add(account);

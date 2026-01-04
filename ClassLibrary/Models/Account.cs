@@ -24,7 +24,7 @@ namespace ClassLibrary.Models
         public int? CustomerId { get; set; }
         public Customer? Customer { get; set; }
 
-        // constructors
+        // constructor voor klant account aanmaken
         public Account(string username, string passwordHash, Customer customer)
         {
             if (string.IsNullOrWhiteSpace(username))
@@ -38,6 +38,21 @@ namespace ClassLibrary.Models
             CustomerId = customer.CustomerId;
             Customer = customer;
             IsActive = false; //wanneer een user de web app betreedt wordt IsActive op true gezet           
+            RegistrationDate = DateTime.Now;
+        }
+
+        // constructor voor aanmaken medewerker/admin account
+        public Account(string username, string passwordHash, Role role)
+        {
+            if (role == Role.Customer)
+            {
+                throw new ArgumentException("Gebruik de customer constructor voor het aanmaken van een klant");
+            }
+
+            Username = username;
+            PasswordHash = passwordHash;
+            AccountRole = role;
+            IsActive = false;
             RegistrationDate = DateTime.Now;
         }
 

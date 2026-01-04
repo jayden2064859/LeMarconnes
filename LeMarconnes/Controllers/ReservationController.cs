@@ -4,6 +4,7 @@ using ClassLibrary.Services;
 using ClassLibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 
 
 namespace LeMarconnes.Controllers
@@ -190,7 +191,7 @@ namespace LeMarconnes.Controllers
                 return RedirectToAction("CreateReservation1");
             }
 
-            if (!customerId.HasValue)
+            if (customerId == null)
                 return RedirectToAction("Login", "Login");
 
             // opgeslagen datum strings weer terug converten naar DateTime
@@ -280,5 +281,7 @@ namespace LeMarconnes.Controllers
 
             return View("ReservationConfirmation");
         }
+
+        
     }
 }

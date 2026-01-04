@@ -2,6 +2,7 @@
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using ClassLibrary.Services;
+using ClassLibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,8 @@ namespace API.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Reservation/5
+
+        // GET: api/reservation/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
@@ -132,6 +134,8 @@ namespace API.Controllers
                 HasElectricity = reservation.HasElectricity,
                 ElectricityDays = reservation.ElectricityDays,
                 TotalPrice = reservation.TotalPrice,
+                
+                // linq gebruiken om PlaceNumbers van gekozen accommodaties op te halen
                 AccommodationPlaceNumbers = reservation.Accommodations
                     .Select(a => a.PlaceNumber)
                     .ToList()

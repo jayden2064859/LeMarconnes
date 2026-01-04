@@ -22,8 +22,10 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
-            return await _context.Customers
+            var customers = await _context.Customers
             .ToListAsync();
+
+            return customers;
         }
 
         // GET: api/customer/{id}
@@ -45,13 +47,20 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer([FromBody] CreateCustomerDTO dto)
         {
+            // valideren of email en telefoonnummer al bestaan in db
+            var customerExists = await _context.Customers
+                .Where(c => c.Email == dto.Email || c.Phone == dto.Phone)
+                .FirstOrDefaultAsync();
 
-            if (await _context.Customers.AnyAsync(c => c.Email == dto.Email))
-                return BadRequest("Email is al geregistreerd");
+            if (customerExists != null)
+            {
+                // conflict = voor wanneer de input qua syntax correct is, maar business rules het alsnog niet toelaten
+                if (customerExists.Email == dto.Email)
+                    return Conflict("Email is al geregistreerd");
 
-            if (await _context.Customers.AnyAsync(c => c.Phone == dto.Phone))
-                return BadRequest("Telefoonnummer is al geregistreerd");
-
+                if (customerExists.Phone == dto.Phone)
+                    return Conflict("Telefoonnummer is al geregistreerd");
+            }
 
             // constructor in customer class gebruiken om object aan te maken
             var newCustomer = new Customer(
@@ -65,7 +74,7 @@ namespace API.Controllers
            _context.Customers.Add(newCustomer);
            await _context.SaveChangesAsync();
 
-           return CreatedAtAction("GetCustomer",new { id = newCustomer.CustomerId }, newCustomer);                        
+           return Ok(newCustomer);                        
         }
 
         // PUT: api/customer
@@ -74,25 +83,17 @@ namespace API.Controllers
         {
             if (id != customer.CustomerId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             _context.Entry(customer).State = EntityState.Modified;
+ 
+            await _context.SaveChangesAsync();
 
-            try
+
+            if (!CustomerExists(id))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -101,7 +102,9 @@ namespace API.Controllers
         // bool voor PUT method
         private bool CustomerExists(int id)
         {
-            return _context.Customers.Any(e => e.CustomerId == id);
+            var exits = _context.Customers.Any(e => e.CustomerId == id);
+
+            return exits;
         }
 
         // DELETE: api/customer

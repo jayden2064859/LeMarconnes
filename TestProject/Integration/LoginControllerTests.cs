@@ -130,7 +130,7 @@ namespace TestProject.Integration
 
         // ITC-16: Lege username
         [Fact]
-        public async Task Login_EmptyUsername_ReturnsBadRequest()
+        public async Task Login_EmptyUsername_ReturnsConflict()
         {
             // ARRANGE
             var loginDto = new LoginDTO
@@ -143,13 +143,13 @@ namespace TestProject.Integration
             var result = await _controller.Login(loginDto);
 
             // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("Gebruikersnaam en wachtwoord zijn verplicht", badRequestResult.Value.ToString());
+            var conflictResult = Assert.IsType<ConflictObjectResult>(result.Result);
+            Assert.Contains("Gebruikersnaam en wachtwoord zijn verplicht", conflictResult.Value.ToString());
         }
 
         // ITC-17: Leeg wachtwoord
         [Fact]
-        public async Task Login_EmptyPassword_ReturnsBadRequest()
+        public async Task Login_EmptyPassword_ReturnsConflict()
         {
             // ARRANGE
             var loginDto = new LoginDTO
@@ -162,8 +162,8 @@ namespace TestProject.Integration
             var result = await _controller.Login(loginDto);
 
             // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("Gebruikersnaam en wachtwoord zijn verplicht", badRequestResult.Value.ToString());
+            var conflictResult = Assert.IsType<ConflictObjectResult>(result.Result);
+            Assert.Contains("Gebruikersnaam en wachtwoord zijn verplicht", conflictResult.Value.ToString());
         }
 
         // ITC-18: Account wordt active na succesvolle login

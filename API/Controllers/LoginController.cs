@@ -19,16 +19,12 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] LoginDTO loginDto)
+        public async Task<ActionResult<LoginResponseDTO>> Login(LoginDTO loginDto)
         {
-            if (string.IsNullOrWhiteSpace(loginDto.Username) || string.IsNullOrWhiteSpace(loginDto.Password))
-            {
-                return BadRequest("Gebruikersnaam en wachtwoord zijn verplicht");
-            }
 
             // zoek account op basis van gebruikersnaam
             var account = await _context.Accounts
-                .Include(a => a.Customer) // <-- deze is belangrijk. hierdoor kunnen we ook alle Customer data gebruiken van een account 
+                .Include(a => a.Customer) // <-- deze is belangrijk. hierdoor kunnen we ook alle Customer data gebruiken van een account  (dit kan door de navigation property in het model)
                 .FirstOrDefaultAsync(a => a.Username == loginDto.Username);
 
             if (account == null)

@@ -28,8 +28,7 @@ namespace LeMarconnes.Controllers
 
 
             // checken of beide username en password fields zijn ingevuld
-            bool requiredFields = LoginService.RequiredFields(username, password);
-            if (!requiredFields)
+            if (!LoginService.RequiredFields(username, password))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("Login");
@@ -44,7 +43,8 @@ namespace LeMarconnes.Controllers
 
             if (!loginResponse.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Ongeldige inloggegevens";
+                var error = await loginResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = error;
                 return View("Login");
             }
 

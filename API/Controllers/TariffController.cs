@@ -20,8 +20,10 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Tariff>>> GetTariffs()
         {
-            return await _context.Tariffs
+            var allTariffs = await _context.Tariffs
             .ToListAsync();
+
+            return allTariffs;
         }
 
         // GET: api/tariff/{id}
@@ -46,7 +48,7 @@ namespace API.Controllers
             _context.Tariffs.Add(tariff);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTariff", new { id = tariff.TariffId }, tariff);
+            return Ok(tariff);
         }
 
         // PUT: api/tariff
@@ -55,34 +57,28 @@ namespace API.Controllers
         {
             if (id != tariff.TariffId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             _context.Entry(tariff).State = EntityState.Modified;
 
-            try
+            await _context.SaveChangesAsync();
+
+            if (!TariffExists(id))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TariffExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
-            return NoContent();
+           return NoContent();
+
         }
 
         // bool voor PUT method
         private bool TariffExists(int id)
         {
-            return _context.Tariffs.Any(e => e.TariffId == id);
+            var exists = _context.Tariffs.Any(e => e.TariffId == id);
+
+            return exists;
         }
 
         // DELETE: api/tariff

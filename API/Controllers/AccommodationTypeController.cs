@@ -20,8 +20,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<AccommodationType>>> GetAccommodationTypes()
         {
-            return await _context.AccommodationsTypes
+
+            var types = await _context.AccommodationsTypes
             .ToListAsync();
+
+            return types;
         }
 
         // GET: api/accommodationType/{id}
@@ -47,7 +50,7 @@ namespace API.Controllers
             _context.AccommodationsTypes.Add(accommodationType);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAccommodationType", new { id = accommodationType.AccommodationTypeId }, accommodationType);
+            return Ok(accommodationType);
         }
 
 
@@ -58,7 +61,7 @@ namespace API.Controllers
         {
             if (id != accommodationType.AccommodationTypeId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             if (!AccommodationTypeExists(id))
@@ -75,8 +78,11 @@ namespace API.Controllers
         // bool voor PUT method
         private bool AccommodationTypeExists(int id)
         {
-            return _context.AccommodationsTypes.Any(e => e.AccommodationTypeId == id);
+            var typeExists = _context.AccommodationsTypes.Any(e => e.AccommodationTypeId == id);
+
+            return typeExists;
         }
+
 
         // DELETE: api/accommodationType
         [HttpDelete("{id}")]

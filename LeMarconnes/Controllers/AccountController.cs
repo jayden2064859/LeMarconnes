@@ -62,6 +62,7 @@ namespace LeMarconnes.Controllers
                 return View("CreateAccount");
             }
 
+            // valideren of username al bestaat in db voordat account aangemaakt kan worden
             var accountResponse = await _httpClient.GetAsync($"/api/Account/exists/{username}");
 
             if (accountResponse.IsSuccessStatusCode)
@@ -71,16 +72,10 @@ namespace LeMarconnes.Controllers
                 return View("CreateAccount");
             }
 
-            // username en wachtwoord worden opgeslagen in de session als alle service methods true teruggeven (true=valid input)
-            try
-            {
-                HttpContext.Session.SetString("RegisterUsername", username);
-                HttpContext.Session.SetString("RegisterPassword", password);
-            }
-            catch
-            {
-                throw new ArgumentException("Er is iets misgegaan tijdens het opslaan van accountgegevens");
-            }
+            // username en wachtwoord worden opgeslagen in de session als alle service methods true teruggeven (true=valid input)          
+            HttpContext.Session.SetString("RegisterUsername", username);
+            HttpContext.Session.SetString("RegisterPassword", password);
+            
 
             return RedirectToAction("CreateCustomer");
         }
@@ -134,7 +129,7 @@ namespace LeMarconnes.Controllers
             // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze direct gelinked kan worden met het account object in dezelfde method.
             var customerDto = CreateCustomerService.CreateNewCustomerDTO(firstName, lastName, email, phone, infix);
 
-            // dto naar api sturen
+            // POST customer doen met de dto
             var customerResponse = await _httpClient.PostAsJsonAsync("/api/Customer", customerDto);
 
             if (!customerResponse.IsSuccessStatusCode)
@@ -147,11 +142,6 @@ namespace LeMarconnes.Controllers
             // api response (customer object) lezen als response succesvol is
             var customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
 
-            if (customer == null)
-            {
-                TempData["Error"] = "Kon klant niet ophalen na aanmaak";
-                return View("CreateCustomer");
-            }
 
             // 2. account dto aanmaken
             var accountDto = CreateAccountService.CreateNewAccountDTO(customer.CustomerId, username, password);

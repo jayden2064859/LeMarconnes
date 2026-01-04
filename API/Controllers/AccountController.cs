@@ -22,9 +22,12 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
-            return await _context.Accounts
+             var allAccounts = await _context.Accounts
             .ToListAsync();
+
+            return allAccounts;
         }
+
 
         // GET: api/account/{id}
         [HttpGet("{id}")]
@@ -40,6 +43,7 @@ namespace API.Controllers
 
             return account;
         }
+
 
         // GET: api/account/exists/{username}
         [HttpGet("exists/{username}")]
@@ -59,19 +63,19 @@ namespace API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount([FromBody] CreateAccountDTO dto)
+        public async Task<ActionResult<Account>> PostAccount(CreateAccountDTO dto)
         {
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
-                return BadRequest("Customer bestaat niet");
+                return NotFound("Customer bestaat niet");
 
 
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();
             var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
 
-            // constructor gebruiken om account object aan te maken
 
+            // constructor gebruiken om account object aan te maken
             var account = new Account(
                 dto.Username,
                 passwordHash,
@@ -80,9 +84,7 @@ namespace API.Controllers
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAccount",
-                new { id = account.AccountId },
-                account);
+            return Ok(account);
         }
 
 
@@ -92,25 +94,16 @@ namespace API.Controllers
         {
             if (id != account.AccountId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             _context.Entry(account).State = EntityState.Modified;
+ 
+            await _context.SaveChangesAsync();
 
-            try
+            if (!AccountExists(id))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();

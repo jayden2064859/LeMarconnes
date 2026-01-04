@@ -89,24 +89,21 @@ namespace LeMarconnes.Controllers
             DateTime startDate = DateTime.Parse(startDateStr);
             DateTime endDate = DateTime.Parse(endDateStr);
 
+
             // beschikbare accommodaties ophalen met available-for-dates endpoint
             List<Accommodation> availableAccommodations = new List<Accommodation>();
-            var response = await _httpClient.GetAsync(
-                $"/api/Accommodation/available-for-dates?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                availableAccommodations = await response.Content.ReadFromJsonAsync<List<Accommodation>>();
-            }
+            var response = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
 
-            // checken of de teruggegeven lijst leeg is of niet
-            if (!availableAccommodations.Any())
+            if (!response.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Geen accommodaties beschikbaar voor deze periode";
+                var error = await response.Content.ReadAsStringAsync();
+                TempData["Error"] = error;
                 return RedirectToAction("CreateReservation1");
             }
 
             // viewmodel voor deze view aanmaken en vullen met de ontvangen datums (session strings) en accommodation lijst (api response)
+            // deze data wordt gebruikt om bijv de ingevoerde datums weer terug te zetten wanneer de view herlaadt door een invoer error
             var viewModel = new CreateReservation2ViewModel
             {
                 StartDate = startDate,
@@ -123,13 +120,14 @@ namespace LeMarconnes.Controllers
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
 
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+
+            // service validatie voor accommodaties
+
+            if (!CreateReservationService.ValidateSession(startDateStr, endDateStr))
             {
                 TempData["Error"] = "Sessie verlopen. Selecteer opnieuw de datums.";
                 return RedirectToAction("CreateReservation1");
             }
-
-            // service validatie voor accommodaties
 
             if (!CreateReservationService.ValidateAccommodationCount(accommodationIds))
             {
@@ -137,15 +135,12 @@ namespace LeMarconnes.Controllers
                 return RedirectToAction("CreateReservation2");
             }
 
-
             // accommodation Ids opslaan in session (als json string)
             HttpContext.Session.SetString("ReservationAccommodationIds",
                 System.Text.Json.JsonSerializer.Serialize(accommodationIds));
 
-
             return RedirectToAction("CreateReservation3");
         }
-
 
 
 
@@ -158,7 +153,7 @@ namespace LeMarconnes.Controllers
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
 
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr) || string.IsNullOrEmpty(accommodationIdsStr))
+            if (!CreateReservationService.ValidateSession(startDateStr, endDateStr))
             {
                 TempData["Error"] = "Sessie verlopen";
                 return RedirectToAction("CreateReservation1");
@@ -184,15 +179,12 @@ namespace LeMarconnes.Controllers
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
             var customerId = HttpContext.Session.GetInt32("CustomerId");
 
-            // checken of sessie nog actief is
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr) || string.IsNullOrEmpty(accommodationIdsStr))
+            // checken of sessie nog actief is (en vooral of customerId van de klant nog beschikbaar is)
+            if (!CreateReservationService.ValidateSession(startDateStr, endDateStr, customerId))
             {
                 TempData["Error"] = "Sessie verlopen";
                 return RedirectToAction("CreateReservation1");
             }
-
-            if (customerId == null)
-                return RedirectToAction("Login", "Login");
 
             // opgeslagen datum strings weer terug converten naar DateTime
             DateTime startDate = DateTime.Parse(startDateStr);
@@ -205,19 +197,19 @@ namespace LeMarconnes.Controllers
             if (!CreateReservationService.ValidateAdultCounts(adultsCount))
             {
                 TempData["Error"] = "Minimaal 1 volwassene nodig (max 10)";
-                return View();
+                return RedirectToAction("CreateReservation3");
             }
 
             if (!CreateReservationService.ValidateChildrenCount(children0_7Count, children7_12Count))
             {
                 TempData["Error"] = "Minimaal 0, maximaal 5 kinderen per leeftijdscategorie";
-                return View();
+                return RedirectToAction("CreateReservation3");
             }
 
             if (!CreateReservationService.ValidateDogsCount(dogsCount))
             {
                 TempData["Error"] = "Minimaal 0, maximaal 3 honden";
-                return View();
+                return RedirectToAction("CreateReservation3");
             }
 
             int numberOfNights = (endDate - startDate).Days;
@@ -225,7 +217,7 @@ namespace LeMarconnes.Controllers
             if (hasElectricity && !CreateReservationService.ValidateElectricityDays(electricityDays, numberOfNights))
             {
                 TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dagen voor elektriciteitsgebruik ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
-                return View();
+                return RedirectToAction("CreateReservation3");
             }
 
             if (!hasElectricity)
@@ -242,8 +234,8 @@ namespace LeMarconnes.Controllers
 
             if (!reservationResponse.IsSuccessStatusCode)
             {
-                var errorText = await reservationResponse.Content.ReadAsStringAsync();
-                TempData["Error"] = $"Fout: {errorText}";
+                var error = await reservationResponse.Content.ReadAsStringAsync();
+                TempData["Error"] = error;
                 return View();
             }
 

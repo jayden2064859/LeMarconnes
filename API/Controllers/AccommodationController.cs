@@ -41,18 +41,20 @@ namespace API.Controllers
 
         // GET: /api/Accommodation/availabe-for-dates
         [HttpGet("available-for-dates")]
-        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate) // start en einddatum parameters worden uit de query string gehaald
+        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(DateTime startDate, DateTime endDate)
         {
             var availableAccommodations = await _context.Accommodations
                 .Where(a => a.AccommodationTypeId == 1 &&
-                    !_context.Reservations.Any(r =>
-                        r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
-                        r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
-                        !(r.EndDate <= startDate || r.StartDate >= endDate)
+                      !_context.Reservations.Any(r => r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
+                      r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
+                      !(r.EndDate <= startDate || r.StartDate >= endDate)
                     ))
                 .ToListAsync();
+
+            if (!availableAccommodations.Any())
+            {
+                return NotFound("Geen beschikbare accommodaties gevonden voor gekozen datum");
+            }
 
             return availableAccommodations;
         }
@@ -65,7 +67,7 @@ namespace API.Controllers
             _context.Accommodations.Add(accommodation);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAccommodation", new { id = accommodation.AccommodationId }, accommodation);
+            return Ok(accommodation);
         }
 
 
@@ -76,7 +78,7 @@ namespace API.Controllers
         {
             if (id != accommodation.AccommodationId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             if (!AccommodationExists(id))

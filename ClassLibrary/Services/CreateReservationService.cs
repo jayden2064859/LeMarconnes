@@ -118,6 +118,33 @@ namespace ClassLibrary.Services
             return true;
         }
 
+        public static bool ValidateSession(string startDate, string endDate)
+        {
+
+            if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        // method overloading zodat deze method gebruikt kan worden in Reservation view 3, wanneer customerId nodig is voor POST
+        public static bool ValidateSession(string startDate, string endDate, int? customerId)
+        {
+            if (customerId == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+
     }
 }
 

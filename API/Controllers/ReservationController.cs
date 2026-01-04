@@ -20,38 +20,9 @@ namespace API.Controllers
             _context = context;  
         }
 
-        // GET: api/reservation
-        [HttpGet]
-        public async Task<ActionResult<List<Reservation>>> GetReservations()
-        {
-            return await _context.Reservations
-                .Include(r => r.Customer)
-                .Include(r => r.Accommodations)
-                .ThenInclude(a => a.AccommodationType)
-                .ToListAsync();
-        }
-
-
-        // GET: api/reservation/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Reservation>> GetReservation(int id)
-        {
-            var reservation = await _context.Reservations
-                .Include(r => r.Customer)
-                .Include(r => r.Accommodations)
-                .FirstOrDefaultAsync(r => r.ReservationId == id);
-
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-
-            return reservation;
-        }
-
         // POST: api/reservation
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation([FromBody] CreateReservationDTO dto)
+        public async Task<ActionResult<Reservation>> PostReservation(CreateReservationDTO dto)
         {
             // specifieke customer ophalen 
             var customer = await _context.Customers
@@ -59,7 +30,7 @@ namespace API.Controllers
 
             if (customer == null)
             {
-                return BadRequest($"Klant met ID {dto.CustomerId} niet gevonden");
+                return NotFound($"Klant met ID {dto.CustomerId} niet gevonden");
             }
                 
             // alle geselecteerde accommodaties ophalen
@@ -70,13 +41,13 @@ namespace API.Controllers
 
             if (accommodations.Count == 0)
             {
-                return BadRequest("Geen geldige accommodaties gevonden");
+                return NotFound("Geen geldige accommodaties gevonden");
             }
             
 
             if (accommodations.Count != dto.AccommodationIds.Count)
             {
-                return BadRequest("Niet alle accommodaties konden worden gevonden");
+                return NotFound("Niet alle accommodaties konden worden gevonden");
             }
 
             // haal tarieven op voor camping 
@@ -143,31 +114,56 @@ namespace API.Controllers
             return Ok(responseDto);
         }
 
+
+
+
+        // GET: api/reservation
+        [HttpGet]
+        public async Task<ActionResult<List<Reservation>>> GetReservations()
+        {
+            var allReservations = await _context.Reservations
+                .Include(r => r.Customer)
+                .Include(r => r.Accommodations)
+                .ThenInclude(a => a.AccommodationType)
+                .ToListAsync();
+
+            return allReservations;
+        }
+
+
+        // GET: api/reservation/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Reservation>> GetReservation(int id)
+        {
+            var reservation = await _context.Reservations
+                .Include(r => r.Customer)
+                .Include(r => r.Accommodations)
+                .FirstOrDefaultAsync(r => r.ReservationId == id);
+
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            return reservation;
+        }
+
         // PUT: api/Reservation/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
             if (id != reservation.ReservationId)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             _context.Entry(reservation).State = EntityState.Modified;
 
-            try
+            await _context.SaveChangesAsync();
+
+            if (!ReservationExists(id))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReservationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();

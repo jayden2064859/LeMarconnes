@@ -47,8 +47,8 @@ namespace TestProject.Integration
             var result = await _controller.PostCustomer(dto);
 
             // ASSERT - Check het type van de response
-            var createdAtResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-            var customer = Assert.IsType<ClassLibrary.Models.Customer>(createdAtResult.Value);
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var customer = Assert.IsType<ClassLibrary.Models.Customer>(okResult.Value);
 
             Assert.Equal("John", customer.FirstName);
             Assert.Equal("Doe", customer.LastName);
@@ -59,7 +59,7 @@ namespace TestProject.Integration
 
         // ITC-02: Duplicate email moet BadRequest geven
         [Fact]
-        public async Task PostCustomer_DuplicateEmail_ReturnsBadRequest()
+        public async Task PostCustomer_DuplicateEmail_ReturnsConflict()
         {
             // ARRANGE - Eerste customer aanmaken
             var firstDto = new CreateCustomerDTO
@@ -71,12 +71,11 @@ namespace TestProject.Integration
             };
             await _controller.PostCustomer(firstDto);
 
-            // Tweede customer metzelfde email
             var secondDto = new CreateCustomerDTO
             {
                 FirstName = "Second",
                 LastName = "Customer",
-                Email = "duplicate@example.com", // Zelfde email!
+                Email = "duplicate@example.com", 
                 Phone = "0622222222"
             };
 
@@ -84,13 +83,13 @@ namespace TestProject.Integration
             var result = await _controller.PostCustomer(secondDto);
 
             // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("Email is al geregistreerd", badRequestResult.Value.ToString());
+            var conflictResult = Assert.IsType<ConflictObjectResult>(result.Result);
+            Assert.Contains("Email is al geregistreerd", conflictResult.Value.ToString());
         }
 
-        // ITC-03: Duplicate telefoonnummer moet BadRequest geven
+        // ITC-03: Duplicate telefoonnummer moet conflict geven
         [Fact]
-        public async Task PostCustomer_DuplicatePhone_ReturnsBadRequest()
+        public async Task PostCustomer_DuplicatePhone_ReturnsConflict()
         {
             // ARRANGE - Eerste customer aanmaken
             var firstDto = new CreateCustomerDTO
@@ -115,8 +114,8 @@ namespace TestProject.Integration
             var result = await _controller.PostCustomer(secondDto);
 
             // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("Telefoonnummer is al geregistreerd", badRequestResult.Value.ToString());
+            var conflictResult = Assert.IsType<ConflictObjectResult>(result.Result);
+            Assert.Contains("Telefoonnummer is al geregistreerd", conflictResult.Value.ToString());
         }
 
         // ITC-04: Customer ophalen met ID
@@ -177,7 +176,7 @@ namespace TestProject.Integration
             var result = await _controller.GetCustomers();
 
             // ASSERT
-            var actionResult = Assert.IsType<ActionResult<IEnumerable<ClassLibrary.Models.Customer>>>(result);
+            var actionResult = Assert.IsType<ActionResult<List<ClassLibrary.Models.Customer>>>(result);
             var customerList = Assert.IsType<List<ClassLibrary.Models.Customer>>(actionResult.Value);
             Assert.Equal(3, customerList.Count);
         }

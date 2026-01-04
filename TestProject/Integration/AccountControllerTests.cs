@@ -62,8 +62,8 @@ namespace TestProject.Integration
             var result = await _controller.PostAccount(dto);
 
             // ASSERT
-            var createdAtResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-            var account = Assert.IsType<Account>(createdAtResult.Value);
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var account = Assert.IsType<Account>(okResult.Value);
 
             Assert.Equal("testuser", account.Username);
             Assert.NotNull(account.PasswordHash);
@@ -74,7 +74,7 @@ namespace TestProject.Integration
 
         // ITC-08: Account aanmaken met niet-bestaande customer
         [Fact]
-        public async Task PostAccount_NonExistentCustomer_ReturnsBadRequest()
+        public async Task PostAccount_NonExistentCustomer_ReturnsConflict()
         {
             // ARRANGE
             var dto = new CreateAccountDTO
@@ -88,8 +88,8 @@ namespace TestProject.Integration
             var result = await _controller.PostAccount(dto);
 
             // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("Customer bestaat niet", badRequestResult.Value.ToString());
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            Assert.Contains("Customer bestaat niet", notFoundResult.Value.ToString());
         }
 
         // ITC-09: Username check - bestaande username
@@ -172,7 +172,7 @@ namespace TestProject.Integration
             var result = await _controller.GetAccounts();
 
             // ASSERT
-            var actionResult = Assert.IsType<ActionResult<IEnumerable<Account>>>(result);
+            var actionResult = Assert.IsType<ActionResult<List<Account>>>(result);
             var accountList = Assert.IsType<List<Account>>(actionResult.Value);
             Assert.Equal(3, accountList.Count);
         }

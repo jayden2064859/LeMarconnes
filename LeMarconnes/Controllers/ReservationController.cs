@@ -24,13 +24,7 @@ namespace LeMarconnes.Controllers
         [HttpGet]
         public IActionResult CreateReservation1()
         {
-            var viewModel = new CreateReservation1ViewModel
-            {
-                // default datum waarden op huidige datum zetten
-                StartDate = DateTime.Today,
-                EndDate = DateTime.Today.AddDays(1)
-            };
-            return View(viewModel);
+            return View();
         }
 
         [HttpPost]
@@ -41,21 +35,13 @@ namespace LeMarconnes.Controllers
             {
                 TempData["Error"] = "Voer een geldige start- en einddatum in";
 
-                return View(new CreateReservation1ViewModel
-                {
-                    StartDate = startDate,
-                    EndDate = endDate
-                });
+                return View();
             }
 
             if (!CreateReservationService.ValidateReservationDates(startDate, endDate))
             {
                 TempData["Error"] = "Einddatum moet later dan startdatum zijn";
-                return View(new CreateReservation1ViewModel
-                {
-                    StartDate = startDate,
-                    EndDate = endDate
-                });
+                return View();
             }
 
             // datums opslaan in session voor volgende stappen
@@ -66,7 +52,6 @@ namespace LeMarconnes.Controllers
             return RedirectToAction("CreateReservation2");
 
         }
-
 
 
 
@@ -90,7 +75,7 @@ namespace LeMarconnes.Controllers
             DateTime endDate = DateTime.Parse(endDateStr);
 
 
-            // beschikbare accommodaties ophalen met available-for-dates endpoint
+            // nieuwe list aanmaken voor beschikbare accommodaties ophalen met available-for-dates endpoint
             List<Accommodation> availableAccommodations = new List<Accommodation>();
 
             var response = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
@@ -101,6 +86,9 @@ namespace LeMarconnes.Controllers
                 TempData["Error"] = error;
                 return RedirectToAction("CreateReservation1");
             }
+
+            // response lezen
+            availableAccommodations = await response.Content.ReadFromJsonAsync<List<Accommodation>>();
 
             // viewmodel voor deze view aanmaken en vullen met de ontvangen datums (session strings) en accommodation lijst (api response)
             // deze data wordt gebruikt om bijv de ingevoerde datums weer terug te zetten wanneer de view herlaadt door een invoer error
@@ -216,7 +204,7 @@ namespace LeMarconnes.Controllers
 
             if (hasElectricity && !CreateReservationService.ValidateElectricityDays(electricityDays, numberOfNights))
             {
-                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dagen voor elektriciteitsgebruik ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
+                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dag(en) voor elektriciteitsgebruik ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
                 return RedirectToAction("CreateReservation3");
             }
 

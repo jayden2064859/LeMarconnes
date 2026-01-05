@@ -48,17 +48,12 @@ namespace API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // retourneer login response 
             var response = new LoginResponseDTO
             {
-                AccountId = account.AccountId,
                 Username = account.Username,
                 Role = account.AccountRole,
                 CustomerId = account.CustomerId,
-                FirstName = account.Customer?.FirstName,
-                LastName = account.Customer?.LastName,
-                Email = account.Customer?.Email,
-                Phone = account.Customer?.Phone
+                FirstName = account.Customer?.FirstName
             };
 
             return Ok(response);

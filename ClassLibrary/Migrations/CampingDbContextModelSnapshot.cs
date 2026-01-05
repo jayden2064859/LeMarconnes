@@ -71,7 +71,7 @@ namespace ClassLibrary.Migrations
                         {
                             AccommodationId = 1,
                             AccommodationTypeId = 1,
-                            Capacity = 6,
+                            Capacity = 10,
                             CurrentStatus = "Beschikbaar",
                             PlaceNumber = "1A"
                         },
@@ -79,7 +79,7 @@ namespace ClassLibrary.Migrations
                         {
                             AccommodationId = 2,
                             AccommodationTypeId = 1,
-                            Capacity = 6,
+                            Capacity = 10,
                             CurrentStatus = "Beschikbaar",
                             PlaceNumber = "2A"
                         },
@@ -87,7 +87,7 @@ namespace ClassLibrary.Migrations
                         {
                             AccommodationId = 3,
                             AccommodationTypeId = 1,
-                            Capacity = 6,
+                            Capacity = 10,
                             CurrentStatus = "Beschikbaar",
                             PlaceNumber = "3A"
                         },
@@ -95,7 +95,7 @@ namespace ClassLibrary.Migrations
                         {
                             AccommodationId = 4,
                             AccommodationTypeId = 1,
-                            Capacity = 6,
+                            Capacity = 10,
                             CurrentStatus = "Beschikbaar",
                             PlaceNumber = "4A"
                         },
@@ -103,7 +103,7 @@ namespace ClassLibrary.Migrations
                         {
                             AccommodationId = 5,
                             AccommodationTypeId = 1,
-                            Capacity = 6,
+                            Capacity = 10,
                             CurrentStatus = "Beschikbaar",
                             PlaceNumber = "5A"
                         });
@@ -146,10 +146,8 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
 
-                    b.Property<string>("AccountRole")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                    b.Property<int>("AccountRole")
+                        .HasColumnType("int");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");

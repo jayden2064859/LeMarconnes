@@ -95,7 +95,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountRole = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    AccountRole = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: true)
@@ -180,11 +180,11 @@ namespace ClassLibrary.Migrations
                 columns: new[] { "AccommodationId", "AccommodationTypeId", "Capacity", "CurrentStatus", "PlaceNumber" },
                 values: new object[,]
                 {
-                    { 1, 1, 6, "Beschikbaar", "1A" },
-                    { 2, 1, 6, "Beschikbaar", "2A" },
-                    { 3, 1, 6, "Beschikbaar", "3A" },
-                    { 4, 1, 6, "Beschikbaar", "4A" },
-                    { 5, 1, 6, "Beschikbaar", "5A" }
+                    { 1, 1, 10, "Beschikbaar", "1A" },
+                    { 2, 1, 10, "Beschikbaar", "2A" },
+                    { 3, 1, 10, "Beschikbaar", "3A" },
+                    { 4, 1, 10, "Beschikbaar", "4A" },
+                    { 5, 1, 10, "Beschikbaar", "5A" }
                 });
 
             migrationBuilder.InsertData(

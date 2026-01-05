@@ -54,11 +54,11 @@ namespace ClassLibrary.Data
 
             // db seeden met accommodaties
             modelBuilder.Entity<Accommodation>().HasData(
-                new Accommodation { AccommodationId = 1, PlaceNumber = "1A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1,},
-                new Accommodation { AccommodationId = 2, PlaceNumber = "2A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
-                new Accommodation { AccommodationId = 3, PlaceNumber = "3A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
-                new Accommodation { AccommodationId = 4, PlaceNumber = "4A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },                               
-                new Accommodation { AccommodationId = 5, PlaceNumber = "5A", Capacity = 6, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, }
+                new Accommodation { AccommodationId = 1, PlaceNumber = "1A", Capacity = 10, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1,},
+                new Accommodation { AccommodationId = 2, PlaceNumber = "2A", Capacity = 10, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
+                new Accommodation { AccommodationId = 3, PlaceNumber = "3A", Capacity = 10, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },
+                new Accommodation { AccommodationId = 4, PlaceNumber = "4A", Capacity = 10, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, },                               
+                new Accommodation { AccommodationId = 5, PlaceNumber = "5A", Capacity = 10, CurrentStatus = Accommodation.AccommodationStatus.Beschikbaar, AccommodationTypeId = 1, }
             );
 
             // database moet string opslaan ipv int for enum waarden (duidelijker voor medewerkers om direct 'Beschikbaar' te lezen ipv '0'
@@ -66,11 +66,6 @@ namespace ClassLibrary.Data
                 .Property(a => a.CurrentStatus)
                 .HasConversion<string>()
                 .HasMaxLength(11);
-
-            modelBuilder.Entity<Account>()
-                .Property(a => a.AccountRole)
-                .HasConversion<string>()
-                .HasMaxLength(8);
 
             modelBuilder.Entity<Reservation>()
                 .Property(a => a.CurrentStatus)

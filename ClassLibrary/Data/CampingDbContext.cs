@@ -67,11 +67,15 @@ namespace ClassLibrary.Data
                 .HasConversion<string>()
                 .HasMaxLength(11);
 
+            modelBuilder.Entity<Account>()
+            .Property(a => a.AccountRole)
+            .HasConversion<string>()
+            .HasMaxLength(10);
+
             modelBuilder.Entity<Reservation>()
                 .Property(a => a.CurrentStatus)
                 .HasConversion<string>()
                 .HasMaxLength(12);
-
 
             // relaties en FKs
 

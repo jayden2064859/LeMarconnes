@@ -15,7 +15,7 @@ namespace TestProject.Unit
             string password = "password123";
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.True(result);
@@ -30,7 +30,7 @@ namespace TestProject.Unit
             string password = "password123";
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.False(result);
@@ -45,7 +45,7 @@ namespace TestProject.Unit
             string password = "";
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.False(result);
@@ -60,7 +60,7 @@ namespace TestProject.Unit
             string password = "";
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.False(result);
@@ -75,7 +75,7 @@ namespace TestProject.Unit
             string password = "password123";
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.False(result);
@@ -90,7 +90,7 @@ namespace TestProject.Unit
             string password = null;
 
             // Act
-            bool result = LoginService.RequiredFields(username, password);
+            bool result = LoginValidation.RequiredFields(username, password);
 
             // Assert
             Assert.False(result);

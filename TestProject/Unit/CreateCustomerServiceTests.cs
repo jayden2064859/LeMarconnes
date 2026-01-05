@@ -13,7 +13,7 @@ namespace TestProject.Unit
             string email = "test@example.com";
 
             // Act
-            bool result = CreateCustomerService.ValidEmail(email);
+            bool result = CustomerValidation.ValidEmail(email);
 
             // Assert
             Assert.True(result);
@@ -27,7 +27,7 @@ namespace TestProject.Unit
             string email = "geen-email";
 
             // Act
-            bool result = CreateCustomerService.ValidEmail(email);
+            bool result = CustomerValidation.ValidEmail(email);
 
             // Assert
             Assert.False(result);
@@ -41,7 +41,7 @@ namespace TestProject.Unit
             string email = "test@@gmail.com";
 
             // Act
-            bool result = CreateCustomerService.ValidEmail(email);
+            bool result = CustomerValidation.ValidEmail(email);
 
             // Assert
             Assert.False(result);
@@ -56,7 +56,7 @@ namespace TestProject.Unit
             string phone = "06ABC34284T";
 
             // Act
-            bool result = CreateCustomerService.ValidatePhone(phone);
+            bool result = CustomerValidation.ValidatePhone(phone);
 
             // Assert
             Assert.False(result);
@@ -71,7 +71,7 @@ namespace TestProject.Unit
             string phone = "0612345678";
 
             // Act
-            bool result = CreateCustomerService.ValidatePhone(phone);
+            bool result = CustomerValidation.ValidatePhone(phone);
 
             // Assert
             Assert.True(result);
@@ -85,7 +85,7 @@ namespace TestProject.Unit
             string phone = "+31612345678";
 
             // Act
-            bool result = CreateCustomerService.ValidatePhone(phone);
+            bool result = CustomerValidation.ValidatePhone(phone);
 
             // Assert
             Assert.True(result);
@@ -105,7 +105,7 @@ namespace TestProject.Unit
             string phone = "0612345678";
 
             // Act
-            bool result = CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone);
+            bool result = CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone);
 
             // Assert
             Assert.True(result);
@@ -123,7 +123,7 @@ namespace TestProject.Unit
             string phone = "";
 
             // Act
-            bool result = CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone);
+            bool result = CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone);
 
             // Assert
             Assert.False(result);
@@ -140,7 +140,7 @@ namespace TestProject.Unit
             string phone = "Test@gmail.com";
 
             // Act
-            bool result = CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone);
+            bool result = CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone);
 
             // Assert
             Assert.False(result);

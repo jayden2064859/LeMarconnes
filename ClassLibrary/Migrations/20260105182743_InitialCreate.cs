@@ -95,7 +95,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountRole = table.Column<int>(type: "int", nullable: false),
+                    AccountRole = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: true)

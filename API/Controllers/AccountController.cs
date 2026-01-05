@@ -57,7 +57,7 @@ namespace API.Controllers
             }
             else
             {
-                return NotFound();
+                return NotFound("Gebruikersnaam is al in gebruik");
             }
         }
 
@@ -68,7 +68,6 @@ namespace API.Controllers
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
                 return NotFound("Customer bestaat niet");
-
 
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();

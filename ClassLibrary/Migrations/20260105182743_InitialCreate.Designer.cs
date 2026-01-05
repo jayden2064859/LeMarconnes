@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(CampingDbContext))]
-    [Migration("20260105021315_InitialCreate")]
+    [Migration("20260105182743_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -149,8 +149,10 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
 
-                    b.Property<int>("AccountRole")
-                        .HasColumnType("int");
+                    b.Property<string>("AccountRole")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");

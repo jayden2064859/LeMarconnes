@@ -9,22 +9,8 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.Services
 {
-    public class CreateCustomerService
+    public class CustomerValidation
     {
-
-        // dto wordt gebruikt om de data op te slaan en het van MVC naar API te sturen.
-        // In de api controller wordt de dto gebruikt om met de constructor het object aan te maken
-        public static CreateCustomerDTO CreateNewCustomerDTO(string firstName, string lastName, string email, string phone, string? infix = null)
-        {
-            return new CreateCustomerDTO
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                Phone = phone,
-                Infix = infix
-            };
-        }
 
        
         public static bool AccountInfoReceived(string username, string password)

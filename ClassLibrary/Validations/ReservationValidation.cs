@@ -11,27 +11,8 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.Services
 {
-    public class CreateReservationService
+    public class ReservationValidation
     {
-        // method die een DTO object aanmaakt
-        public static CreateReservationDTO CreateNewReservationDTO(int customerId, List<int> accommodationIds, DateTime startDate,
-            DateTime endDate, int adultsCount, int children0_7Count, int children7_12Count, int dogsCount, bool hasElectricity, int? electricityDays = null)
-        {
-            return new CreateReservationDTO
-            {
-                CustomerId = customerId,
-                AccommodationIds = accommodationIds,
-                StartDate = startDate,
-                EndDate = endDate,
-                AdultsCount = adultsCount,
-                Children0_7Count = children0_7Count,
-                Children7_12Count = children7_12Count,
-                DogsCount = dogsCount,
-                HasElectricity = hasElectricity,
-                ElectricityDays = electricityDays
-
-            };
-        }
 
         // minimaal 1, max 2 accommodations per reservering
         public static bool ValidateAccommodationCount(List<int> accommodationList)

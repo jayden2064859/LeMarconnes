@@ -146,8 +146,10 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
 
-                    b.Property<int>("AccountRole")
-                        .HasColumnType("int");
+                    b.Property<string>("AccountRole")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");

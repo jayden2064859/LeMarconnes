@@ -1,11 +1,34 @@
 using ClassLibrary.Data;
 using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// dependency injection voor service api connecties
+builder.Services.AddHttpClient<AccountService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7290");
+});
+
+builder.Services.AddHttpClient<CustomerService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7290");
+});
+
+builder.Services.AddHttpClient<LoginService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7290");
+});
+
+builder.Services.AddHttpClient<ReservationService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7290");
+});
+
 
 builder.Services.AddHttpClient();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

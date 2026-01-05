@@ -1,8 +1,8 @@
 ﻿using ClassLibrary.DTOs;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,22 +10,26 @@ namespace ClassLibrary.Services
 {
     public class LoginService
     {
-        public static LoginDTO CreateNewLoginDTO(string username, string password)
+        private readonly HttpClient _httpClient;
+
+        public LoginService(HttpClient httpClient)
         {
-            return new LoginDTO
-            {
-                Username = username,
-                Password = password
-            };
+            _httpClient = httpClient;
         }
-        public static bool RequiredFields(string username, string password)
+
+        public async Task<(LoginResponseDTO?, string?)> LoginAsync(LoginDTO loginDto)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            var postLogin = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
+
+            if (!postLogin.IsSuccessStatusCode)
             {
-                return false;
+                // api error message doorgeven
+                var errorContent = await postLogin.Content.ReadAsStringAsync();
+                return (null, errorContent);
             }
-            return true;
+
+            var responseDto = await postLogin.Content.ReadFromJsonAsync<LoginResponseDTO>();
+            return (responseDto, null);
         }
     }
 }
-

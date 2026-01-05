@@ -1,4 +1,5 @@
-﻿using ClassLibrary.Models;
+﻿using ClassLibrary.DTOs;
+using ClassLibrary.Models;
 using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +11,14 @@ namespace LeMarconnes.Controllers
     public class AccountController : Controller
     {
 
-        private readonly HttpClient _httpClient;
+        // dependency injection gebruiken voor de services (api communicatie)
+        private readonly AccountService _accountService;
+        private readonly CustomerService _customerService;
 
-        public AccountController(IHttpClientFactory factory)
+        public AccountController(AccountService accountService, CustomerService customerService)
         {
-            _httpClient = factory.CreateClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7290");
+            _accountService = accountService;
+            _customerService = customerService;
         }
 
         [HttpGet]
@@ -29,45 +32,44 @@ namespace LeMarconnes.Controllers
         {
             // service gebruiken om te checken of wachtwoorden overeenkomen
 
-            if (!CreateAccountService.DoPasswordsMatch(password, confirmPassword))
+            if (!AccountValidation.DoPasswordsMatch(password, confirmPassword))
             {
                 TempData["Error"] = "Wachtwoorden komen niet overeen";
                 return View("CreateAccount");
             }
 
-            if (!CreateAccountService.ValidPasswordLength(password))
+            if (!AccountValidation.ValidPasswordLength(password))
             {
                 TempData["Error"] = "Wachtwoord moet minimaal 4 karakters zijn";
                 return View("CreateAccount");
             }
 
             // checken of alle velden zijn ingevuld        
-            if (!CreateAccountService.ValidateFields(username, password, confirmPassword))
+            if (!AccountValidation.ValidateFields(username, password, confirmPassword))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("CreateAccount");
             }
 
             // checken of username input geldig is                    
-            if (!CreateAccountService.ValidUsernameLength(username))
+            if (!AccountValidation.ValidUsernameLength(username))
             {
                 TempData["Error"] = "Gebruikersnaam moet minimaal 4 karakters zijn";
                 return View("CreateAccount");
             }
 
             // checken of username alleen uit geldige tekens bestaat
-            if (!CreateAccountService.ValidUsernameChars(username))
+            if (!AccountValidation.ValidUsernameChars(username))
             {
                 TempData["Error"] = "Gebruikersnaam kan alleen uit letters en cijfers bestaan";
                 return View("CreateAccount");
             }
 
             // valideren of username al bestaat in db voordat account aangemaakt kan worden
-            var accountResponse = await _httpClient.GetAsync($"/api/Account/exists/{username}");
+            var exists = await _accountService.CheckUsernameExistsAsync(username);
 
-            if (accountResponse.IsSuccessStatusCode)
+            if (exists)
             {
-                // api geeft 200 OK terug als username bestaat
                 TempData["Error"] = "Gebruikersnaam is al in gebruik";
                 return View("CreateAccount");
             }
@@ -76,15 +78,12 @@ namespace LeMarconnes.Controllers
             HttpContext.Session.SetString("RegisterUsername", username);
             HttpContext.Session.SetString("RegisterPassword", password);
             
-
             return RedirectToAction("CreateCustomer");
         }
 
-
-        [HttpGet]
+       [HttpGet]
         public IActionResult CreateCustomer()
         {
-
             return View("CreateCustomer");
         }
 
@@ -98,27 +97,27 @@ namespace LeMarconnes.Controllers
             var password = HttpContext.Session.GetString("RegisterPassword");
 
             // checken of username en password succesvol uit de session zijn gehaald     
-            if (!CreateCustomerService.AccountInfoReceived(username, password))
+            if (!CustomerValidation.AccountInfoReceived(username, password))
             {
                 TempData["Error"] = "Sessie verlopen. Probeer opnieuw.";
                 return View("CreateAccount");
             }
 
             // checken of all required parameters geldige invoer hebben (niet null of alleen maar whitespace)         
-            if (!CreateCustomerService.RequiredFieldsCheck(firstName, lastName, email, phone))
+            if (!CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone))
             {
                 TempData["Error"] = "Vul alle verplichte velden in";
                 return View("CreateCustomer");
             }
 
             // checken of email invoer minimaal 1 '@' teken heeft (en maximaal 1)
-            if (!CreateCustomerService.ValidEmail(email))
+            if (!CustomerValidation.ValidEmail(email))
             {
                 TempData["Error"] = "Ongeldige email";
                 return View("CreateCustomer");
             }
 
-            if (!CreateCustomerService.ValidatePhone(phone))
+            if (!CustomerValidation.ValidatePhone(phone))
             {
                 TempData["Error"] = "Ongeldig telefoonnummer";
                 return View("CreateCustomer");
@@ -126,38 +125,44 @@ namespace LeMarconnes.Controllers
 
             // 1. customer dto aanmaken
             // customer moet als eerst aangemaakt worden, zodat het customer object teruggegeven kan worden voordat het account object wordt aangemaakt.
-            // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze direct gelinked kan worden met het account object in dezelfde method.
-            var customerDto = CreateCustomerService.CreateNewCustomerDTO(firstName, lastName, email, phone, infix);
-
-            // POST customer doen met de dto
-            var customerResponse = await _httpClient.PostAsJsonAsync("/api/Customer", customerDto);
-
-            if (!customerResponse.IsSuccessStatusCode)
+            // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze direct gelinked kan worden met het account object in dezelfde method.           
+            var customerDto = new CreateCustomerDTO
             {
-                var error = await customerResponse.Content.ReadAsStringAsync();
-                TempData["Error"] = error;
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Phone = phone,
+                Infix = infix
+            };
+
+
+            // POST customer doen met de dto (customer obj wordt uitgelezen als Post succesvol is, anders wordt error  uitgelezen)
+            var (customer, customerError) = await _customerService.CreateCustomerAsync(customerDto);
+
+            if (customer == null)
+            {
+                TempData["Error"] = customerError;
                 return View("CreateCustomer");
             }
 
-            // api response (customer object) lezen als response succesvol is
-            var customer = await customerResponse.Content.ReadFromJsonAsync<Customer>();
-
-
             // 2. account dto aanmaken
-            var accountDto = CreateAccountService.CreateNewAccountDTO(customer.CustomerId, username, password);
-
-            // dto naar api sturen
-            var accountResponse = await _httpClient.PostAsJsonAsync("/api/Account", accountDto);
-
-            if (!accountResponse.IsSuccessStatusCode)
+            var accountDto = new CreateAccountDTO
             {
+                CustomerId = customer.CustomerId,
+                Username = username,
+                PlainPassword = password
+            };
 
-                var error = await accountResponse.Content.ReadAsStringAsync();
-                TempData["Error"] = error;
 
+            // dto naar api sturen 
+            var (accountCreated, accountError) = await _accountService.CreateAccountAsync(accountDto);
+
+            if (accountCreated == null)
+            {
                 // rollback customer als account niet aangemaakt wordt
-                await _httpClient.DeleteAsync($"/api/Customer/{customer.CustomerId}");
+                await _customerService.DeleteCustomerAsync(customer.CustomerId);
 
+                TempData["Error"] = accountError;
                 return View("CreateCustomer");
             }
 

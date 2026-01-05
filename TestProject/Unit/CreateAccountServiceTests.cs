@@ -10,7 +10,7 @@ namespace TestProject.Unit
         public void ValidUsernameLength_TooShort_ReturnsFalse()
         {
             string username = "jan"; // 3 karakters
-            bool result = CreateAccountService.ValidUsernameLength(username);
+            bool result = AccountValidation.ValidUsernameLength(username);
             Assert.False(result);
         }
 
@@ -19,7 +19,7 @@ namespace TestProject.Unit
         public void ValidUsernameLength_Valid_ReturnsTrue()
         {
             string username = "ValidUsername"; // 13 karakters
-            bool result = CreateAccountService.ValidUsernameLength(username);
+            bool result = AccountValidation.ValidUsernameLength(username);
             Assert.True(result);
         }
 
@@ -28,7 +28,7 @@ namespace TestProject.Unit
         public void ValidUsernameLength_TooLong_ReturnsFalse()
         {
             string username = "User12345678901234567"; // 21 karakters
-            bool result = CreateAccountService.ValidUsernameLength(username);
+            bool result = AccountValidation.ValidUsernameLength(username);
             Assert.False(result);
         }
 
@@ -37,7 +37,7 @@ namespace TestProject.Unit
         public void ValidUsernameChars_WithSpecialChars_ReturnsFalse()
         {
             string username = "user_123!";
-            bool result = CreateAccountService.ValidUsernameChars(username);
+            bool result = AccountValidation.ValidUsernameChars(username);
             Assert.False(result);
         }
 
@@ -46,7 +46,7 @@ namespace TestProject.Unit
         public void ValidUsernameChars_OnlyLettersAndDigits_ReturnsTrue()
         {
             string username = "user123";
-            bool result = CreateAccountService.ValidUsernameChars(username);
+            bool result = AccountValidation.ValidUsernameChars(username);
             Assert.True(result);
         }
 
@@ -58,7 +58,7 @@ namespace TestProject.Unit
             string password = "Test123";
             string confirmPassword = "Test123";
 
-            bool result = CreateAccountService.ValidateFields(username, password, confirmPassword);
+            bool result = AccountValidation.ValidateFields(username, password, confirmPassword);
             Assert.False(result);
         }
 
@@ -67,7 +67,7 @@ namespace TestProject.Unit
         public void ValidUsernameLength_MaxLength_ReturnsTrue()
         {
             string username = "User1234567890123456"; // 20 karakters
-            bool result = CreateAccountService.ValidUsernameLength(username);
+            bool result = AccountValidation.ValidUsernameLength(username);
             Assert.True(result);
         }
 
@@ -76,7 +76,7 @@ namespace TestProject.Unit
         public void ValidPasswordLength_Minimum_ReturnsTrue()
         {
             string password = "abcd"; // 4 karakters
-            bool result = CreateAccountService.ValidPasswordLength(password);
+            bool result = AccountValidation.ValidPasswordLength(password);
             Assert.True(result);
         }
 
@@ -84,7 +84,7 @@ namespace TestProject.Unit
         [Fact]
         public void DoPasswordsMatch_MatchingPasswords_ReturnsTrue()
         {
-            bool result = CreateAccountService.DoPasswordsMatch("Test123", "Test123");
+            bool result = AccountValidation.DoPasswordsMatch("Test123", "Test123");
             Assert.True(result);
         }
 
@@ -92,7 +92,7 @@ namespace TestProject.Unit
         [Fact]
         public void DoPasswordsMatch_NonMatchingPasswords_ReturnsFalse()
         {
-            bool result = CreateAccountService.DoPasswordsMatch("Test123", "Test456");
+            bool result = AccountValidation.DoPasswordsMatch("Test123", "Test456");
             Assert.False(result);
         }
 
@@ -100,7 +100,7 @@ namespace TestProject.Unit
         [Fact]
         public void ValidateFields_AllFieldsValid_ReturnsTrue()
         {
-            bool result = CreateAccountService.ValidateFields(
+            bool result = AccountValidation.ValidateFields(
                 "testuser",
                 "Test123",
                 "Test123"
@@ -114,7 +114,7 @@ namespace TestProject.Unit
         public void ValidPasswordLength_TooShort_ReturnsFalse()
         {
             string password = "abc"; // 3 karakters
-            bool result = CreateAccountService.ValidPasswordLength(password);
+            bool result = AccountValidation.ValidPasswordLength(password);
             Assert.False(result);
         }
     }

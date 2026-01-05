@@ -10,17 +10,9 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.Services
 {
-    public class CreateAccountService
+    public class AccountValidation
     {
-        public static CreateAccountDTO CreateNewAccountDTO(int customerId, string username, string plainPassword)
-        {
-            return new CreateAccountDTO
-            {
-                CustomerId = customerId,
-                Username = username,
-                PlainPassword = plainPassword
-            };
-        }
+
         public static bool DoPasswordsMatch(string password, string confirmPassword)
         {
             // wachtwoord inputs moeten matchen

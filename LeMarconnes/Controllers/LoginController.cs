@@ -9,12 +9,11 @@ namespace LeMarconnes.Controllers
     public class LoginController : Controller
     {
 
-        private readonly HttpClient _httpClient;
+        private readonly LoginService _loginService;
 
-        public LoginController(IHttpClientFactory factory)
+        public LoginController(LoginService loginService)
         {
-            _httpClient = factory.CreateClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7290");
+            _loginService = loginService;
         }
 
         public IActionResult Login()
@@ -26,42 +25,31 @@ namespace LeMarconnes.Controllers
         public async Task<IActionResult> Login(string username, string password)
         {
 
-
             // checken of beide username en password fields zijn ingevuld
-            if (!LoginService.RequiredFields(username, password))
+            if (!LoginValidation.RequiredFields(username, password))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("Login");
             }
 
-            // dto aanmaken via de login service method
-            var loginDto = LoginService.CreateNewLoginDTO(username, password);
-
+            var loginDto = new LoginDTO
+            {
+                Username = username,
+                Password = password
+            };
 
             // loginDto naar api sturen, en de response daarvan in loginResponse var zetten 
-            var loginResponse = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
-
-            if (!loginResponse.IsSuccessStatusCode)
-            {
-                var error = await loginResponse.Content.ReadAsStringAsync();
-                TempData["Error"] = error;
-                return View("Login");
-            }
-
-            // login response lezen 
-            var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
+            var (loginResult, errorMessage) = await _loginService.LoginAsync(loginDto);
 
             if (loginResult == null)
             {
-                TempData["Error"] = "Er ging iets mis bij het inloggen";
+                TempData["Error"] = errorMessage;
                 return View("Login");
             }
-
             // sla gegevens die nodig zijn op in session 
             HttpContext.Session.SetString("Username", loginResult.Username);
             HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
             HttpContext.Session.SetString("FirstName", loginResult.FirstName);
-
 
             // customer id opslaan in session (wordt gebruikt voor reserveringen en om te checken of session nog valid is)
             if (loginResult.CustomerId.HasValue)

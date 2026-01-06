@@ -3,7 +3,7 @@ using Xunit;
 
 namespace TestProject.Unit
 {
-    public class LoginServiceTests
+    public class LoginValidationsTests
     {
         
         // UTC-26: Geldige login input

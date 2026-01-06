@@ -32,7 +32,7 @@ namespace ClassLibrary.Services
                 return false;
             }
 
-            // input voor aantal dagan electriciteitsgebruik kan niet hoger zijn dan aantal overnachtingen
+            // input voor aantal dagen electriciteitsgebruik kan niet hoger zijn dan aantal overnachtingen
             if (electricityDays > numberOfNights)
             {
                 return false;
@@ -98,33 +98,6 @@ namespace ClassLibrary.Services
                 return false;
             return true;
         }
-
-        public static bool ValidateSession(string startDate, string endDate)
-        {
-
-            if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        // method overloading zodat deze method gebruikt kan worden in Reservation view 3, wanneer customerId nodig is voor POST
-        public static bool ValidateSession(string startDate, string endDate, int? customerId)
-        {
-            if (customerId == null)
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
-            {
-                return false;
-            }
-            return true;
-        }
-
-
 
     }
 }

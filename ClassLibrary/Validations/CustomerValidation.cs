@@ -12,19 +12,9 @@ namespace ClassLibrary.Services
     public class CustomerValidation
     {
 
-       
-        public static bool AccountInfoReceived(string username, string password)
-        {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                return false;
-            }
-            return true;
-        }
-
         public static bool RequiredFieldsCheck(string firstName, string lastName, string email, string phone)
         {
-            // array maken van alle required fields en linq gebruiken om alles in 1 keer te checken
+            // array maken van alle required fields en linq gebruiken om alles in 1 keer te checken (meerdere values in 1 var)
             var requiredFields = new[] { firstName, lastName, email, phone };
             if (requiredFields.Any(string.IsNullOrWhiteSpace))
             {

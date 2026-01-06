@@ -19,10 +19,17 @@ namespace ClassLibrary.Services
             _httpClient = httpClient;
         }
 
-        public async Task<bool> CheckUsernameExistsAsync(string username)
+        public async Task<(bool?, string?)> CheckUsernameExistsAsync(string username)
         {
-            var exists = await _httpClient.GetAsync($"/api/Account/exists/{username}");
-            return exists.IsSuccessStatusCode; 
+            var usernameExists = await _httpClient.GetAsync($"/api/Account/exists/{username}");
+            
+            if (!usernameExists.IsSuccessStatusCode)
+            {
+                var errorContent = await usernameExists.Content.ReadAsStringAsync();
+                return (null, errorContent);
+            }
+            
+            return (usernameExists.IsSuccessStatusCode, null); 
         }
 
         // account object is niet nodig na succesvol aanmaken, dus alleen een true/false is nodig hiervoor

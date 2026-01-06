@@ -24,6 +24,45 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(CreateReservationDTO dto)
         {
+            // business rule validaties
+
+            if (!ReservationValidation.ValidDateInput(dto.StartDate, dto.EndDate))
+            {
+                return Conflict("Start- en einddatum zijn ongeldig");
+            }
+               
+            if (!ReservationValidation.ValidateReservationDates(dto.StartDate, dto.EndDate))
+            {
+                return Conflict("Einddatum moet later zijn dan startdatum");
+            }
+               
+            if (!ReservationValidation.ValidateAccommodationCount(dto.AccommodationIds))
+            {
+                return Conflict("Minimaal 1 en maximaal 2 accommodaties toegestaan");
+            }
+
+            if (!ReservationValidation.ValidateAdultCounts(dto.AdultsCount))
+            {
+                return Conflict("Minimaal 1 en maximaal 10 volwassenen");
+            }
+
+            if (!ReservationValidation.ValidateChildrenCount(dto.Children0_7Count, dto.Children7_12Count))
+            {
+                return Conflict("Kinderen: min 0, max 5 per categorie");
+            }              
+
+            if (!ReservationValidation.ValidateDogsCount(dto.DogsCount))
+            {
+                return Conflict("Maximaal 3 honden toegestaan");
+            }
+               
+            int numberOfNights = (dto.EndDate - dto.StartDate).Days;
+            if (dto.HasElectricity && !ReservationValidation.ValidateElectricityDays(dto.ElectricityDays, numberOfNights))
+            {
+                return Conflict($"Elektriciteitsdagen moeten tussen 1 en {numberOfNights} liggen");
+            }
+              
+            
             // specifieke customer ophalen 
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.CustomerId == dto.CustomerId);

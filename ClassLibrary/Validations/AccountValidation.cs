@@ -37,6 +37,7 @@ namespace ClassLibrary.Services
         public static bool ValidateFields(string username, string password, string confirmPassword)
         {
             // LINQ om alle parameters in 1 keer te valideren
+            // array gebruiken omdat het altijd een vastte grootte van 3 elementen heeft
             var requiredFields = new[] { username, password, confirmPassword };
             if (requiredFields.Any(string.IsNullOrWhiteSpace))
             {
@@ -65,11 +66,6 @@ namespace ClassLibrary.Services
             }
             return true;
         }
-
-
-
-
-
 
     };
 

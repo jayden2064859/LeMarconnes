@@ -3,7 +3,7 @@ using Xunit;
 
 namespace TestProject.Unit
 {
-    public class CreateAccountServiceTests
+    public class AccountValidationsTests
     {
         // UTC-14: Valideer gebruikersnaam lengte (te kort)
         [Fact]

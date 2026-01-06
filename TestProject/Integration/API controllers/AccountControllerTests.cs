@@ -121,7 +121,8 @@ namespace TestProject.Integration
             var result = await _controller.CheckUsernameExists("nonexistinguser");
 
             // ASSERT
-            Assert.IsType<NotFoundResult>(result);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Gebruikersnaam is al in gebruik", notFoundResult.Value);
         }
 
         // ITC-11: Account ophalen met ID

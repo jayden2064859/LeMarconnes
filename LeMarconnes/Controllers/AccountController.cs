@@ -30,47 +30,27 @@ namespace LeMarconnes.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAccount(string username, string password, string confirmPassword)
         {
-            // service gebruiken om te checken of wachtwoorden overeenkomen
+            // services voor UI/UX validaties
 
             if (!AccountValidation.DoPasswordsMatch(password, confirmPassword))
             {
                 TempData["Error"] = "Wachtwoorden komen niet overeen";
                 return View("CreateAccount");
             }
-
-            if (!AccountValidation.ValidPasswordLength(password))
-            {
-                TempData["Error"] = "Wachtwoord moet minimaal 4 karakters zijn";
-                return View("CreateAccount");
-            }
-
-            // checken of alle velden zijn ingevuld        
+       
             if (!AccountValidation.ValidateFields(username, password, confirmPassword))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("CreateAccount");
             }
 
-            // checken of username input geldig is                    
-            if (!AccountValidation.ValidUsernameLength(username))
-            {
-                TempData["Error"] = "Gebruikersnaam moet minimaal 4 karakters zijn";
-                return View("CreateAccount");
-            }
-
-            // checken of username alleen uit geldige tekens bestaat
-            if (!AccountValidation.ValidUsernameChars(username))
-            {
-                TempData["Error"] = "Gebruikersnaam kan alleen uit letters en cijfers bestaan";
-                return View("CreateAccount");
-            }
 
             // valideren of username al bestaat in db voordat account aangemaakt kan worden
-            var exists = await _accountService.CheckUsernameExistsAsync(username);
+            var (exists, error) = await _accountService.CheckUsernameExistsAsync(username); 
 
-            if (exists)
+            if (exists == null)
             {
-                TempData["Error"] = "Gebruikersnaam is al in gebruik";
+                TempData["Error"] = error;
                 return View("CreateAccount");
             }
 
@@ -80,6 +60,8 @@ namespace LeMarconnes.Controllers
             
             return RedirectToAction("CreateCustomer");
         }
+
+
 
        [HttpGet]
         public IActionResult CreateCustomer()
@@ -96,30 +78,17 @@ namespace LeMarconnes.Controllers
             var username = HttpContext.Session.GetString("RegisterUsername");
             var password = HttpContext.Session.GetString("RegisterPassword");
 
-            // checken of username en password succesvol uit de session zijn gehaald     
-            if (!CustomerValidation.AccountInfoReceived(username, password))
+
+            // checken of sessie verlopen is (oftewel data van de vorige view is dan niet meer opgeslagen)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                TempData["Error"] = "Sessie verlopen. Probeer opnieuw.";
-                return View("CreateAccount");
+                return RedirectToAction("Login", "Login");
             }
 
-            // checken of all required parameters geldige invoer hebben (niet null of alleen maar whitespace)         
+            // UI/UX validatie       
             if (!CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone))
             {
                 TempData["Error"] = "Vul alle verplichte velden in";
-                return View("CreateCustomer");
-            }
-
-            // checken of email invoer minimaal 1 '@' teken heeft (en maximaal 1)
-            if (!CustomerValidation.ValidEmail(email))
-            {
-                TempData["Error"] = "Ongeldige email";
-                return View("CreateCustomer");
-            }
-
-            if (!CustomerValidation.ValidatePhone(phone))
-            {
-                TempData["Error"] = "Ongeldig telefoonnummer";
                 return View("CreateCustomer");
             }
 
@@ -135,8 +104,7 @@ namespace LeMarconnes.Controllers
                 Infix = infix
             };
 
-
-            // POST customer doen met de dto (customer obj wordt uitgelezen als Post succesvol is, anders wordt error  uitgelezen)
+            // POST customer doen met de dto (customer obj wordt uitgelezen als Post succesvol is, anders wordt error uitgelezen)
             var (customer, customerError) = await _customerService.CreateCustomerAsync(customerDto);
 
             if (customer == null)
@@ -153,16 +121,15 @@ namespace LeMarconnes.Controllers
                 PlainPassword = password
             };
 
-
             // dto naar api sturen 
-            var (accountCreated, accountError) = await _accountService.CreateAccountAsync(accountDto);
+            var (accountCreated, error) = await _accountService.CreateAccountAsync(accountDto);
 
             if (accountCreated == null)
             {
                 // rollback customer als account niet aangemaakt wordt
                 await _customerService.DeleteCustomerAsync(customer.CustomerId);
 
-                TempData["Error"] = accountError;
+                TempData["Error"] = error;
                 return View("CreateCustomer");
             }
 

@@ -2,8 +2,10 @@
 using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace API.Controllers
 {
@@ -45,9 +47,21 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer([FromBody] CreateCustomerDTO dto)
+        public async Task<ActionResult<Customer>> PostCustomer(CreateCustomerDTO dto)
         {
-            // valideren of email en telefoonnummer al bestaan in db
+
+            // services voor business rules
+            if (!CustomerValidation.ValidEmail(dto.Email))
+            {
+                return Conflict("Ongeldige email");
+            }
+
+            if (!CustomerValidation.ValidatePhone(dto.Phone))
+            {
+                return Conflict("Ongeldig telefoonnummer");
+            }
+
+            // valideren of email en telefoonnummer al bestaan in db (wordt pas na de service validaties gedaan om onnodige queries naar db te voorkomen)
             var customerExists = await _context.Customers
                 .Where(c => c.Email == dto.Email || c.Phone == dto.Phone)
                 .FirstOrDefaultAsync();
@@ -56,10 +70,14 @@ namespace API.Controllers
             {
                 // conflict = voor wanneer de input qua syntax correct is, maar business rules het alsnog niet toelaten
                 if (customerExists.Email == dto.Email)
+                {
                     return Conflict("Email is al geregistreerd");
-
+                }
+               
                 if (customerExists.Phone == dto.Phone)
+                {
                     return Conflict("Telefoonnummer is al geregistreerd");
+                }                
             }
 
             // constructor in customer class gebruiken om object aan te maken

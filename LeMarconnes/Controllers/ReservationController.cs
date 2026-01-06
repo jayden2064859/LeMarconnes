@@ -98,24 +98,22 @@ namespace LeMarconnes.Controllers
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
 
-
-            // service validatie voor accommodaties
-
-            if (!ReservationValidation.ValidateSession(startDateStr, endDateStr))
-            {
-                return RedirectToAction("Login", "Login");
-            }
-
             if (!ReservationValidation.ValidateAccommodationCount(accommodationIds))
             {
-                TempData["Error"] = "Minimaal 1, Max 2 campingplekken per reservering";
+                TempData["Error"] = "Minimaal 1 en maximaal 2 accommodaties toegestaan";
                 return RedirectToAction("CreateReservation2");
+            }
+
+            // checken of sessie nog actief is (data van vorige view nog beschikbaar)
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            {
+                return RedirectToAction("Login", "Login");
             }
 
             // accommodation Ids opslaan in session (als json string)
             HttpContext.Session.SetString("ReservationAccommodationIds",
             System.Text.Json.JsonSerializer.Serialize(accommodationIds));
-
+                        
             return RedirectToAction("CreateReservation3");
         }
 
@@ -130,7 +128,7 @@ namespace LeMarconnes.Controllers
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
 
-            if (!ReservationValidation.ValidateSession(startDateStr, endDateStr))
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
             {
                 return RedirectToAction("Login", "Login");
             }
@@ -140,6 +138,7 @@ namespace LeMarconnes.Controllers
             DateTime endDate = DateTime.Parse(endDateStr);
 
             int numberOfNights = (endDate - startDate).Days;
+
             // aantal overnachtingen opslaan in viewbag zodat het in de view gebruikt kan worden
             ViewBag.NumberOfNights = numberOfNights;
 
@@ -155,8 +154,8 @@ namespace LeMarconnes.Controllers
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
             var customerId = HttpContext.Session.GetInt32("CustomerId");
 
-            // checken of sessie nog actief is (en vooral of customerId van de klant nog beschikbaar is)
-            if (!ReservationValidation.ValidateSession(startDateStr, endDateStr, customerId))
+            // checken of sessie nog actief is (customerId in session is nodig)
+            if (!customerId.HasValue)
             {
                 return RedirectToAction("Login", "Login");
             }
@@ -167,33 +166,6 @@ namespace LeMarconnes.Controllers
 
             // string van accommodationIds terug converten naar List<int>
             var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);
-
-            // service validaties
-            if (!ReservationValidation.ValidateAdultCounts(adultsCount))
-            {
-                TempData["Error"] = "Minimaal 1 volwassene nodig (max 10)";
-                return RedirectToAction("CreateReservation3");
-            }
-
-            if (!ReservationValidation.ValidateChildrenCount(children0_7Count, children7_12Count))
-            {
-                TempData["Error"] = "Minimaal 0, maximaal 5 kinderen per leeftijdscategorie";
-                return RedirectToAction("CreateReservation3");
-            }
-
-            if (!ReservationValidation.ValidateDogsCount(dogsCount))
-            {
-                TempData["Error"] = "Minimaal 0, maximaal 3 honden";
-                return RedirectToAction("CreateReservation3");
-            }
-
-            int numberOfNights = (endDate - startDate).Days;
-
-            if (hasElectricity && !ReservationValidation.ValidateElectricityDays(electricityDays, numberOfNights))
-            {
-                TempData["Error"] = $"Minimaal 1, maximaal {numberOfNights} dag(en) voor elektriciteitsgebruik ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
-                return RedirectToAction("CreateReservation3");
-            }
 
             if (!hasElectricity)
             {

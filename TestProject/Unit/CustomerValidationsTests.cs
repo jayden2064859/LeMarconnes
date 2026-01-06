@@ -3,7 +3,7 @@ using Xunit;
 
 namespace TestProject.Unit
 {
-    public class CreateCustomerServiceTests
+    public class CustomerValidationsTests
     {
         // UTC-05: Valideer geldige e-mail
         [Fact]

@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,16 +50,13 @@ namespace API.Controllers
         [HttpGet("exists/{username}")]
         public async Task<IActionResult> CheckUsernameExists(string username)
         {
-            var exists = await _context.Accounts.AnyAsync(a => a.Username == username);
+            var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
 
-            if (exists)
+            if (existingUsername)
             {
-                return Ok();
+                return Conflict("Gebruikersnaam bestaat al");
             }
-            else
-            {
-                return NotFound("Gebruikersnaam is al in gebruik");
-            }
+            return Ok("Gebruikersnaam is beschikbaar");          
         }
 
         // POST: api/account
@@ -67,7 +65,27 @@ namespace API.Controllers
         {
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
+            {
                 return NotFound("Customer bestaat niet");
+
+            }
+ 
+            // service validaties
+            if (!AccountValidation.ValidPasswordLength(dto.PlainPassword))
+            {
+                return Conflict("Wachtwoord moet minimaal 4 karakters zijn");
+            }
+                           
+            if (!AccountValidation.ValidUsernameLength(dto.Username))
+            {
+                return Conflict("Gebruikersnaam moet minimaal 4 karakters zijn");
+            }
+                         
+            if (!AccountValidation.ValidUsernameChars(dto.Username))
+            {
+                return Conflict("Gebruikersnaam kan alleen uit letters en cijfers bestaan");
+
+            }
 
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();

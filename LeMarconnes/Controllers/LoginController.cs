@@ -58,14 +58,14 @@ namespace LeMarconnes.Controllers
             }
 
             // redirect terug naar homepage 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Homepage", "Home");
         }
 
         [HttpGet]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Homepage", "Home");
         }
     }
 }

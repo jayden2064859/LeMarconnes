@@ -70,10 +70,11 @@ namespace ClassLibrary.Services
             return true;
         }
 
-        // minstens 1 (max 10) volwassene nodig voor reservering
+        // aantal personen per reservering business rules: in totaal 8 personen per reservering (4 volwassenen, 2 kinderen 0-7, 2 kinderen 7-12) 
+        // minstens 1 volwassene nodig voor een reservering
         public static bool ValidateAdultCounts(int adultsCount)
         {
-            if (adultsCount < 1 || adultsCount > 10)
+            if (adultsCount < 1 || adultsCount > 4)
             {
                 return false;
             }
@@ -83,18 +84,18 @@ namespace ClassLibrary.Services
         // geen negatieve inputs voor beide leeftijdscategorieen 
         public static bool ValidateChildrenCount(int children_07Count, int children7_12Count)
         {
-            // geen negatieve inputs voor beide, en beide max 5  
-            if (children_07Count < 0 || children7_12Count < 0 || children_07Count > 5 || children7_12Count > 5)
+
+            if (children_07Count < 0 || children7_12Count < 0 || children_07Count > 2 || children7_12Count > 2)
             {
                 return false;
             }
             return true;
         }
 
-        // max 3 honden per reservering
+        // max 2 honden per reservering
         public static bool ValidateDogsCount(int dogsCount)
         {
-            if (dogsCount < 0 || dogsCount > 3)
+            if (dogsCount < 0 || dogsCount > 2)
                 return false;
             return true;
         }

@@ -8,7 +8,7 @@ namespace LeMarconnes.Controllers
     public class HomeController : Controller
     {
 
-        public IActionResult Index()
+        public IActionResult Homepage()
         {
             return View();
         }

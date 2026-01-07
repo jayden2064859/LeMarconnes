@@ -43,17 +43,17 @@ namespace API.Controllers
 
             if (!ReservationValidation.ValidateAdultCounts(dto.AdultsCount))
             {
-                return Conflict("Minimaal 1 en maximaal 10 volwassenen");
+                return Conflict("Minimaal 1 en maximaal 4 volwassenen");
             }
 
             if (!ReservationValidation.ValidateChildrenCount(dto.Children0_7Count, dto.Children7_12Count))
             {
-                return Conflict("Kinderen: min 0, max 5 per categorie");
+                return Conflict("Kinderen: Minimaal 0 en maximaal 2 per categorie");
             }              
 
             if (!ReservationValidation.ValidateDogsCount(dto.DogsCount))
             {
-                return Conflict("Maximaal 3 honden toegestaan");
+                return Conflict("Maximaal 2 honden toegestaan");
             }
                
             int numberOfNights = (dto.EndDate - dto.StartDate).Days;

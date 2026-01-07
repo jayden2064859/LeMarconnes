@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,11 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<LoginResponseDTO>> Login(LoginDTO loginDto)
         {
+
+            if (!LoginValidation.RequiredFields(loginDto.Username, loginDto.Password))
+            {
+                return BadRequest("Ongeldige invoer");
+            }
 
             // zoek account op basis van gebruikersnaam
             var account = await _context.Accounts

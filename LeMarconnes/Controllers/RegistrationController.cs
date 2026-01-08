@@ -8,14 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LeMarconnes.Controllers
 {
-    public class AccountController : Controller
+    public class RegistrationController : Controller
     {
 
         // dependency injection gebruiken voor de services (api communicatie)
         private readonly AccountService _accountService;
         private readonly CustomerService _customerService;
 
-        public AccountController(AccountService accountService, CustomerService customerService)
+        public RegistrationController(AccountService accountService, CustomerService customerService)
         {
             _accountService = accountService;
             _customerService = customerService;

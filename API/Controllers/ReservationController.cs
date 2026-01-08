@@ -83,7 +83,6 @@ namespace API.Controllers
                 return NotFound("Geen geldige accommodaties gevonden");
             }
             
-
             if (accommodations.Count != dto.AccommodationIds.Count)
             {
                 return NotFound("Niet alle accommodaties konden worden gevonden");
@@ -152,7 +151,6 @@ namespace API.Controllers
             };
             return Ok(responseDto);
         }
-
 
 
 

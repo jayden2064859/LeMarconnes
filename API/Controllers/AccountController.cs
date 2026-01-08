@@ -48,8 +48,13 @@ namespace API.Controllers
 
         // GET: api/account/exists/{username}
         [HttpGet("exists/{username}")]
-        public async Task<IActionResult> CheckUsernameExists(string username)
+        public async Task<IActionResult> CheckUsernameAvailable(string username)
         {
+            if (!AccountValidation.ValidUsernameLength(username) || !AccountValidation.ValidUsernameChars(username))
+            {
+                return Conflict("Ongeldige username");
+            }
+
             var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
 
             if (existingUsername)

@@ -21,18 +21,35 @@ namespace ClassLibrary.Models
         {
 
             if (string.IsNullOrWhiteSpace(firstName))
+            {
                 throw new ArgumentException("Voornaam is verplicht");
+            }
 
             if (string.IsNullOrWhiteSpace(lastName))
+            {
                 throw new ArgumentException("Achternaam is verplicht");
+            }
 
             if (string.IsNullOrWhiteSpace(email))
+            {
                 throw new ArgumentException("Email is verplicht");
+            }
 
             if (string.IsNullOrWhiteSpace(phone))
+            {
                 throw new ArgumentException("Telefoonnummer is verplicht");
+            }
 
+            if (!phone.All(char.IsDigit) ||  phone.Length < 8 || phone.Length > 12) 
+            { throw new ArgumentException("Ongeldig telefoonnummer"); 
+            }
 
+            int count = email.Count(c => c == '@');
+            if (count != 1) 
+            { 
+                throw new ArgumentException("Ongeldig emailadres"); 
+            }
+            
             FirstName = firstName;
             LastName = lastName;
             Email = email;
@@ -40,6 +57,7 @@ namespace ClassLibrary.Models
             Infix = infix;
             RegistrationDate = DateTime.Now;
         }
+
         public Customer()
         {
             RegistrationDate = DateTime.Now;

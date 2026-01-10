@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DTOs
 {
-    public class CreateReservationDTO
+    public class CampingReservationDTO
     {
         [Required]
         public int CustomerId { get; set; } // customerId is nodig om reservation aan customer te linken
         [Required]
-        public List<int> AccommodationIds { get; set; } = new(); // gereserveerde accommodaties moet gekoppeld worden 
+        public List<int> AccommodationIds { get; set; } = new List<int>(); // gereserveerde accommodaties moet gekoppeld worden 
         [Required]
         public DateTime StartDate { get; set; }
         [Required]
@@ -26,7 +26,7 @@ namespace ClassLibrary.DTOs
         public int Children7_12Count { get; set; }
         [Required]
         public int DogsCount { get; set; }
-
+        [Required]
         public bool HasElectricity { get; set; }
 
         public int? ElectricityDays { get; set; }

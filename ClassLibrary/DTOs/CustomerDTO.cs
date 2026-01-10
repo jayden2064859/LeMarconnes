@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DTOs
 {
-    public class CreateCustomerDTO
+    public class CustomerDTO
     {
         [Required]
         public string FirstName { get; set; }

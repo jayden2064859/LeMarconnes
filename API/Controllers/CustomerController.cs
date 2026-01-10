@@ -13,9 +13,9 @@ namespace API.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly CampingDbContext _context;
+        private readonly LeMarconnesDbContext _context;
 
-        public CustomerController(CampingDbContext context)
+        public CustomerController(LeMarconnesDbContext context)
         {
             _context = context;
         }
@@ -47,21 +47,9 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(CreateCustomerDTO dto)
+        public async Task<ActionResult<Customer>> PostCustomer(CustomerDTO dto)
         {
-
-            // services voor business rules
-            if (!CustomerValidation.ValidEmail(dto.Email))
-            {
-                return Conflict("Ongeldige email");
-            }
-
-            if (!CustomerValidation.ValidatePhone(dto.Phone))
-            {
-                return Conflict("Ongeldig telefoonnummer");
-            }
-
-            // valideren of email en telefoonnummer al bestaan in db (wordt pas na de service validaties gedaan om onnodige queries naar db te voorkomen)
+            // valideren of email en telefoonnummer al bestaan in database
             var customerExists = await _context.Customers
                 .Where(c => c.Email == dto.Email || c.Phone == dto.Phone)
                 .FirstOrDefaultAsync();
@@ -79,20 +67,28 @@ namespace API.Controllers
                     return Conflict("Telefoonnummer is al geregistreerd");
                 }                
             }
+            try
+            {
 
-            // constructor in customer class gebruiken om object aan te maken
-            var newCustomer = new Customer(
-                dto.FirstName,
-                dto.LastName,
-                dto.Email,
-                dto.Phone,
-                dto.Infix
-            );  
 
-           _context.Customers.Add(newCustomer);
-           await _context.SaveChangesAsync();
+                // constructor in customer class gebruiken om object aan te maken
+                var newCustomer = new Customer(
+                    dto.FirstName,
+                    dto.LastName,
+                    dto.Email,
+                    dto.Phone,
+                    dto.Infix
+                );
 
-           return Ok(newCustomer);                        
+                _context.Customers.Add(newCustomer);
+                await _context.SaveChangesAsync();
+
+                return Ok(newCustomer);
+            }
+            catch (ArgumentException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         // PUT: api/customer

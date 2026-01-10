@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Reflection.Metadata.Ecma335;
 
-
 namespace LeMarconnes.Controllers
 {
-    public class ReservationController : Controller
+    public class CampingReservationController : Controller
     {
 
         private readonly ReservationService _reservationService;
 
-        public ReservationController(ReservationService reservationService)
+        public CampingReservationController(ReservationService reservationService)
         {
             _reservationService = reservationService;
         }
@@ -29,19 +28,6 @@ namespace LeMarconnes.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateReservation1(DateTime startDate, DateTime endDate)
         {
-            // service validaties voor datums
-            if (!ReservationValidation.ValidDateInput(startDate, endDate))
-            {
-                TempData["Error"] = "Voer een geldige start- en einddatum in";
-
-                return View();
-            }
-
-            if (!ReservationValidation.ValidateReservationDates(startDate, endDate))
-            {
-                TempData["Error"] = "Einddatum moet later dan startdatum zijn";
-                return View();
-            }
 
             // datums opslaan in session voor volgende stappen
             HttpContext.Session.SetString("ReservationStartDate", startDate.ToString("yyyy-MM-dd"));
@@ -51,8 +37,6 @@ namespace LeMarconnes.Controllers
             return RedirectToAction("CreateReservation2");
 
         }
-
-
 
         // reserveren stap 2: accommodaties kiezen
         [HttpGet]
@@ -72,7 +56,8 @@ namespace LeMarconnes.Controllers
             DateTime startDate = DateTime.Parse(startDateStr);
             DateTime endDate = DateTime.Parse(endDateStr);
 
-            var (accommodations, errorMessage) = await _reservationService.GetAvailableAccommodationsAsync(startDate, endDate);
+            var (accommodations, errorMessage) = await _reservationService.GetAvailableAccommodationsAsync
+                                                                            (startDate, endDate, Accommodation.AccommodationType.Camping);
 
             if (accommodations == null)
             {
@@ -98,12 +83,6 @@ namespace LeMarconnes.Controllers
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
 
-            if (!ReservationValidation.ValidateAccommodationCount(accommodationIds))
-            {
-                TempData["Error"] = "Minimaal 1 en maximaal 2 accommodaties toegestaan";
-                return RedirectToAction("CreateReservation2");
-            }
-
             // checken of sessie nog actief is (data van vorige view nog beschikbaar)
             if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
             {
@@ -126,7 +105,7 @@ namespace LeMarconnes.Controllers
             // datum en accommodaties moeten opgehaald worden om sessie validatie uit te voeren
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
-            var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
+
 
             if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
             {
@@ -137,18 +116,15 @@ namespace LeMarconnes.Controllers
             DateTime startDate = DateTime.Parse(startDateStr);
             DateTime endDate = DateTime.Parse(endDateStr);
 
-            int numberOfNights = (endDate - startDate).Days;
-
-            // aantal overnachtingen opslaan in viewbag zodat het in de view gebruikt kan worden
-            ViewBag.NumberOfNights = numberOfNights;
-
             return View();
         }
 
         [HttpPost]
+        // alle parameters moeten nullable zijn voor beide accommodatie-types
         public async Task<IActionResult> CreateReservation3(int adultsCount, int children0_7Count, int children7_12Count,
-                                                            int dogsCount, bool hasElectricity, int? electricityDays = null)
+                                                            int dogsCount, bool hasElectricity, int? electricityDays)
         {
+            // session data ophalen
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
@@ -167,29 +143,23 @@ namespace LeMarconnes.Controllers
             // string van accommodationIds terug converten naar List<int>
             var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);
 
-            if (!hasElectricity)
-            {
-                electricityDays = null;
-            }
 
-            // DTO aanmaken
-            var reservationDto = new CreateReservationDTO
-            {
-                CustomerId = customerId.Value,
-                AccommodationIds = accommodationIds,
-                StartDate = startDate,
-                EndDate = endDate,
-                AdultsCount = adultsCount,
-                Children0_7Count = children0_7Count,
-                Children7_12Count = children7_12Count,
-                DogsCount = dogsCount,
-                HasElectricity = hasElectricity,
-                ElectricityDays = electricityDays
-            };
+                var dto = new CampingReservationDTO
+                {
+                    CustomerId = customerId.Value,
+                    AccommodationIds = accommodationIds,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    AdultsCount = adultsCount,
+                    Children0_7Count = children0_7Count,
+                    Children7_12Count = children7_12Count,
+                    DogsCount = dogsCount,
+                    HasElectricity = hasElectricity,
+                    ElectricityDays = electricityDays
+                };
 
-
-            // api call om reservation te posten
-            var (reservation, errorMessage) = await _reservationService.CreateReservationAsync(reservationDto);
+            // api call service geeft reservation object terug als het succesvol was, anders een error message
+            var (reservation, errorMessage) = await _reservationService.CreateCampingReservationAsync(dto);
 
             if (reservation == null)
             {
@@ -197,7 +167,7 @@ namespace LeMarconnes.Controllers
                 return View();
             }
 
-            // session clearen
+            // Clear session
             HttpContext.Session.Remove("ReservationStartDate");
             HttpContext.Session.Remove("ReservationEndDate");
             HttpContext.Session.Remove("ReservationAccommodationIds");
@@ -219,7 +189,6 @@ namespace LeMarconnes.Controllers
                 TotalPrice = reservation.TotalPrice,
                 AccommodationPlaceNumbers = reservation.AccommodationPlaceNumbers
             };
-
             return View("ReservationConfirmation", viewModel);
         }
 

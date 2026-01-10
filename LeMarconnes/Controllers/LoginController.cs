@@ -26,7 +26,7 @@ namespace LeMarconnes.Controllers
         {
 
             // checken of beide username en password fields zijn ingevuld
-            if (!LoginValidation.RequiredFields(username, password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("Login");

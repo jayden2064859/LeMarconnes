@@ -12,9 +12,9 @@ namespace API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly CampingDbContext _context;
+        private readonly LeMarconnesDbContext _context;
 
-        public AccountController(CampingDbContext context)
+        public AccountController(LeMarconnesDbContext context)
         {
             _context = context;
         }
@@ -48,13 +48,12 @@ namespace API.Controllers
 
         // GET: api/account/exists/{username}
         [HttpGet("exists/{username}")]
-        public async Task<IActionResult> CheckUsernameAvailable(string username)
+        public async Task<IActionResult> CheckUsernameExists(string username)
         {
-            if (!AccountValidation.ValidUsernameLength(username) || !AccountValidation.ValidUsernameChars(username))
+            if (username.Length <= 3 || username.Length > 15 || !username.All(char.IsLetterOrDigit))
             {
-                return Conflict("Ongeldige username");
+                return Conflict("Ongeldige usernameinput");
             }
-
             var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
 
             if (existingUsername)
@@ -66,47 +65,36 @@ namespace API.Controllers
 
         // POST: api/account
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(CreateAccountDTO dto)
+        public async Task<ActionResult<Account>> PostAccount(AccountDTO dto)
         {
             var customer = await _context.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
             {
                 return NotFound("Customer bestaat niet");
-
-            }
- 
-            // service validaties
-            if (!AccountValidation.ValidPasswordLength(dto.PlainPassword))
-            {
-                return Conflict("Wachtwoord moet minimaal 4 karakters zijn");
             }
                            
-            if (!AccountValidation.ValidUsernameLength(dto.Username))
-            {
-                return Conflict("Gebruikersnaam moet minimaal 4 karakters zijn");
-            }
-                         
-            if (!AccountValidation.ValidUsernameChars(dto.Username))
-            {
-                return Conflict("Gebruikersnaam kan alleen uit letters en cijfers bestaan");
-
-            }
-
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();
             var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
 
+            try
+            {
 
-            // constructor gebruiken om account object aan te maken
-            var account = new Account(
-                dto.Username,
-                passwordHash,
-                customer);
+                // constructor gebruiken om account object aan te maken
+                var account = new Account(
+                    dto.Username,
+                    passwordHash,
+                    customer);
 
-            _context.Accounts.Add(account);
-            await _context.SaveChangesAsync();
+                _context.Accounts.Add(account);
+                await _context.SaveChangesAsync();
 
-            return Ok(account);
+                return Ok(account);
+            }
+            catch (ArgumentException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
 

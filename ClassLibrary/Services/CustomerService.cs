@@ -19,7 +19,7 @@ namespace ClassLibrary.Services
         }
 
         // POST customer (gebruikt tuple om beide het object en eventuele error message terug te geven)
-        public async Task<(Customer?, string? error)> CreateCustomerAsync(CreateCustomerDTO customerDto)
+        public async Task<(Customer?, string? error)> CreateCustomerAsync(CustomerDTO customerDto)
         {
             var postCustomer = await _httpClient.PostAsJsonAsync("/api/Customer", customerDto);
 

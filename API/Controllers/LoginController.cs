@@ -12,9 +12,9 @@ namespace API.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly CampingDbContext _context;
+        private readonly LeMarconnesDbContext _context;
 
-        public LoginController(CampingDbContext context)
+        public LoginController(LeMarconnesDbContext context)
         {
             _context = context;
         }
@@ -23,19 +23,19 @@ namespace API.Controllers
         public async Task<ActionResult<LoginResponseDTO>> Login(LoginDTO loginDto)
         {
 
-            if (!LoginValidation.RequiredFields(loginDto.Username, loginDto.Password))
+            if (string.IsNullOrEmpty(loginDto.Username) || string.IsNullOrEmpty(loginDto.Password))
             {
                 return BadRequest("Ongeldige invoer");
             }
 
             // zoek account op basis van gebruikersnaam
             var account = await _context.Accounts
-                .Include(a => a.Customer) // <-- deze is belangrijk. hierdoor kunnen we ook alle Customer data gebruiken van een account  (dit kan door de navigation property in het model)
+                .Include(a => a.Customer) // "include" is mogelijk door navigation property in model
                 .FirstOrDefaultAsync(a => a.Username == loginDto.Username);
 
             if (account == null)
             {
-                return Unauthorized("Ongeldige inloggegevens");
+                return Unauthorized("Gebruikersnaam bestaat niet");
             }
 
             // controleer wachtwoord

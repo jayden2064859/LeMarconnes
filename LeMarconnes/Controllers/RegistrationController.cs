@@ -2,6 +2,7 @@
 using ClassLibrary.Models;
 using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 
 
@@ -32,19 +33,18 @@ namespace LeMarconnes.Controllers
         {
             // services voor UI/UX validaties
 
-            if (!AccountValidation.DoPasswordsMatch(password, confirmPassword))
+            if (password != confirmPassword)
             {
                 TempData["Error"] = "Wachtwoorden komen niet overeen";
                 return View("CreateAccount");
             }
-       
-            if (!AccountValidation.ValidateFields(username, password, confirmPassword))
+
+            if (username.IsNullOrEmpty() || password.IsNullOrEmpty() || confirmPassword.IsNullOrEmpty())
             {
                 TempData["Error"] = "Vul alle velden in";
                 return View("CreateAccount");
             }
-
-
+       
             // valideren of username al bestaat in db voordat account aangemaakt kan worden
             var (exists, error) = await _accountService.CheckUsernameExistsAsync(username); 
 
@@ -70,14 +70,11 @@ namespace LeMarconnes.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCustomer(string firstName, string lastName, string email,
-                                                string phone, string? infix = null)
+        public async Task<IActionResult> CreateCustomer(string firstName, string lastName, string email, string phone, string? infix = null)
         {
-
             // opgeslagen username en password van de vorige pagina uit de session ophalen
             var username = HttpContext.Session.GetString("RegisterUsername");
             var password = HttpContext.Session.GetString("RegisterPassword");
-
 
             // checken of sessie verlopen is (oftewel data van de vorige view is dan niet meer opgeslagen)
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
@@ -85,17 +82,10 @@ namespace LeMarconnes.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            // UI/UX validatie       
-            if (!CustomerValidation.RequiredFieldsCheck(firstName, lastName, email, phone))
-            {
-                TempData["Error"] = "Vul alle verplichte velden in";
-                return View("CreateCustomer");
-            }
-
             // 1. customer dto aanmaken
             // customer moet als eerst aangemaakt worden, zodat het customer object teruggegeven kan worden voordat het account object wordt aangemaakt.
             // het (door de database gegenereerde) customerId wordt uit dit customer object gehaald, zodat deze direct gelinked kan worden met het account object in dezelfde method.           
-            var customerDto = new CreateCustomerDTO
+            var customerDto = new CustomerDTO
             {
                 FirstName = firstName,
                 LastName = lastName,
@@ -114,7 +104,7 @@ namespace LeMarconnes.Controllers
             }
 
             // 2. account dto aanmaken
-            var accountDto = new CreateAccountDTO
+            var accountDto = new AccountDTO
             {
                 CustomerId = customer.CustomerId,
                 Username = username,

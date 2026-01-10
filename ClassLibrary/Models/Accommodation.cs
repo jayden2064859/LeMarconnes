@@ -9,14 +9,13 @@ namespace ClassLibrary.Models
         public int AccommodationId { get; set; }
         public string PlaceNumber { get; set; }
         public int Capacity { get; set; }
-        public AccommodationStatus CurrentStatus { get; set; } = AccommodationStatus.Beschikbaar; // nieuwe accommodations initialiseren op beschikbaar
-        public enum AccommodationStatus
+
+        public AccommodationType Type { get; set; }
+        public enum AccommodationType
         {
-            Beschikbaar = 0,
-            Bezet = 1
+            Camping = 1,
+            Hotel = 2
         }
-        public int AccommodationTypeId { get; set; }
-        public AccommodationType AccommodationType { get; set; }
         public List<Reservation>Reservations { get; set; } = new List<Reservation>();
 
            

@@ -13,143 +13,116 @@ namespace API.Controllers
     [ApiController]
     public class ReservationController : ControllerBase
     {
-        private readonly CampingDbContext _context;
+        private readonly LeMarconnesDbContext _context;
         
-        public ReservationController(CampingDbContext context)
+        public ReservationController(LeMarconnesDbContext context)
         {
             _context = context;  
         }
 
-        // POST: api/reservation
-        [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(CreateReservationDTO dto)
+        // POST: api/reservation/camping
+        [HttpPost("camping")]
+        public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {
-            // business rule validaties
-
-            if (!ReservationValidation.ValidDateInput(dto.StartDate, dto.EndDate))
+            // check gekozen accommodaties voor beschikbaarheid op basis van ingevoerde datum
+            foreach (var accommodationId in dto.AccommodationIds)
             {
-                return Conflict("Start- en einddatum zijn ongeldig");
-            }
-               
-            if (!ReservationValidation.ValidateReservationDates(dto.StartDate, dto.EndDate))
-            {
-                return Conflict("Einddatum moet later zijn dan startdatum");
-            }
-               
-            if (!ReservationValidation.ValidateAccommodationCount(dto.AccommodationIds))
-            {
-                return Conflict("Minimaal 1 en maximaal 2 accommodaties toegestaan");
+                // voor elk accommodatie in de dto lijst, check of er al een reservering bestaat die overlapt met de datums
+                bool hasOverlap = await _context.Reservations
+                    .AnyAsync(r => r.Accommodations.Any(ra => ra.AccommodationId == accommodationId) &&
+                                  (r.EndDate > dto.StartDate && r.StartDate < dto.EndDate)); 
+                if (hasOverlap)
+                {
+                    var accommodation = await _context.Accommodations.FindAsync(accommodationId);
+                    return Conflict($"Accommodatie {accommodation.PlaceNumber} is niet beschikbaar voor de ingevoerde datum");
+                }
             }
 
-            if (!ReservationValidation.ValidateAdultCounts(dto.AdultsCount))
-            {
-                return Conflict("Minimaal 1 en maximaal 4 volwassenen");
-            }
-
-            if (!ReservationValidation.ValidateChildrenCount(dto.Children0_7Count, dto.Children7_12Count))
-            {
-                return Conflict("Kinderen: Minimaal 0 en maximaal 2 per categorie");
-            }              
-
-            if (!ReservationValidation.ValidateDogsCount(dto.DogsCount))
-            {
-                return Conflict("Maximaal 2 honden toegestaan");
-            }
-               
-            int numberOfNights = (dto.EndDate - dto.StartDate).Days;
-            if (dto.HasElectricity && !ReservationValidation.ValidateElectricityDays(dto.ElectricityDays, numberOfNights))
-            {
-                return Conflict($"Elektriciteitsdagen moeten tussen 1 en {numberOfNights} liggen");
-            }
-              
-            
             // specifieke customer ophalen 
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.CustomerId == dto.CustomerId);
 
             if (customer == null)
             {
-                return NotFound($"Klant met ID {dto.CustomerId} niet gevonden");
+                return NotFound("Klant niet gevonden");
             }
                 
             // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
-                .Include(a => a.AccommodationType)
                 .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
+                .Where(a => a.Type == Accommodation.AccommodationType.Camping)
                 .ToListAsync();
 
-            if (accommodations.Count == 0)
+            if (!accommodations.Any())
             {
-                return NotFound("Geen geldige accommodaties gevonden");
-            }
-            
-            if (accommodations.Count != dto.AccommodationIds.Count)
-            {
-                return NotFound("Niet alle accommodaties konden worden gevonden");
+                return NotFound("Geen campingplaatsen gevonden");
             }
 
             // haal tarieven op voor camping 
             var tariffs = await _context.Tariffs
-                .Where(t => t.AccommodationTypeId == 1)
+                .Where(t => t.AccommodationType == Accommodation.AccommodationType.Camping)
                 .ToListAsync();
 
-            // maak nieuwe reservering aan met constructor
-            var reservation = new Reservation(
-                dto.CustomerId,
-                dto.StartDate,
-                dto.EndDate,
-                dto.AdultsCount,
-                dto.Children0_7Count,
-                dto.Children7_12Count,
-                dto.DogsCount,
-                dto.HasElectricity,
-                dto.ElectricityDays
-            );
-
-            // specifiek customer object linken aan reservation
-            reservation.Customer = customer;
-
-            // reservation koppelen aan customer
-            customer.AddReservation(reservation);
-
-            // voeg accommodaties toe aan de reservering
-            foreach (var accommodation in accommodations)
+            try
             {
-                reservation.AddAccommodation(accommodation);
-                accommodation.CurrentStatus = Accommodation.AccommodationStatus.Bezet; // status updaten van elke accommodation die gekoppeld is aan een (niet verlopen) reservering
+                // maak nieuwe reservering aan met constructor
+                var campingReservation = new CampingReservation(
+                    dto.CustomerId,
+                    dto.StartDate,
+                    dto.EndDate,
+                    dto.AdultsCount,
+                    dto.Children0_7Count,
+                    dto.Children7_12Count,
+                    dto.DogsCount,
+                    dto.HasElectricity,
+                    dto.ElectricityDays
+                );
+
+                // specifieke customer linken aan reservation
+                campingReservation.Customer = customer;
+
+                // reservation koppelen aan customer
+                customer.AddReservation(campingReservation);
+
+                // voeg accommodaties toe aan de reservering
+                foreach (var accommodation in accommodations)
+                {
+                    campingReservation.AddAccommodation(accommodation);
+                }
+
+                // bereken totale prijs
+                // (polymorphism: reservation base class definieert de abstract method, CampingReservation heeft zijn eigen override implementatie ervan)
+                campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
+
+                _context.Reservations.Add(campingReservation);
+                await _context.SaveChangesAsync();
+
+                var responseDto = new CampingReservationResponseDTO
+                {
+                    FirstName = campingReservation.Customer.FirstName,
+                    Infix = campingReservation.Customer.Infix,
+                    LastName = campingReservation.Customer.LastName,
+                    StartDate = campingReservation.StartDate,
+                    EndDate = campingReservation.EndDate,
+                    AdultsCount = campingReservation.AdultsCount,
+                    Children0_7Count = campingReservation.Children0_7Count,
+                    Children7_12Count = campingReservation.Children7_12Count,
+                    DogsCount = campingReservation.DogsCount,
+                    HasElectricity = campingReservation.HasElectricity,
+                    ElectricityDays = campingReservation.ElectricityDays,
+                    TotalPrice = campingReservation.TotalPrice,
+
+                    // linq gebruiken om PlaceNumbers van gekozen accommodaties op te halen
+                    AccommodationPlaceNumbers = campingReservation.Accommodations
+                        .Select(a => a.PlaceNumber)
+                        .ToList()
+                };
+                return Ok(responseDto);
             }
-
-            // bereken totale prijs
-            reservation.TotalPrice = TariffCalculator.CalculateTotalPrice(
-                reservation,
-                tariffs,
-                accommodations.Count
-            );
-
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
-
-            var responseDto = new ReservationResponseDTO
+            catch (ArgumentException ex) // vangt de validations van constructor op
             {
-                FirstName = reservation.Customer.FirstName,
-                Infix = reservation.Customer.Infix,
-                LastName = reservation.Customer.LastName,
-                StartDate = reservation.StartDate,
-                EndDate = reservation.EndDate,
-                AdultsCount = reservation.AdultsCount,
-                Children0_7Count = reservation.Children0_7Count,
-                Children7_12Count = reservation.Children7_12Count,
-                DogsCount = reservation.DogsCount,
-                HasElectricity = reservation.HasElectricity,
-                ElectricityDays = reservation.ElectricityDays,
-                TotalPrice = reservation.TotalPrice,
-                
-                // linq gebruiken om PlaceNumbers van gekozen accommodaties op te halen
-                AccommodationPlaceNumbers = reservation.Accommodations
-                    .Select(a => a.PlaceNumber)
-                    .ToList()
-            };
-            return Ok(responseDto);
+                return Conflict(ex.Message);
+            }
         }
 
 
@@ -161,7 +134,6 @@ namespace API.Controllers
             var allReservations = await _context.Reservations
                 .Include(r => r.Customer)
                 .Include(r => r.Accommodations)
-                .ThenInclude(a => a.AccommodationType)
                 .ToListAsync();
 
             return allReservations;

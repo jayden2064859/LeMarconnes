@@ -1,0 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ClassLibrary.DTOs
+{
+    // response DTO die de API controller endpoint aanmaakt en terugstuurt naar de Service die de endpoint gecalled heeft
+    // Als de POST succesvol is, stuurt de service de response DTO terug naar de MVC (anders error message), en kan de MVC controller
+    // de responseDTO gebruiken voor de bevestigingspagina.
+    public class HotelReservationResponseDTO
+    {
+        public string FirstName { get; set; }
+        public string? Infix { get; set; }
+        public string LastName { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int PersonCount { get; set; }
+        public decimal TotalPrice { get; set; }
+        public List<string> AccommodationPlaceNumbers { get; set; } = new List<string>();
+    }
+}

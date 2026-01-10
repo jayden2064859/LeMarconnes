@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // db registreren
-builder.Services.AddDbContext<CampingDbContext>(options =>
+builder.Services.AddDbContext<LeMarconnesDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();

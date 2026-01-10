@@ -17,9 +17,9 @@ namespace ClassLibrary.Services
         }
 
         // available-for-dates api call waarbij response meteen teruggegeven wordt
-        public async Task<(List<Accommodation>?, string?)> GetAvailableAccommodationsAsync(DateTime startDate, DateTime endDate)
+        public async Task<(List<Accommodation>?, string?)> GetAvailableAccommodationsAsync(DateTime startDate, DateTime endDate, Accommodation.AccommodationType type)
         {
-            var available = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+            var available = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?type={type}&startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
             if (!available.IsSuccessStatusCode)
             {
                 var errorContent = await available.Content.ReadAsStringAsync();
@@ -30,10 +30,14 @@ namespace ClassLibrary.Services
             return (response, null);
         }
 
-        // post reservation api call waarbij response meteen teruggegeven wordt (en eventuele error message via tuple)
-        public async Task<(ReservationResponseDTO?, string?)> CreateReservationAsync(CreateReservationDTO reservationDto)
+
+        // customer POST endpoint call
+
+        //"(CampingReservationResponseDTO?, string?)" betekent dat deze method een responseDTO terugstuurt,
+        // OF een error message string, afhankelijk van het resultaat wat de API teruggeeft.
+        public async Task<(CampingReservationResponseDTO?, string?)> CreateCampingReservationAsync(CampingReservationDTO reservationDto)
         {
-            var postReservation = await _httpClient.PostAsJsonAsync("/api/Reservation", reservationDto);
+            var postReservation = await _httpClient.PostAsJsonAsync("/api/reservation/camping", reservationDto);
 
             if (!postReservation.IsSuccessStatusCode)
             {
@@ -41,8 +45,12 @@ namespace ClassLibrary.Services
                 return(null, errorContent);
             }
 
-            var response = await postReservation.Content.ReadFromJsonAsync<ReservationResponseDTO>();
+            var response = await postReservation.Content.ReadFromJsonAsync<CampingReservationResponseDTO>();
             return (response, null);
         }
+
+
+        // hotel POST endpoint call moet hier
+
     }
 }

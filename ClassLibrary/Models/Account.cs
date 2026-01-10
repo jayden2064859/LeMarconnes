@@ -28,10 +28,26 @@ namespace ClassLibrary.Models
         public Account(string username, string passwordHash, Customer customer)
         {
             if (string.IsNullOrWhiteSpace(username))
+            {
                 throw new ArgumentException("Gebruikersnaam is verplicht");
+
+            }
             if (string.IsNullOrWhiteSpace(passwordHash))
+            {
                 throw new ArgumentException("Wachtwoord hash is verplicht");
-                    
+
+            }
+
+            if (username.Length <= 3 || username.Length > 15)
+            {
+                throw new ArgumentException("Username moet minimaal 3, maximaal 15 karakters zijn");
+            }
+
+            if (!username.All(char.IsLetterOrDigit))
+            {
+                throw new ArgumentException("Ongeldige username");
+            }
+
             Username = username;
             PasswordHash = passwordHash;
             AccountRole = Account.Role.Customer;
@@ -50,12 +66,19 @@ namespace ClassLibrary.Models
             }
 
             if (string.IsNullOrWhiteSpace(username))
+            {
                 throw new ArgumentException("Gebruikersnaam is verplicht");
-            if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("Wachtwoord hash is verplicht");
-            if (string.IsNullOrWhiteSpace(role.ToString()))
-                throw new ArgumentException("Accountrol is verplicht");
 
+            }
+            if (string.IsNullOrWhiteSpace(passwordHash))
+            {
+                throw new ArgumentException("Wachtwoord hash is verplicht");
+
+            }
+            if (string.IsNullOrWhiteSpace(role.ToString()))
+            {
+                throw new ArgumentException("Accountrol is verplicht");
+            }
 
             Username = username;
             PasswordHash = passwordHash;

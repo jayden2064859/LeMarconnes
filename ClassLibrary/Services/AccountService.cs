@@ -33,7 +33,7 @@ namespace ClassLibrary.Services
         }
 
         // account object is niet nodig na succesvol aanmaken, dus alleen een true/false is nodig hiervoor
-        public async Task<(bool?, string?)> CreateAccountAsync(CreateAccountDTO accountDto)
+        public async Task<(bool?, string?)> CreateAccountAsync(AccountDTO accountDto)
         {
             var account = await _httpClient.PostAsJsonAsync("/api/Account", accountDto);
 

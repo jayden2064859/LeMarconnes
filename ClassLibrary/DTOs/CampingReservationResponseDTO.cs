@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DTOs
 {
-    public class ReservationResponseDTO
+    public class CampingReservationResponseDTO
     {
         public string FirstName { get; set; }
         public string? Infix { get; set; }
@@ -20,6 +20,6 @@ namespace ClassLibrary.DTOs
         public bool HasElectricity { get; set; }
         public int? ElectricityDays { get; set; }
         public decimal TotalPrice { get; set; }
-        public List<string> AccommodationPlaceNumbers { get; set; } = new();
+        public List<string> AccommodationPlaceNumbers { get; set; } = new List<string>();
     }
 }

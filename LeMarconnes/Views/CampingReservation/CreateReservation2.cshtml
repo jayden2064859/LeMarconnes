@@ -1,6 +1,6 @@
 ﻿@model ClassLibrary.ViewModels.CreateReservation2ViewModel
 @{
-    ViewData["Title"] = "Reservering - Stap 2: Accommodaties";
+    ViewData["Title"] = "Camping reservering - Stap 2: Accommodaties";
 }
 
 <div class="container mt-5">
@@ -35,7 +35,7 @@
                     }
                     else
                     {
-                        <form asp-action="CreateReservation2" asp-controller="Reservation" method="post">
+                        <form asp-action="CreateReservation2" asp-controller="CampingReservation" method="post">
                             <input type="hidden" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
 
@@ -52,8 +52,8 @@
                                                     <input class="form-check-input" type="checkbox"
                                                            name="accommodationIds" value="@a.AccommodationId"
                                                            id="acc_@a.AccommodationId" />
-                                                    <label class="form-check-label" for="acc_@a.AccommodationId">
-                                                        <strong>Campingplaats @a.PlaceNumber</strong><br />
+                                                    <label class="form-check-label" for="@a.AccommodationId">                                                       
+                                                            <strong>Plaats @a.PlaceNumber</strong>                                                      
                                                     </label>
                                                 </div>
                                             </div>

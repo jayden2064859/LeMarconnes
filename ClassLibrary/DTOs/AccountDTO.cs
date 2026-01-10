@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary.DTOs
 {
-    public class CreateAccountDTO
+    public class AccountDTO
     {
         [Required]
         public int? CustomerId { get; set; }
@@ -18,8 +18,6 @@ namespace ClassLibrary.DTOs
         [Required]
         public string PlainPassword { get; set; }
 
-        public Account.Role? Role { get; set; }
-
-        
+        public Account.Role? Role { get; set; }      
     }
 }

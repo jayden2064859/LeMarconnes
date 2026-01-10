@@ -9,9 +9,9 @@ namespace API.Controllers
     [ApiController]
     public class AccommodationController : ControllerBase
     {
-        private readonly CampingDbContext _context;
+        private readonly LeMarconnesDbContext _context;
 
-        public AccommodationController(CampingDbContext context)
+        public AccommodationController(LeMarconnesDbContext context)
         {
             _context = context;
         }
@@ -39,24 +39,24 @@ namespace API.Controllers
             return accommodation;
         }
 
-        // GET: /api/Accommodation/availabe-for-dates
+        // GET: /api/Accommodation/available-for-dates      
+        // deze endpoint wordt gebruikt in de MVC om beschikbare accommodaties te tonen aan de user op basis van opgegeven datums
+        // werkt voor beide Camping en Hotel accommodaties, afhankelijk van het AccommodationType enum dat je meegeeft
         [HttpGet("available-for-dates")]
-        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(
+            Accommodation.AccommodationType type,                                                                                              
+            DateTime startDate,
+            DateTime endDate)
         {
-            var availableAccommodations = await _context.Accommodations
-                .Where(a => a.AccommodationTypeId == 1 &&
-                      !_context.Reservations.Any(r => r.CurrentStatus != Reservation.ReservationStatus.Verlopen &&
-                      r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
-                      !(r.EndDate <= startDate || r.StartDate >= endDate)
+            var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
+                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type
+                    // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
+                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
+                        r.StartDate < endDate && r.EndDate > startDate
                     ))
                 .ToListAsync();
 
-            if (!availableAccommodations.Any())
-            {
-                return NotFound("Geen beschikbare accommodaties gevonden voor gekozen datum");
-            }
-
-            return availableAccommodations;
+            return Ok(availableAccommodations);
         }
 
 

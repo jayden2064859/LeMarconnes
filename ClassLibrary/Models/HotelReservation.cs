@@ -13,7 +13,7 @@ public class HotelReservation : Reservation
     public HotelReservation() : base() { } // lege constructor (voor EF)
     public HotelReservation(int customerId, DateTime startDate, DateTime endDate, int personCount) : base(customerId, startDate, endDate)
     {
-        if (personCount < 1 || personCount > 10)
+        if (personCount < 1 || personCount > 10) 
         {
             throw new ArgumentException("Minimaal 1, Maximaal 10 personen voor reservering");
         }

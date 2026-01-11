@@ -27,11 +27,9 @@ namespace API.Controllers
             DateOnly endDate)
         {
             var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
-                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type
-                                               // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
-                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
-                        r.StartDate < endDate && r.EndDate > startDate
-                    ))
+                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
+                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) && 
+                    r.StartDate <= endDate && r.EndDate >= startDate))  // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
                 .Select(a => new AvailableAccommodationDTO
                 {
                     AccommodationId = a.AccommodationId,

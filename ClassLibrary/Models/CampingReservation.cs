@@ -24,12 +24,18 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
             throw new ArgumentException("Minimaal 1, maximaal 4 volwassenen");
         }
 
+        // elke leeftijdscategorie mag geen input minder dan 0 of meer dan 2 hebben
+        if (children0_7Count < 0 || children7_12Count > 2 || children7_12Count < 0 || children7_12Count > 2)
+        {
+            throw new ArgumentException("Minimaal 0, maximaal 2 kinderen per leeftijdscategorie");
+        }
+
         // minimaal 0, maximaal 4 kinderen per reservering
         int totalChildren = children0_7Count + children7_12Count;
 
         if ( totalChildren < 0 || totalChildren > 4)
         {
-            throw new ArgumentException("Minimaal 0, maximaal 2 kinderen per leeftijdscategorie");
+            throw new ArgumentException("Maximaal 4 kinderen per reservering");
         }
 
         // een klant kan max 2 campingplekken reserveren. Elke campingplek staat 2 volwassenen, 2 kinderen toe. 
@@ -47,9 +53,9 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
         }
 
         // als klant electriciteit wil gebruiken, kan het aantal niet minder dan 1 dag zijn
-        if (hasElectricity && electricityDays < 1)
+        if (hasElectricity && electricityDays < 1 || hasElectricity && electricityDays == null)
         {
-            throw new ArgumentException("Ongeldige invoer voor elektriciteitsgebruik");
+            throw new ArgumentException("Minstens 1 dag elektriciteit vereist");
         }
 
         // als klant electriciteit wil gebruiken, kan het aantal niet meer zijn dan het aantal overnachtingen

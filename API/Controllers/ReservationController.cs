@@ -1,4 +1,5 @@
-﻿using ClassLibrary.Data;
+﻿using API.Services;
+using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using ClassLibrary.Services;
@@ -13,39 +14,38 @@ namespace API.Controllers
     [ApiController]
     public class ReservationController : ControllerBase
     {
+        private readonly PostCampingReservationService _service;
         private readonly LeMarconnesDbContext _context;
         
-        public ReservationController(LeMarconnesDbContext context)
+        public ReservationController(LeMarconnesDbContext context, PostCampingReservationService service)
         {
-            _context = context;  
+            _context = context;
+            _service = service;
         }
 
         // POST: api/reservation/camping
         [HttpPost("camping")]
         public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {
-            // check gekozen accommodaties voor beschikbaarheid op basis van ingevoerde datum
-            foreach (var accommodationId in dto.AccommodationIds)
+            // database communicatie is encapsulated in API services
+            // check in de db of er al een reservering bestaat die overlapped in datum
+            var conflictMsg = await _service.ValidateAccommodationAvailability(dto.StartDate, dto.EndDate, dto.AccommodationIds);
+
+            if (conflictMsg != null)
             {
-                // voor elk accommodatie in de dto lijst, check of er al een reservering bestaat die overlapt met de datums
-                bool hasOverlap = await _context.Reservations
-                    .AnyAsync(r => r.Accommodations.Any(ra => ra.AccommodationId == accommodationId) &&
-                                  (r.EndDate > dto.StartDate && r.StartDate < dto.EndDate)); 
-                if (hasOverlap)
-                {
-                    var accommodation = await _context.Accommodations.FindAsync(accommodationId);
-                    return Conflict($"Accommodatie {accommodation.PlaceNumber} is niet beschikbaar voor de ingevoerde datum");
-                }
+                return Conflict(conflictMsg);
             }
 
             // specifieke customer ophalen 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == dto.CustomerId);
+            var (customer, notFoundMsg) = await _service.GetCustomer(dto.CustomerId);
 
-            if (customer == null)
+            if (notFoundMsg != null)
             {
-                return NotFound("Klant niet gevonden");
+                return NotFound(notFoundMsg);
             }
+
+
+
                 
             // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
@@ -66,6 +66,7 @@ namespace API.Controllers
             try
             {
                 // maak nieuwe reservering aan met constructor
+                // var of CampingReservation moet gebruikt worden omdat camping-specifieke properties beschikbaar moeten zijn voor de responseDto
                 var campingReservation = new CampingReservation(
                     dto.CustomerId,
                     dto.StartDate,

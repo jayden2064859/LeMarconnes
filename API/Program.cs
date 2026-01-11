@@ -1,8 +1,11 @@
+using API.Services;
 using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<PostCampingReservationService>(); // AddScoped voor API services omdat de DbContext zelf ook scoped is (dezelfde instantie per request)
 
 // db registreren
 builder.Services.AddDbContext<LeMarconnesDbContext>(options =>

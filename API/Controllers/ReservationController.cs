@@ -90,8 +90,7 @@ namespace API.Controllers
                     campingReservation.AddAccommodation(accommodation);
                 }
 
-                // bereken totale prijs
-                // (polymorphism: reservation base class definieert de abstract method, CampingReservation heeft zijn eigen override implementatie ervan)
+                // bereken totale prijs met de override method van CampingReservation class
                 campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
 
                 _context.Reservations.Add(campingReservation);

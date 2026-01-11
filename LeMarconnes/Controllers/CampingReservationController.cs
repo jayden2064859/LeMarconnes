@@ -89,6 +89,13 @@ namespace LeMarconnes.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
+            if (accommodationIds.Count > 2)
+            {
+                 TempData["Error"] = "Maximaal 2 accommodaties toegestaan";
+
+                return RedirectToAction("CreateReservation2");
+            }
+
             // accommodation Ids opslaan in session (als json string)
             HttpContext.Session.SetString("ReservationAccommodationIds",
             System.Text.Json.JsonSerializer.Serialize(accommodationIds));

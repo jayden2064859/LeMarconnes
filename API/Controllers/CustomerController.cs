@@ -20,32 +20,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/customer
-        [HttpGet]
-        public async Task<ActionResult<List<Customer>>> GetCustomers()
-        {
-            var customers = await _context.Customers
-            .ToListAsync();
-
-            return customers;
-        }
-
-        // GET: api/customer/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Customer>> GetCustomer(int id)
-        {
-            var customer = await _context.Customers
-                .Include(c => c.Reservations) // reserveringen meegeven van een specifieke klant
-                .FirstOrDefaultAsync(c => c.CustomerId == id);
-
-            if (customer == null)
-            {
-                return NotFound();
-            }
-
-            return customer;
-        }
-
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(CustomerDTO dto)
         {
@@ -89,6 +63,36 @@ namespace API.Controllers
             {
                 return Conflict(ex.Message);
             }
+        }
+
+
+
+
+
+        // GET: api/customer
+        [HttpGet]
+        public async Task<ActionResult<List<Customer>>> GetCustomers()
+        {
+            var customers = await _context.Customers
+            .ToListAsync();
+
+            return customers;
+        }
+
+        // GET: api/customer/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Customer>> GetCustomer(int id)
+        {
+            var customer = await _context.Customers
+                .Include(c => c.Reservations) // reserveringen meegeven van een specifieke klant
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return customer;
         }
 
         // PUT: api/customer

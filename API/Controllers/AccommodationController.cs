@@ -2,6 +2,7 @@
 using ClassLibrary.Models;
 using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
+using ClassLibrary.DTOs;
 
 namespace API.Controllers
 {
@@ -16,8 +17,41 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/accommodation
-        [HttpGet]
+        // GET: /api/Accommodation/available-for-dates      
+        // deze endpoint wordt gebruikt in de MVC om beschikbare accommodaties te tonen aan de user op basis van opgegeven datums
+        // werkt voor beide Camping en Hotel accommodaties, afhankelijk van het AccommodationType enum dat je meegeeft
+        [HttpGet("available-for-dates")]
+        public async Task<ActionResult<List<AvailableAccommodationDTO>>> GetAvailableAccommodationsForDates(
+            Accommodation.AccommodationType type,
+            DateTime startDate,
+            DateTime endDate)
+        {
+            var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
+                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type
+                                               // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
+                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
+                        r.StartDate < endDate && r.EndDate > startDate
+                    ))
+                .Select(a => new AvailableAccommodationDTO
+                {
+                    AccommodationId = a.AccommodationId,
+                    PlaceNumber = a.PlaceNumber,
+                    Capacity = a.Capacity,
+                    Type = a.Type
+
+                }).ToListAsync();
+
+             
+            return Ok(availableAccommodations);
+        }
+
+
+
+
+
+
+    // GET: api/accommodation
+    [HttpGet]
         public async Task<ActionResult<List<Accommodation>>> GetAccommodations()
         {
             return await _context.Accommodations
@@ -37,26 +71,6 @@ namespace API.Controllers
             }
 
             return accommodation;
-        }
-
-        // GET: /api/Accommodation/available-for-dates      
-        // deze endpoint wordt gebruikt in de MVC om beschikbare accommodaties te tonen aan de user op basis van opgegeven datums
-        // werkt voor beide Camping en Hotel accommodaties, afhankelijk van het AccommodationType enum dat je meegeeft
-        [HttpGet("available-for-dates")]
-        public async Task<ActionResult<List<Accommodation>>> GetAvailableAccommodationsForDates(
-            Accommodation.AccommodationType type,                                                                                              
-            DateTime startDate,
-            DateTime endDate)
-        {
-            var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
-                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type
-                    // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
-                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&
-                        r.StartDate < endDate && r.EndDate > startDate
-                    ))
-                .ToListAsync();
-
-            return Ok(availableAccommodations);
         }
 
 

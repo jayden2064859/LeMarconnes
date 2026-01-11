@@ -19,33 +19,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/account
-        [HttpGet]
-        public async Task<ActionResult<List<Account>>> GetAccounts()
-        {
-             var allAccounts = await _context.Accounts
-            .ToListAsync();
-
-            return allAccounts;
-        }
-
-
-        // GET: api/account/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(int id)
-        {
-            var account = await _context.Accounts
-                .FirstOrDefaultAsync(c => c.AccountId == id);
-
-            if (account == null)
-            {
-                return NotFound();
-            }
-
-            return account;
-        }
-
-
         // GET: api/account/exists/{username}
         [HttpGet("exists/{username}")]
         public async Task<IActionResult> CheckUsernameExists(string username)
@@ -97,6 +70,35 @@ namespace API.Controllers
             }
         }
 
+
+         
+
+
+        // GET: api/account
+        [HttpGet]
+        public async Task<ActionResult<List<Account>>> GetAccounts()
+        {
+            var allAccounts = await _context.Accounts
+           .ToListAsync();
+
+            return allAccounts;
+        }
+
+
+        // GET: api/account/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Account>> GetAccount(int id)
+        {
+            var account = await _context.Accounts
+                .FirstOrDefaultAsync(c => c.AccountId == id);
+
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            return account;
+        }
 
         // PUT: api/account
         [HttpPut("{id}")]

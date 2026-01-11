@@ -13,8 +13,8 @@ namespace ClassLibrary.Models
 
         // class properties
         public int ReservationId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateOnly StartDate { get; set; } // DateOnly is logischer voor datums, want tarieven zijn per overnachting
+        public DateOnly EndDate { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime RegistrationDate { get; set; }
 
@@ -31,14 +31,18 @@ namespace ClassLibrary.Models
         }
         
         // main constructor voor aanmaken van reservering 
-        public Reservation(int customerId, DateTime startDate, DateTime endDate)
+        public Reservation(int customerId, DateOnly startDate, DateOnly endDate)
         {
             if (customerId <= 0) 
             { 
                 throw new ArgumentException("Invalid customer"); 
             }
 
-            if (startDate < DateTime.Today)
+            // DateOnly heeft geen .today optie zoals DateTime, 
+            // dus DateTime wordt eerst gebruikt om de huidige dag te bepalen, en daarna converted naar DateOnly
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            if (startDate < today)
             {
                 throw new ArgumentException("Startdatum moet minimaal vandaag zijn");
 
@@ -48,13 +52,7 @@ namespace ClassLibrary.Models
             {
                 throw new ArgumentException("Einddatum moet later zijn dan startdatum");
             }
-               
-
-            if (endDate < DateTime.Today.AddDays(1))
-            {
-                throw new ArgumentException("Einddatum moet minimaal morgen zijn");
-            }
-             
+                          
             CustomerId = customerId;
             StartDate = startDate;
             EndDate = endDate;
@@ -65,7 +63,7 @@ namespace ClassLibrary.Models
         // methods
         public int GetNumberOfNights() 
         {
-            return (EndDate - StartDate).Days;
+            return EndDate.DayNumber - StartDate.DayNumber;
         }
 
         public void AddAccommodation(Accommodation accommodation)
@@ -74,7 +72,7 @@ namespace ClassLibrary.Models
             {
                 throw new ArgumentException("Geen accommodatie gevonden om toe te voegen");
             }
-            if (Accommodations.Count > 2)
+            if (Accommodations.Count >= 2) 
             {
                 throw new ArgumentException("Maximaal 2 accommodaties per reservering");
             }

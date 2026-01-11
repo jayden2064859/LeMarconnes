@@ -14,7 +14,7 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
 
 
     // Constructor roept base constructor aan
-    public CampingReservation(int customerId, DateTime startDate, DateTime endDate, int adultsCount, int children0_7Count, int children7_12Count,
+    public CampingReservation(int customerId, DateOnly startDate, DateOnly endDate, int adultsCount, int children0_7Count, int children7_12Count,
         int dogsCount, bool hasElectricity, int? electricityDays = null) : base(customerId, startDate, endDate)
     {
 

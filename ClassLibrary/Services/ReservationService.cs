@@ -17,7 +17,7 @@ namespace ClassLibrary.Services
         }
 
         // available-for-dates api call waarbij response meteen teruggegeven wordt
-        public async Task<(List<Accommodation>?, string?)> GetAvailableAccommodationsAsync(DateTime startDate, DateTime endDate, Accommodation.AccommodationType type)
+        public async Task<(List<Accommodation>?, string?)> GetAvailableAccommodationsAsync(DateOnly startDate, DateOnly endDate, Accommodation.AccommodationType type)
         {
             var available = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?type={type}&startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
             if (!available.IsSuccessStatusCode)

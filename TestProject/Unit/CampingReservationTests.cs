@@ -16,8 +16,10 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            // eerst moet een DateTime aangemaakt worden om .Today te kunnen gebruiken, daarna wordt het 
+            // veranderd naar DateOnly (logischer voor het reserveringssysteem)
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             var reservation = new CampingReservation(
@@ -43,8 +45,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try
@@ -78,8 +80,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try
@@ -111,8 +113,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try
@@ -145,8 +147,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try
@@ -179,8 +181,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1); 
-            DateTime endDate = DateTime.Today.AddDays(5); // 4 overnachtingen
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5)); // 4 overnachtingen
 
             // act
             try
@@ -213,8 +215,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(11);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(11)); // 10 overnachtingen
 
             // act
             var reservation = new CampingReservation(
@@ -226,7 +228,7 @@ namespace TestProject.Unit
             children7_12Count: 2,
             dogsCount: 2,
             hasElectricity: true,
-            electricityDays: 10
+            electricityDays: 10 
             );
 
             // assert

@@ -23,8 +23,8 @@ namespace API.Controllers
         [HttpGet("available-for-dates")]
         public async Task<ActionResult<List<AvailableAccommodationDTO>>> GetAvailableAccommodationsForDates(
             Accommodation.AccommodationType type,
-            DateTime startDate,
-            DateTime endDate)
+            DateOnly startDate,
+            DateOnly endDate)
         {
             var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
                 .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type

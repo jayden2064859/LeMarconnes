@@ -11,7 +11,7 @@ public class HotelReservation : Reservation
     public int PersonCount { get; set; } 
 
     public HotelReservation() : base() { } // lege constructor (voor EF)
-    public HotelReservation(int customerId, DateTime startDate, DateTime endDate, int personCount) : base(customerId, startDate, endDate)
+    public HotelReservation(int customerId, DateOnly startDate, DateOnly endDate, int personCount) : base(customerId, startDate, endDate)
     {
         if (personCount < 1 || personCount > 10) 
         {

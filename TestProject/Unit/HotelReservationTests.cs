@@ -15,8 +15,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             var reservation = new HotelReservation(
@@ -37,8 +37,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(11);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try
@@ -66,8 +66,8 @@ namespace TestProject.Unit
         {
             // arrange
             int customerId = 1;
-            DateTime startDate = DateTime.Today.AddDays(1);
-            DateTime endDate = DateTime.Today.AddDays(5);
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
             // act
             try

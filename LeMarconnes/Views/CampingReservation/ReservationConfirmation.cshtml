@@ -28,7 +28,7 @@
     </tr>
     <tr>
         <th style="text-align: left; padding: 5px;">Aantal nachten</th>
-        <td style="padding: 5px;">@( (Model.EndDate - Model.StartDate).Days )</td>
+        <td style="padding: 5px;">@(Model.EndDate.DayNumber - Model.StartDate.DayNumber)</td>
     </tr>
 
     <tr>

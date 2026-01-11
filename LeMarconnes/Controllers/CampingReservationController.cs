@@ -26,12 +26,12 @@ namespace LeMarconnes.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateReservation1(DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> CreateReservation1(DateOnly startDate, DateOnly endDate)
         {
 
             // datums opslaan in session voor volgende stappen
-            HttpContext.Session.SetString("ReservationStartDate", startDate.ToString("yyyy-MM-dd"));
-            HttpContext.Session.SetString("ReservationEndDate", endDate.ToString("yyyy-MM-dd"));
+            HttpContext.Session.SetString("ReservationStartDate", startDate.ToString());
+            HttpContext.Session.SetString("ReservationEndDate", endDate.ToString());
 
             // doorsturen naar stap 2
             return RedirectToAction("CreateReservation2");
@@ -53,8 +53,8 @@ namespace LeMarconnes.Controllers
             }
 
             // datums terug converten van string naar DateTime
-            DateTime startDate = DateTime.Parse(startDateStr);
-            DateTime endDate = DateTime.Parse(endDateStr);
+            DateOnly startDate = DateOnly.Parse(startDateStr);
+            DateOnly endDate = DateOnly.Parse(endDateStr);
 
             var (accommodations, errorMessage) = await _reservationService.GetAvailableAccommodationsAsync
                                                                             (startDate, endDate, Accommodation.AccommodationType.Camping);
@@ -120,8 +120,8 @@ namespace LeMarconnes.Controllers
             }
 
             // strings weer terug converten naar date time omdat datum berekening uitgevoerd moet worden
-            DateTime startDate = DateTime.Parse(startDateStr);
-            DateTime endDate = DateTime.Parse(endDateStr);
+            DateOnly startDate = DateOnly.Parse(startDateStr);
+            DateOnly endDate = DateOnly.Parse(endDateStr);
 
             return View();
         }
@@ -144,8 +144,8 @@ namespace LeMarconnes.Controllers
             }
 
             // opgeslagen datum strings weer terug converten naar DateTime
-            DateTime startDate = DateTime.Parse(startDateStr);
-            DateTime endDate = DateTime.Parse(endDateStr);
+            DateOnly startDate = DateOnly.Parse(startDateStr);
+            DateOnly endDate = DateOnly.Parse(endDateStr);
 
             // string van accommodationIds terug converten naar List<int>
             var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);

@@ -15,9 +15,9 @@ namespace ClassLibrary.DTOs
         [Required]
         public List<int> AccommodationIds { get; set; } = new List<int>(); // gereserveerde accommodaties moet gekoppeld worden 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateOnly StartDate { get; set; }
         [Required]
-        public DateTime EndDate { get; set; }
+        public DateOnly EndDate { get; set; }
         [Required]
         public int AdultsCount { get; set; }
         [Required]

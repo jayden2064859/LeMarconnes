@@ -5,20 +5,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
-namespace API.Services
+namespace API.DbServices
 {
     // LINQ queries (database communicatie via DbContext) worden alleen uitgevoerd in deze services, zodat de API controllers nooit directe communicatie hebben met de database (encapsulation)
-    public class CampingReservationService
+    public class CampingReservationDbService
     {
         private readonly LeMarconnesDbContext _context;
 
-        public CampingReservationService(LeMarconnesDbContext context)
+        public CampingReservationDbService(LeMarconnesDbContext context)
         {
             _context = context;
         }
 
      // voor POST api/reservation/camping
-        public async Task<string?> ValidateAccommodationAvailability(DateOnly startDate, DateOnly endDate, List<int> accommodationIds)
+        public async Task<string?> ValidateAccommodationAvailabilityAsync(DateOnly startDate, DateOnly endDate, List<int> accommodationIds)
         {
             // check gekozen accommodaties voor beschikbaarheid op basis van ingevoerde datum
             foreach (var accommodationId in accommodationIds)
@@ -38,7 +38,7 @@ namespace API.Services
         }
 
         // return type namen worden voor tuples toegevoegd om duidelijk te maken wat de functie van beide types zijn (functioneel niet nodig)
-        public async Task<(Customer? customer, string? errorMessage)> GetCustomer(int customerId)
+        public async Task<(Customer? customer, string? errorMessage)> GetCustomerAsync(int customerId)
         {
             // specifieke customer ophalen 
             var customer = await _context.Customers
@@ -52,7 +52,7 @@ namespace API.Services
             return (customer, null);
         }
 
-        public async Task<(List<Accommodation>? accommodations, string? errorMessage)> GetSelectedAccommodations(List<int> accommodationIds)
+        public async Task<(List<Accommodation>? accommodations, string? errorMessage)> GetSelectedAccommodationsAsync(List<int> accommodationIds)
         {
             // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
@@ -69,7 +69,7 @@ namespace API.Services
         }
 
 
-        public async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffs(Accommodation.AccommodationType type)
+        public async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffsAsync(Accommodation.AccommodationType type)
         {
             // haal tarieven op voor camping 
             var tariffs = await _context.Tariffs
@@ -84,7 +84,7 @@ namespace API.Services
             return (tariffs, null);
         }
 
-        public async Task<CampingReservation> AddCampingReservation(CampingReservation reservation)
+        public async Task<CampingReservation> AddCampingReservationAsync(CampingReservation reservation)
         {
             // resevering toevoegen aan db
             _context.Reservations.Add(reservation);
@@ -95,7 +95,7 @@ namespace API.Services
 
 
      // voor GET /api/reservation (alle)
-        public async Task<List<Reservation>> GetAllReservations()
+        public async Task<List<Reservation>> GetAllReservationsAsync()
         {
             var allReservations = await _context.Reservations
                 .Include(r => r.Customer)
@@ -107,7 +107,7 @@ namespace API.Services
         }
 
      // voor GET /api/reservation/{id}
-        public async Task<(Reservation? reservation, string? errorMessage)> GetReservationById(int id)
+        public async Task<(Reservation? reservation, string? errorMessage)> GetReservationByIdAsync(int id)
         {
             var reservation = await _context.Reservations
                 .Include(r => r.Customer)
@@ -124,7 +124,7 @@ namespace API.Services
 
      // voor PUT /api/reservation/{id}
 
-        public async Task<(bool success, string? errorMessage)> UpdateReservation(int id, Reservation updatedReservation)
+        public async Task<(bool success, string? errorMessage)> UpdateReservationAsync(int id, Reservation updatedReservation)
         {
             // check of de ids overeenkomen
             if (id != updatedReservation.ReservationId)
@@ -149,7 +149,7 @@ namespace API.Services
         }
 
      // voor DELETE /api/reservation/{id}
-        public async Task<(bool success, string? errorMessage)> DeleteReservation(int id)
+        public async Task<(bool success, string? errorMessage)> DeleteReservationAsync(int id)
         {
             // specifieke reservering ophalen uit db
             var reservation = await _context.Reservations.FindAsync(id);

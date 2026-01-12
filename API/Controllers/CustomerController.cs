@@ -1,11 +1,9 @@
-﻿using Azure.Core;
-using ClassLibrary.Data;
+﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
+
 
 namespace API.Controllers
 {

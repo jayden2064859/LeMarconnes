@@ -1,7 +1,4 @@
-﻿using ClassLibrary.Models;
-using Microsoft.EntityFrameworkCore;
-
-
+﻿
 namespace ClassLibrary.Models
 {
     public class Accommodation

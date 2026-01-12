@@ -1,19 +1,17 @@
 ﻿using ClassLibrary.DTOs;
-using ClassLibrary.Services;
+using ClassLibrary.HttpServices;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 
-
-namespace LeMarconnes.Controllers
+namespace MVC.Controllers
 {
     public class LoginController : Controller
     {
 
-        private readonly LoginService _loginService;
+        private readonly LoginHttpService _httpService;
 
-        public LoginController(LoginService loginService)
+        public LoginController(LoginHttpService httpService)
         {
-            _loginService = loginService;
+            _httpService = httpService;
         }
 
         public IActionResult Login()
@@ -39,7 +37,7 @@ namespace LeMarconnes.Controllers
             };
 
             // loginDto naar api sturen, en de response daarvan in loginResponse var zetten 
-            var (loginResult, errorMessage) = await _loginService.LoginAsync(loginDto);
+            var (loginResult, errorMessage) = await _httpService.LoginAsync(loginDto);
 
             if (loginResult == null)
             {

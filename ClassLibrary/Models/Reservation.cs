@@ -1,9 +1,4 @@
-﻿using ClassLibrary.Models;
-using ClassLibrary.Services;
-using Microsoft.Identity.Client;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
+﻿
 namespace ClassLibrary.Models
 {
     // reservation is de base class die properties bevat die relevant zijn voor ALLE type reserveringen,

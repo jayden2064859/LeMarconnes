@@ -1,9 +1,7 @@
-﻿using API.Services;
+﻿using API.DbServices;
 using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.Services;
-using ClassLibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,11 +13,11 @@ namespace API.Controllers
     public class ReservationController : ControllerBase
     {
         // dependency injection van de camping service
-        private readonly CampingReservationService _service;
+        private readonly CampingReservationDbService _dbService;
 
-        public ReservationController(LeMarconnesDbContext context, CampingReservationService service)
+        public ReservationController(LeMarconnesDbContext context, CampingReservationDbService dbService)
         {
-            _service = service;
+            _dbService = dbService;
         }
 
         // POST: api/reservation/camping
@@ -28,35 +26,38 @@ namespace API.Controllers
         {
             // database communicatie is encapsulated in API services
             // check in de db of er al een reservering bestaat die overlapped in datum
-            var accommodationConflictError = await _service.ValidateAccommodationAvailability(dto.StartDate, dto.EndDate, dto.AccommodationIds);
+            var accommodationConflictMessage = await _dbService.ValidateAccommodationAvailabilityAsync(
+            dto.StartDate,
+            dto.EndDate,
+            dto.AccommodationIds);
 
-            if (accommodationConflictError != null)
+            if (accommodationConflictMessage != null)
             {
-                return Conflict(accommodationConflictError);
+                return Conflict(accommodationConflictMessage);
             }
 
             // specifieke customer ophalen 
-            var (customer, customerNotFoundError) = await _service.GetCustomer(dto.CustomerId);
+            var (customer, customerNotFoundMessage) = await _dbService.GetCustomerAsync(dto.CustomerId);
 
-            if (customerNotFoundError != null)
+            if (customerNotFoundMessage != null)
             {
-                return NotFound(customerNotFoundError);
+                return NotFound(customerNotFoundMessage);
             }
 
             // geselecteerde accommodaties ophalen
-            var (accommodations, accommodationNotFoundError) = await _service.GetSelectedAccommodations(dto.AccommodationIds);
+            var (accommodations, accommodationNotFoundMessage) = await _dbService.GetSelectedAccommodationsAsync(dto.AccommodationIds);
 
-            if (accommodationNotFoundError != null)
+            if (accommodationNotFoundMessage != null)
             {
-                return NotFound(accommodationNotFoundError);
+                return NotFound(accommodationNotFoundMessage);
             }
 
             // tarieven voor camping ophalen 
-            var (tariffs, tariffsNotFoundError) = await _service.GetCampingTariffs(Accommodation.AccommodationType.Camping);
+            var (tariffs, tariffsNotFoundMessage) = await _dbService.GetCampingTariffsAsync(Accommodation.AccommodationType.Camping);
 
-            if (tariffsNotFoundError != null)
+            if (tariffsNotFoundMessage != null)
             {
-                return NotFound(tariffsNotFoundError);
+                return NotFound(tariffsNotFoundMessage);
             }
 
             try
@@ -91,7 +92,7 @@ namespace API.Controllers
                 campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
 
 
-                var reservationCreated = await _service.AddCampingReservation(campingReservation);
+                var reservationCreated = await _dbService.AddCampingReservationAsync(campingReservation);
 
                 var responseDto = new CampingReservationResponseDTO
                 {
@@ -131,7 +132,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
-            var allReservations = await _service.GetAllReservations();
+            var allReservations = await _dbService.GetAllReservationsAsync();
             return Ok(allReservations);
         }
 
@@ -140,7 +141,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
-            var (reservation, errorMessage) = await _service.GetReservationById(id);
+            var (reservation, errorMessage) = await _dbService.GetReservationByIdAsync(id);
 
             if (errorMessage != null)
             {
@@ -154,7 +155,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
-            var (succesfullyUpdated, errorMessage) = await _service.UpdateReservation(id, reservation);
+            var (succesfullyUpdated, errorMessage) = await _dbService.UpdateReservationAsync(id, reservation);
 
             if (!succesfullyUpdated)
             {
@@ -168,7 +169,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {
-            var (success, errorMessage) = await _service.DeleteReservation(id);
+            var (success, errorMessage) = await _dbService.DeleteReservationAsync(id);
 
             if (!success)
             {

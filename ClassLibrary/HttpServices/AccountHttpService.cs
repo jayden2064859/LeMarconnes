@@ -1,20 +1,13 @@
 ﻿using ClassLibrary.DTOs;
-using ClassLibrary.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
-
-namespace ClassLibrary.Services
+namespace ClassLibrary.HttpServices
 {
-    public class AccountService
+    public class AccountHttpService
     {
         private readonly HttpClient _httpClient;
 
-        public AccountService(HttpClient httpClient)
+        public AccountHttpService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }

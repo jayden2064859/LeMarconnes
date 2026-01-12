@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 
-namespace LeMarconnes.Controllers
+namespace MVC.Controllers
 {
     public class HomeController : Controller
     {

@@ -1,7 +1,7 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.Services;
+using ClassLibrary.HttpServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

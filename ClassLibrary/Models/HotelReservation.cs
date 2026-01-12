@@ -1,5 +1,5 @@
 ﻿using ClassLibrary.Models;
-using ClassLibrary.Services;
+using ClassLibrary.HttpServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;

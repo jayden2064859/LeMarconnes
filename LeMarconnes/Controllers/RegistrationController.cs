@@ -1,25 +1,21 @@
 ﻿using ClassLibrary.DTOs;
-using ClassLibrary.Models;
-using ClassLibrary.Services;
+using ClassLibrary.HttpServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
-
-
-
-namespace LeMarconnes.Controllers
+namespace MVC.Controllers
 {
     public class RegistrationController : Controller
     {
 
         // dependency injection gebruiken voor de services (api communicatie)
-        private readonly AccountService _accountService;
-        private readonly CustomerService _customerService;
+        private readonly AccountHttpService _accountHttpService;
+        private readonly CustomerHttpService _customerHttpService;
 
-        public RegistrationController(AccountService accountService, CustomerService customerService)
+        public RegistrationController(AccountHttpService accountService, CustomerHttpService customerService)
         {
-            _accountService = accountService;
-            _customerService = customerService;
+            _accountHttpService = accountService;
+            _customerHttpService = customerService;
         }
 
         [HttpGet]
@@ -46,7 +42,7 @@ namespace LeMarconnes.Controllers
             }
        
             // valideren of username al bestaat in db voordat account aangemaakt kan worden
-            var (exists, error) = await _accountService.CheckUsernameExistsAsync(username); 
+            var (exists, error) = await _accountHttpService.CheckUsernameExistsAsync(username); 
 
             if (exists == null)
             {
@@ -95,7 +91,7 @@ namespace LeMarconnes.Controllers
             };
 
             // POST customer doen met de dto (customer obj wordt uitgelezen als Post succesvol is, anders wordt error uitgelezen)
-            var (customer, customerError) = await _customerService.CreateCustomerAsync(customerDto);
+            var (customer, customerError) = await _customerHttpService.CreateCustomerAsync(customerDto);
 
             if (customer == null)
             {
@@ -112,12 +108,12 @@ namespace LeMarconnes.Controllers
             };
 
             // dto naar api sturen 
-            var (accountCreated, error) = await _accountService.CreateAccountAsync(accountDto);
+            var (accountCreated, error) = await _accountHttpService.CreateAccountAsync(accountDto);
 
             if (accountCreated == null)
             {
                 // rollback customer als account niet aangemaakt wordt
-                await _customerService.DeleteCustomerAsync(customer.CustomerId);
+                await _customerHttpService.DeleteCustomerAsync(customer.CustomerId);
 
                 TempData["Error"] = error;
                 return View("CreateCustomer");

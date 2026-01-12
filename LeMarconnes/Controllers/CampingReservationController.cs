@@ -1,21 +1,20 @@
 ﻿using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.Services;
+using ClassLibrary.HttpServices;
 using ClassLibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Reflection.Metadata.Ecma335;
 
-namespace LeMarconnes.Controllers
+
+namespace MVC.Controllers
 {
     public class CampingReservationController : Controller
     {
 
-        private readonly ReservationService _reservationService;
+        private readonly ReservationHttpService _httpService;
 
-        public CampingReservationController(ReservationService reservationService)
+        public CampingReservationController(ReservationHttpService httpService)
         {
-            _reservationService = reservationService;
+            _httpService = httpService;
         }
 
         // reservering stap 1: datums kiezen
@@ -56,7 +55,7 @@ namespace LeMarconnes.Controllers
             DateOnly startDate = DateOnly.Parse(startDateStr);
             DateOnly endDate = DateOnly.Parse(endDateStr);
 
-            var (accommodations, errorMessage) = await _reservationService.GetAvailableAccommodationsAsync
+            var (accommodations, errorMessage) = await _httpService.GetAvailableAccommodationsAsync
                                                                             (startDate, endDate, Accommodation.AccommodationType.Camping);
 
             if (accommodations == null)
@@ -166,7 +165,7 @@ namespace LeMarconnes.Controllers
                 };
 
             // api call service geeft reservation object terug als het succesvol was, anders een error message
-            var (reservation, errorMessage) = await _reservationService.CreateCampingReservationAsync(dto);
+            var (reservation, errorMessage) = await _httpService.CreateCampingReservationAsync(dto);
 
             if (reservation == null)
             {

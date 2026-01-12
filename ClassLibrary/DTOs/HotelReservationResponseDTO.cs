@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ClassLibrary.DTOs
 {
     // response DTO die de API controller endpoint aanmaakt en terugstuurt naar de Service die de endpoint gecalled heeft

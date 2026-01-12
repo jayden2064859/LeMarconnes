@@ -1,10 +1,9 @@
-﻿using ClassLibrary.Data;
+﻿using API.DbServices;
+using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -13,12 +12,15 @@ namespace API.Controllers
     public class LoginController : ControllerBase
     {
         private readonly LeMarconnesDbContext _context;
+        private readonly LoginDbService _dbService;
 
-        public LoginController(LeMarconnesDbContext context)
+        public LoginController(LeMarconnesDbContext context, LoginDbService dbService)
         {
             _context = context;
+            _dbService = dbService;
         }
 
+        // POST: api/login
         [HttpPost]
         public async Task<ActionResult<LoginResponseDTO>> Login(LoginDTO loginDto)
         {
@@ -28,30 +30,21 @@ namespace API.Controllers
                 return BadRequest("Ongeldige invoer");
             }
 
-            // zoek account op basis van gebruikersnaam
-            var account = await _context.Accounts
-                .Include(a => a.Customer) // "include" is mogelijk door navigation property in model
-                .FirstOrDefaultAsync(a => a.Username == loginDto.Username);
+            // zoek account op basis van gebruikersnaam uit Dto
+            var (account, notFoundMessage) = await _dbService.GetAccountByUsernameAsync(loginDto.Username);
 
-            if (account == null)
+            if (notFoundMessage != null)
             {
-                return Unauthorized("Gebruikersnaam bestaat niet");
+                return NotFound("Gebruikersnaam bestaat niet");
             }
 
-            // controleer wachtwoord
-            var hasher = new PasswordHasher<Account>();
-            var result = hasher.VerifyHashedPassword(null, account.PasswordHash, loginDto.Password);
-
-            if (result != PasswordVerificationResult.Success)
+            // verify wachtwoord
+            // het wachtwoord in de Dto wordt gehashed en vergeleken met de opgeslagen hash van het matchende account in de database
+            var (isValid, unauthorizedMessage) = await _dbService.VerifyPasswordAsync(account, loginDto.Password);
+            
+            if (!isValid) // in dit geval is het veiliger om op de boolean specifiek te checken voor authentication ipv errormessage 
             {
-                return Unauthorized("Ongeldige inloggegevens");
-            }
-
-            // zet status op active na inloggen
-            if (!account.IsActive)
-            {
-                account.IsActive = true;
-                await _context.SaveChangesAsync();
+                return Unauthorized(unauthorizedMessage);
             }
 
             var response = new LoginResponseDTO

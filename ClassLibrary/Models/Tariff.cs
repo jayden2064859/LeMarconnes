@@ -1,6 +1,4 @@
-﻿using ClassLibrary.Models;
-using static ClassLibrary.Models.Accommodation;
-
+﻿
 namespace ClassLibrary.Models
 {
     public class Tariff

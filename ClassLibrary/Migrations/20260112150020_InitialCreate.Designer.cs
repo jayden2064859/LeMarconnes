@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(LeMarconnesDbContext))]
-    [Migration("20260111183537_InitialCreate")]
+    [Migration("20260112150020_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -157,9 +157,6 @@ namespace ClassLibrary.Migrations
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

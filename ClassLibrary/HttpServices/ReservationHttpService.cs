@@ -1,17 +1,14 @@
 ﻿using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
-namespace ClassLibrary.Services
+namespace ClassLibrary.HttpServices
 {
-    public class ReservationService
+    public class ReservationHttpService
     {
         private readonly HttpClient _httpClient;
 
-        public ReservationService(HttpClient httpClient)
+        public ReservationHttpService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }

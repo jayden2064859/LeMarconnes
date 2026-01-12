@@ -1,6 +1,4 @@
-﻿using ClassLibrary.Models;
-using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace ClassLibrary.Models
 {
     public class Account
@@ -17,7 +15,6 @@ namespace ClassLibrary.Models
             Admin = 2
 
         }
-        public bool IsActive { get; set; }
         public DateTime RegistrationDate { get; set; }
 
         // customer aan account linken
@@ -52,8 +49,7 @@ namespace ClassLibrary.Models
             PasswordHash = passwordHash;
             AccountRole = Account.Role.Customer;
             CustomerId = customer.CustomerId;
-            Customer = customer;
-            IsActive = false; //wanneer een user de web app betreedt wordt IsActive op true gezet           
+            Customer = customer;     
             RegistrationDate = DateTime.Now;
         }
 
@@ -83,7 +79,6 @@ namespace ClassLibrary.Models
             Username = username;
             PasswordHash = passwordHash;
             AccountRole = role;
-            IsActive = false;
             RegistrationDate = DateTime.Now;
         }
 

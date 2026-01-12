@@ -14,12 +14,11 @@ namespace API.Controllers
     [ApiController]
     public class ReservationController : ControllerBase
     {
-        private readonly PostCampingReservationService _service;
-        private readonly LeMarconnesDbContext _context;
-        
-        public ReservationController(LeMarconnesDbContext context, PostCampingReservationService service)
+        // dependency injection van de camping service
+        private readonly CampingReservationService _service;
+
+        public ReservationController(LeMarconnesDbContext context, CampingReservationService service)
         {
-            _context = context;
             _service = service;
         }
 
@@ -29,39 +28,36 @@ namespace API.Controllers
         {
             // database communicatie is encapsulated in API services
             // check in de db of er al een reservering bestaat die overlapped in datum
-            var conflictMsg = await _service.ValidateAccommodationAvailability(dto.StartDate, dto.EndDate, dto.AccommodationIds);
+            var accommodationConflictError = await _service.ValidateAccommodationAvailability(dto.StartDate, dto.EndDate, dto.AccommodationIds);
 
-            if (conflictMsg != null)
+            if (accommodationConflictError != null)
             {
-                return Conflict(conflictMsg);
+                return Conflict(accommodationConflictError);
             }
 
             // specifieke customer ophalen 
-            var (customer, notFoundMsg) = await _service.GetCustomer(dto.CustomerId);
+            var (customer, customerNotFoundError) = await _service.GetCustomer(dto.CustomerId);
 
-            if (notFoundMsg != null)
+            if (customerNotFoundError != null)
             {
-                return NotFound(notFoundMsg);
+                return NotFound(customerNotFoundError);
             }
 
+            // geselecteerde accommodaties ophalen
+            var (accommodations, accommodationNotFoundError) = await _service.GetSelectedAccommodations(dto.AccommodationIds);
 
-
-                
-            // alle geselecteerde accommodaties ophalen
-            var accommodations = await _context.Accommodations
-                .Where(a => dto.AccommodationIds.Contains(a.AccommodationId))
-                .Where(a => a.Type == Accommodation.AccommodationType.Camping)
-                .ToListAsync();
-
-            if (!accommodations.Any())
+            if (accommodationNotFoundError != null)
             {
-                return NotFound("Geen campingplaatsen gevonden");
+                return NotFound(accommodationNotFoundError);
             }
 
-            // haal tarieven op voor camping 
-            var tariffs = await _context.Tariffs
-                .Where(t => t.AccommodationType == Accommodation.AccommodationType.Camping)
-                .ToListAsync();
+            // tarieven voor camping ophalen 
+            var (tariffs, tariffsNotFoundError) = await _service.GetCampingTariffs(Accommodation.AccommodationType.Camping);
+
+            if (tariffsNotFoundError != null)
+            {
+                return NotFound(tariffsNotFoundError);
+            }
 
             try
             {
@@ -83,19 +79,19 @@ namespace API.Controllers
                 campingReservation.Customer = customer;
 
                 // reservation koppelen aan customer
-                customer.AddReservation(campingReservation);
+                customer.AddReservation(campingReservation); // inheritance (campingReservation gebruikt parent class Reservation methode)
 
                 // voeg accommodaties toe aan de reservering
                 foreach (var accommodation in accommodations)
                 {
-                    campingReservation.AddAccommodation(accommodation);
+                    campingReservation.AddAccommodation(accommodation); // inheritance (campingReservation gebruikt parent class Reservation methode)
                 }
 
                 // bereken totale prijs met de override method van CampingReservation class
                 campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
 
-                _context.Reservations.Add(campingReservation);
-                await _context.SaveChangesAsync();
+
+                var reservationCreated = await _service.AddCampingReservation(campingReservation);
 
                 var responseDto = new CampingReservationResponseDTO
                 {
@@ -123,20 +119,20 @@ namespace API.Controllers
             {
                 return Conflict(ex.Message);
             }
-        }
+            catch (DbUpdateException ex) // vangt database conflicten op
+            {
 
+                return Conflict(ex.Message);
+            }
+        }
 
 
         // GET: api/reservation
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
-            var allReservations = await _context.Reservations
-                .Include(r => r.Customer)
-                .Include(r => r.Accommodations)
-                .ToListAsync();
-
-            return allReservations;
+            var allReservations = await _service.GetAllReservations();
+            return Ok(allReservations);
         }
 
 
@@ -144,61 +140,45 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
-            var reservation = await _context.Reservations
-                .Include(r => r.Customer)
-                .Include(r => r.Accommodations)
-                .FirstOrDefaultAsync(r => r.ReservationId == id);
+            var (reservation, errorMessage) = await _service.GetReservationById(id);
 
-            if (reservation == null)
+            if (errorMessage != null)
             {
-                return NotFound();
+                return NotFound(errorMessage);
             }
+            return Ok(reservation);
 
-            return reservation;
         }
 
         // PUT: api/Reservation/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
-            if (id != reservation.ReservationId)
+            var (succesfullyUpdated, errorMessage) = await _service.UpdateReservation(id, reservation);
+
+            if (!succesfullyUpdated)
             {
-                return NotFound();
+                return NotFound(errorMessage);
             }
 
-            _context.Entry(reservation).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-
-            if (!ReservationExists(id))
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            return Ok();
         }
 
         // DELETE: api/Reservation/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
+            var (success, errorMessage) = await _service.DeleteReservation(id);
+
+            if (!success)
             {
-                return NotFound();
+                return NotFound(errorMessage);
             }
+            return Ok();
 
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
 
-            return NoContent();
+
+
         }
-
-        private bool ReservationExists(int id)
-        {
-            return _context.Reservations.Any(e => e.ReservationId == id);
-        }
-
-
     }
 }

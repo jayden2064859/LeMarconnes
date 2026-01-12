@@ -5,25 +5,26 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var baseAdress = new Uri("https://localhost:7290");
 // dependency injection voor service api connecties
 builder.Services.AddHttpClient<AccountService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7290");
+    client.BaseAddress = baseAdress;
 });
 
 builder.Services.AddHttpClient<CustomerService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7290");
+    client.BaseAddress = baseAdress;
 });
 
 builder.Services.AddHttpClient<LoginService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7290");
+    client.BaseAddress = baseAdress;
 });
 
 builder.Services.AddHttpClient<ReservationService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7290");
+    client.BaseAddress = baseAdress;
 });
 
 

@@ -2,7 +2,7 @@
 
 namespace ClassLibrary.DTOs
 {
-    public class LoginDTO
+    public class AuthenticateDTO
     {
         [Required]       
         public string Username { get; set; }

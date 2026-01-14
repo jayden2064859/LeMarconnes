@@ -12,10 +12,6 @@ namespace ClassLibrary.Models
         public string Phone { get; set; }
         public DateTime RegistrationDate { get; set; }
 
-        // navigation properties
-        public List<Reservation> Reservations { get; set; } = new List<Reservation>();
-
-
         // constructors
         public Customer(string firstName, string lastName, string email, string phone, string? infix = null)
         {
@@ -62,17 +58,6 @@ namespace ClassLibrary.Models
         {
             RegistrationDate = DateTime.Now;
         }
-
-        // methods
-        public void AddReservation(Reservation reservation)
-        {
-            Reservations.Add(reservation);
-            reservation.CustomerId = CustomerId; 
-        }
-
-        public List<Reservation> GetAllReservations()
-        {
-            return Reservations.ToList();
-        }      
+    
     }
 }

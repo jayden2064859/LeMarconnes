@@ -12,15 +12,6 @@ namespace ClassLibrary.Models
         {
             Camping = 1,
             Hotel = 2
-        }
-        public List<Reservation>Reservations { get; set; } = new List<Reservation>();
-
-           
-        // methods
-        public void AddReservation(Reservation reservation)
-        {
-            Reservations.Add(reservation);
-        }
-      
+        }      
     }
 }

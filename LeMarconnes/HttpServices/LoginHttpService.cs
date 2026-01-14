@@ -1,7 +1,7 @@
 ﻿using ClassLibrary.DTOs;
 using System.Net.Http.Json;
 
-namespace ClassLibrary.HttpServices
+namespace MVC.HttpServices
 {
     public class LoginHttpService
     {
@@ -12,9 +12,9 @@ namespace ClassLibrary.HttpServices
             _httpClient = httpClient;
         }
 
-        public async Task<(LoginResponseDTO?, string?)> LoginAsync(LoginDTO loginDto)
+        public async Task<(AuthenticateResponseDTO?, string?)> LoginAsync(AuthenticateDTO loginDto)
         {
-            var postLogin = await _httpClient.PostAsJsonAsync("/api/Login", loginDto);
+            var postLogin = await _httpClient.PostAsJsonAsync("/api/authenticate", loginDto);
 
             if (!postLogin.IsSuccessStatusCode)
             {
@@ -23,7 +23,7 @@ namespace ClassLibrary.HttpServices
                 return (null, errorContent);
             }
 
-            var responseDto = await postLogin.Content.ReadFromJsonAsync<LoginResponseDTO>();
+            var responseDto = await postLogin.Content.ReadFromJsonAsync<AuthenticateResponseDTO>();
             return (responseDto, null);
         }
     }

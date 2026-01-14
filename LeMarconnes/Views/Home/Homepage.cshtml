@@ -1,19 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Le Marconnès";
 
-    // user data ophalen uit session
     var username = Context.Session.GetString("Username");
-    var firstName = Context.Session.GetString("FirstName");
+    var customerId = Context.Session.GetString("CustomerId");
 }
 
 
 <div class="container mt-5">
     <div class="text-center mb-5" style="padding: 15px;">
-        @if (!string.IsNullOrEmpty(Context.Session.GetString("FirstName")))
-        {
-            <h1 class="display-4 mb-5">Welkom, @firstName</h1>
-        }
-        else if (!string.IsNullOrEmpty(Context.Session.GetString("Username")))
+        @if (!String.IsNullOrEmpty(username))
         {
             <h1 class="display-4 mb-5">Welkom, @username</h1>
         }
@@ -21,9 +16,8 @@
         {
             <h1 class="display-4 mb-5">Welkom bij camping Le Marconnès!</h1>
         }
-
-        <!-- view voor ingelogde gebruiker -->
-        @if (Context.Session.GetInt32("CustomerId") != null)
+        <!-- view voor ingelogde klant -->
+        @if (!String.IsNullOrEmpty(customerId))
         {
             <div class="row justify-content-center">
 

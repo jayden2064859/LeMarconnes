@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.DbServices
 {
-    public class LoginDbService
+    public class AuthenticateDbService
     {
         private readonly LeMarconnesDbContext _context;
 
-        public LoginDbService(LeMarconnesDbContext context)
+        public AuthenticateDbService(LeMarconnesDbContext context)
         {
             _context = context;
         }

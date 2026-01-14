@@ -2,6 +2,7 @@
 using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,12 +16,13 @@ namespace API.Controllers
         // dependency injection van de camping service
         private readonly CampingReservationDbService _dbService;
 
-        public ReservationController(LeMarconnesDbContext context, CampingReservationDbService dbService)
+        public ReservationController(CampingReservationDbService dbService)
         {
             _dbService = dbService;
         }
 
         // POST: api/reservation/camping
+        [Authorize] // alleen het accountrol Customer mag deze endpoint gebruiken
         [HttpPost("camping")]
         public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {
@@ -79,9 +81,6 @@ namespace API.Controllers
                 // specifieke customer linken aan reservation
                 campingReservation.Customer = customer;
 
-                // reservation koppelen aan customer
-                customer.AddReservation(campingReservation); // inheritance (campingReservation gebruikt parent class Reservation methode)
-
                 // voeg accommodaties toe aan de reservering
                 foreach (var accommodation in accommodations)
                 {
@@ -129,6 +128,7 @@ namespace API.Controllers
 
 
         // GET: api/reservation
+        [Authorize(Roles = "Admin")] 
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetReservations()
         {
@@ -138,6 +138,7 @@ namespace API.Controllers
 
 
         // GET: api/reservation/{id}
+        [Authorize(Roles = "Admin")] 
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
@@ -152,6 +153,7 @@ namespace API.Controllers
         }
 
         // PUT: api/Reservation/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
@@ -166,6 +168,7 @@ namespace API.Controllers
         }
 
         // DELETE: api/Reservation/5
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {

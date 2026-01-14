@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ClassLibrary.Models;
+﻿using Azure;
 using ClassLibrary.Data;
-using Microsoft.EntityFrameworkCore;
 using ClassLibrary.DTOs;
+using ClassLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -20,6 +22,7 @@ namespace API.Controllers
         // GET: /api/Accommodation/available-for-dates      
         // deze endpoint wordt gebruikt in de MVC om beschikbare accommodaties te tonen aan de user op basis van opgegeven datums
         // werkt voor beide Camping en Hotel accommodaties, afhankelijk van het AccommodationType enum dat je meegeeft
+        [AllowAnonymous]
         [HttpGet("available-for-dates")]
         public async Task<ActionResult<List<AvailableAccommodationDTO>>> GetAvailableAccommodationsForDates(
             Accommodation.AccommodationType type,
@@ -39,17 +42,13 @@ namespace API.Controllers
 
                 }).ToListAsync();
 
-             
             return Ok(availableAccommodations);
         }
 
 
-
-
-
-
-    // GET: api/accommodation
-    [HttpGet]
+        // GET: api/accommodation
+        [AllowAnonymous]
+        [HttpGet]
         public async Task<ActionResult<List<Accommodation>>> GetAccommodations()
         {
             return await _context.Accommodations
@@ -57,6 +56,7 @@ namespace API.Controllers
         }
 
         // GET: api/accommodation/{id} 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<Accommodation>> GetAccommodation(int id)
         {
@@ -73,6 +73,7 @@ namespace API.Controllers
 
 
         //  POST: api/accommodation
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Accommodation>> PostAccommodation(Accommodation accommodation)
         {
@@ -85,6 +86,7 @@ namespace API.Controllers
 
 
         // PUT: api/accommodation
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccommodation(int id, Accommodation accommodation)
         {
@@ -111,6 +113,7 @@ namespace API.Controllers
         }
 
         // DELETE: api/accommodation
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccommodation(int id)
         {

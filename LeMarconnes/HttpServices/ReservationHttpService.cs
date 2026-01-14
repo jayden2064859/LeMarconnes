@@ -1,8 +1,11 @@
 ﻿using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace ClassLibrary.HttpServices
+namespace MVC.HttpServices
 {
     public class ReservationHttpService
     {
@@ -23,6 +26,7 @@ namespace ClassLibrary.HttpServices
                 return (null, errorContent);
             }
 
+
             var response = await available.Content.ReadFromJsonAsync<List<Accommodation>>();
             return (response, null);
         }
@@ -32,18 +36,27 @@ namespace ClassLibrary.HttpServices
 
         //"(CampingReservationResponseDTO?, string?)" betekent dat deze method een responseDTO terugstuurt,
         // OF een error message string, afhankelijk van het resultaat wat de API teruggeeft.
-        public async Task<(CampingReservationResponseDTO?, string?)> CreateCampingReservationAsync(CampingReservationDTO reservationDto)
+        public async Task<(CampingReservationResponseDTO?, string?)> CreateCampingReservationAsync(CampingReservationDTO reservationDto, string? token)
         {
-            var postReservation = await _httpClient.PostAsJsonAsync("/api/reservation/camping", reservationDto);
-
-            if (!postReservation.IsSuccessStatusCode)
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/reservation/camping");
+            if (!string.IsNullOrEmpty(token))
             {
-                var errorContent = await postReservation.Content.ReadAsStringAsync();
-                return(null, errorContent);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
 
-            var response = await postReservation.Content.ReadFromJsonAsync<CampingReservationResponseDTO>();
-            return (response, null);
+            request.Content = JsonContent.Create(reservationDto);
+            // endpoint call doen met jwt token als header
+            var response = await _httpClient.SendAsync(request);
+
+            // return response
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (null, errorContent);
+            }
+
+            var responseDto = await response.Content.ReadFromJsonAsync<CampingReservationResponseDTO>();
+            return (responseDto, null);
         }
 
 

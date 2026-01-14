@@ -1,12 +1,14 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace API.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -65,8 +67,6 @@ namespace API.Controllers
 
 
 
-
-
         // GET: api/customer
         [HttpGet]
         public async Task<ActionResult<List<Customer>>> GetCustomers()
@@ -82,7 +82,6 @@ namespace API.Controllers
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
             var customer = await _context.Customers
-                .Include(c => c.Reservations) // reserveringen meegeven van een specifieke klant
                 .FirstOrDefaultAsync(c => c.CustomerId == id);
 
             if (customer == null)
@@ -94,6 +93,7 @@ namespace API.Controllers
         }
 
         // PUT: api/customer
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
@@ -139,7 +139,5 @@ namespace API.Controllers
 
             return Ok();
         }
-
-
     }
 }

@@ -1,6 +1,13 @@
 ﻿using ClassLibrary.DTOs;
-using ClassLibrary.HttpServices;
+using MVC.HttpServices;
+using ClassLibrary.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MVC.Controllers
 {
@@ -14,15 +21,16 @@ namespace MVC.Controllers
             _httpService = httpService;
         }
 
+        [HttpGet]
         public IActionResult Login()
         {
+
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
-
             // checken of beide username en password fields zijn ingevuld
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
@@ -30,7 +38,7 @@ namespace MVC.Controllers
                 return View("Login");
             }
 
-            var loginDto = new LoginDTO
+            var loginDto = new AuthenticateDTO
             {
                 Username = username,
                 Password = password
@@ -44,16 +52,11 @@ namespace MVC.Controllers
                 TempData["Error"] = errorMessage;
                 return View("Login");
             }
-            // sla gegevens die nodig zijn op in session 
-            HttpContext.Session.SetString("Username", loginResult.Username);
-            HttpContext.Session.SetString("AccountRole", loginResult.Role.ToString());
-            HttpContext.Session.SetString("FirstName", loginResult.FirstName);
 
-            // customer id opslaan in session (wordt gebruikt voor reserveringen en om te checken of session nog valid is)
-            if (loginResult.CustomerId.HasValue)
-            {
-                HttpContext.Session.SetInt32("CustomerId", loginResult.CustomerId.Value);
-            }
+            HttpContext.Session.SetString("JwtToken", loginResult.Token);
+            HttpContext.Session.SetString("CustomerId", loginResult.CustomerId.ToString());
+            HttpContext.Session.SetString("Username", loginResult.Username);
+            HttpContext.Session.SetString("Role", loginResult.Role.ToString());
 
             // redirect terug naar homepage 
             return RedirectToAction("Homepage", "Home");

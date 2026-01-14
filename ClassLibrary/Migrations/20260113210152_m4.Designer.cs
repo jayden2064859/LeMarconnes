@@ -4,6 +4,7 @@ using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClassLibrary.Migrations
 {
     [DbContext(typeof(LeMarconnesDbContext))]
-    partial class LeMarconnesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113210152_m4")]
+    partial class m4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,12 +30,12 @@ namespace ClassLibrary.Migrations
                     b.Property<int>("AccommodationsAccommodationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReservationId")
+                    b.Property<int>("ReservationsReservationId")
                         .HasColumnType("int");
 
-                    b.HasKey("AccommodationsAccommodationId", "ReservationId");
+                    b.HasKey("AccommodationsAccommodationId", "ReservationsReservationId");
 
-                    b.HasIndex("ReservationId");
+                    b.HasIndex("ReservationsReservationId");
 
                     b.ToTable("AccommodationReservation");
                 });
@@ -183,7 +186,7 @@ namespace ClassLibrary.Migrations
                             AccountId = 2,
                             AccountRole = "Admin",
                             PasswordHash = "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==",
-                            RegistrationDate = new DateTime(2026, 1, 14, 2, 15, 6, 815, DateTimeKind.Local).AddTicks(4127),
+                            RegistrationDate = new DateTime(2026, 1, 13, 22, 1, 52, 379, DateTimeKind.Local).AddTicks(5739),
                             Username = "Admin"
                         });
                 });
@@ -428,7 +431,7 @@ namespace ClassLibrary.Migrations
 
                     b.HasOne("ClassLibrary.Models.Reservation", null)
                         .WithMany()
-                        .HasForeignKey("ReservationId")
+                        .HasForeignKey("ReservationsReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -446,12 +449,17 @@ namespace ClassLibrary.Migrations
             modelBuilder.Entity("ClassLibrary.Models.Reservation", b =>
                 {
                     b.HasOne("ClassLibrary.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Reservations")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("ClassLibrary.Models.Customer", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,13 +1,14 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using ClassLibrary.HttpServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -20,7 +21,8 @@ namespace API.Controllers
         }
 
         // GET: api/account/exists/{username}
-        [HttpGet("exists/{username}")]
+        [AllowAnonymous] 
+        [HttpGet("available/{username}")]
         public async Task<IActionResult> CheckUsernameExists(string username)
         {
             if (username.Length <= 3 || username.Length > 15 || !username.All(char.IsLetterOrDigit))
@@ -37,6 +39,7 @@ namespace API.Controllers
         }
 
         // POST: api/account
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(AccountDTO dto)
         {
@@ -70,11 +73,8 @@ namespace API.Controllers
             }
         }
 
-
-         
-
-
         // GET: api/account
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
@@ -86,6 +86,7 @@ namespace API.Controllers
 
 
         // GET: api/account/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(int id)
         {
@@ -101,6 +102,7 @@ namespace API.Controllers
         }
 
         // PUT: api/account
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(int id, Account account)
         {
@@ -129,6 +131,7 @@ namespace API.Controllers
 
 
         // DELETE: api/account
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {

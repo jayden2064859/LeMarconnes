@@ -1,7 +1,8 @@
 ﻿using ClassLibrary.DTOs;
+using MVC.HttpServices;
 using ClassLibrary.Models;
-using ClassLibrary.HttpServices;
 using ClassLibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -21,13 +22,16 @@ namespace MVC.Controllers
         [HttpGet]
         public IActionResult CreateReservation1()
         {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("CustomerId")))
+            {
+                return RedirectToAction("Login", "Login");
+            }
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateReservation1(DateOnly startDate, DateOnly endDate)
         {
-
             // datums opslaan in session voor volgende stappen
             HttpContext.Session.SetString("ReservationStartDate", startDate.ToString());
             HttpContext.Session.SetString("ReservationEndDate", endDate.ToString());
@@ -81,16 +85,22 @@ namespace MVC.Controllers
             // datums ophalen uit session voor validatie
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+            var customerId = HttpContext.Session.GetString("CustomerId");
 
-            // checken of sessie nog actief is (data van vorige view nog beschikbaar)
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            // check of sessie verlopen is
+            if (string.IsNullOrEmpty(customerId))
             {
-                return RedirectToAction("Login", "Login");
+                return RedirectToAction("Login", "Login"); 
             }
 
-            if (accommodationIds.Count > 2)
+            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
             {
-                 TempData["Error"] = "Maximaal 2 accommodaties toegestaan";
+                return RedirectToAction("CreateReservation1");
+            }
+
+            if (accommodationIds.Count < 1 || accommodationIds.Count > 2 || accommodationIds == null)
+            {
+                 TempData["Error"] = "Minimaal 1, Maximaal 2 accommodaties toegestaan";
 
                 return RedirectToAction("CreateReservation2");
             }
@@ -126,21 +136,19 @@ namespace MVC.Controllers
         }
 
         [HttpPost]
-        // alle parameters moeten nullable zijn voor beide accommodatie-types
         public async Task<IActionResult> CreateReservation3(int adultsCount, int children0_7Count, int children7_12Count,
                                                             int dogsCount, bool hasElectricity, int? electricityDays)
         {
-            // session data ophalen
+            // session data voor reservering ophalen
             var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
             var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
             var accommodationIdsStr = HttpContext.Session.GetString("ReservationAccommodationIds");
-            var customerId = HttpContext.Session.GetInt32("CustomerId");
-
-            // checken of sessie nog actief is (customerId in session is nodig)
-            if (!customerId.HasValue)
+            var customerIdStr = HttpContext.Session.GetString("CustomerId");
+                     
+            if (string.IsNullOrEmpty(customerIdStr))
             {
                 return RedirectToAction("Login", "Login");
-            }
+            }            
 
             // opgeslagen datum strings weer terug converten naar DateTime
             DateOnly startDate = DateOnly.Parse(startDateStr);
@@ -149,34 +157,35 @@ namespace MVC.Controllers
             // string van accommodationIds terug converten naar List<int>
             var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);
 
+            // customerId string terug naar int 
+            int customerId = int.Parse(customerIdStr);
 
-                var dto = new CampingReservationDTO
-                {
-                    CustomerId = customerId.Value,
-                    AccommodationIds = accommodationIds,
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    AdultsCount = adultsCount,
-                    Children0_7Count = children0_7Count,
-                    Children7_12Count = children7_12Count,
-                    DogsCount = dogsCount,
-                    HasElectricity = hasElectricity,
-                    ElectricityDays = electricityDays
-                };
+            // dto aanmaken 
+            var dto = new CampingReservationDTO
+            {
+                CustomerId = customerId,
+                AccommodationIds = accommodationIds,
+                StartDate = startDate,
+                EndDate = endDate,
+                AdultsCount = adultsCount,
+                Children0_7Count = children0_7Count,
+                Children7_12Count = children7_12Count,
+                DogsCount = dogsCount,
+                HasElectricity = hasElectricity,
+                ElectricityDays = electricityDays
+            };
 
-            // api call service geeft reservation object terug als het succesvol was, anders een error message
-            var (reservation, errorMessage) = await _httpService.CreateCampingReservationAsync(dto);
+            // token ophalen uit session 
+            var token = HttpContext.Session.GetString("JwtToken");
+
+            // service geeft reservation object terug als de endpoint call succesvol is, anders een error message
+            var (reservation, errorMessage) = await _httpService.CreateCampingReservationAsync(dto, token);
 
             if (reservation == null)
             {
                 TempData["Error"] = errorMessage;
                 return View();
             }
-
-            // Clear session
-            HttpContext.Session.Remove("ReservationStartDate");
-            HttpContext.Session.Remove("ReservationEndDate");
-            HttpContext.Session.Remove("ReservationAccommodationIds");
 
             // ViewModel voor de volgende pagina aanmaken en vullen met reserveringsdata
             var viewModel = new ReservationConfirmationViewModel
@@ -197,6 +206,7 @@ namespace MVC.Controllers
             };
             return View("ReservationConfirmation", viewModel);
         }
+
 
         [HttpGet]
         public IActionResult ReservationConfirmation()

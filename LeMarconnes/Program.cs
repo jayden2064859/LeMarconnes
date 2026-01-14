@@ -1,22 +1,14 @@
 using ClassLibrary.Data;
+using MVC.HttpServices;
 using ClassLibrary.Models;
-using ClassLibrary.HttpServices;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var baseAdress = new Uri("https://localhost:7290");
+
 // dependency injection voor service api connecties
-builder.Services.AddHttpClient<AccountHttpService>(client =>
-{
-    client.BaseAddress = baseAdress;
-});
-
-builder.Services.AddHttpClient<CustomerHttpService>(client =>
-{
-    client.BaseAddress = baseAdress;
-});
-
 builder.Services.AddHttpClient<LoginHttpService>(client =>
 {
     client.BaseAddress = baseAdress;
@@ -27,7 +19,12 @@ builder.Services.AddHttpClient<ReservationHttpService>(client =>
     client.BaseAddress = baseAdress;
 });
 
+builder.Services.AddHttpClient<RegistrationHttpService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7290");
+});
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
 
@@ -41,9 +38,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-
-
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -58,13 +54,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Homepage}/{id?}");
 
-app.UseSession();
 app.UseStaticFiles();
 
 app.Run();

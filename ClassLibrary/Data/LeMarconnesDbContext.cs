@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClassLibrary.Data
 {
-    public class LeMarconnesDbContext : DbContext // We gebruiken inheritance om de bestaande methods van Dbcontext te gebruiken 
+    public class LeMarconnesDbContext : DbContext
     {
-        // lege constructor voor dependency injection
-        public LeMarconnesDbContext(DbContextOptions<LeMarconnesDbContext> options) : base(options) // geeft de geconfigureerde opties door aan de parent class DbContext (zoals connectionstring)
+        public LeMarconnesDbContext(DbContextOptions<LeMarconnesDbContext> options) : base(options) 
         {        
         }
         public LeMarconnesDbContext() 
@@ -83,6 +82,19 @@ namespace ClassLibrary.Data
                 new Accommodation { AccommodationId = 11, PlaceNumber = "307", Capacity = 5, Type = Accommodation.AccommodationType.Hotel } 
             );
 
+            // admin account toevoegen voor endpoint tests
+            modelBuilder.Entity<Account>().HasData(
+                new Account
+                {
+                    AccountId = 2,
+                    Username = "Admin",
+                    PasswordHash = "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==", // wachtwoord is 'admin'
+                    AccountRole = Account.Role.Admin,
+                    RegistrationDate = DateTime.Now,
+                    CustomerId = null
+                }
+            );
+            
 
             // database moet string opslaan ipv int for enum waarden 
             modelBuilder.Entity<Account>()
@@ -102,19 +114,18 @@ namespace ClassLibrary.Data
             // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Customer) // een reservation heeft precies 1 customer
-                .WithMany(c => c.Reservations) // een customer kan meerdere reservations hebben
+                .WithMany() // een customer kan meerdere reservations hebben 
                 .HasForeignKey(r => r.CustomerId);
 
 
             // reservation 0..* - 1..* accommodation
             modelBuilder.Entity<Reservation>()
                 .HasMany(r => r.Accommodations) // een reservation heeft 1 of meer accommodaties 
-                .WithMany(a => a.Reservations); // een accommodatie kan meerdere reservations gehad hebben
+                .WithMany(); // een accommodatie kan meerdere reservations gehad hebben
                 
             
             // account 0..1 - 0..1 customer
-            // account kan een customer hebben, maar hoeft niet. (Bijv medewerker, admin, eigenaar)
-            // Een customer hoeft ook niet altijd een account te hebben (bijv telefonisch en op locatie reserveren)
+            // Een customer hoeft niet altijd een account te hebben (bijv telefonisch en op locatie reserveren)
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Customer)
                 .WithOne() // customer gebruikt geen account navigation property (om loops te voorkomen) maar relatie is nog steeds 0..1 - 0..1

@@ -60,7 +60,7 @@ namespace ClassLibrary.Data
                 new Tariff { TariffId = 11, Name = "Hotelkamer_4personen", Price = 88.00m, AccommodationType = Accommodation.AccommodationType.Hotel },
                 new Tariff { TariffId = 12, Name = "Hotelkamer_5personen", Price = 105.50m, AccommodationType = Accommodation.AccommodationType.Hotel },
                 new Tariff { TariffId = 13, Name = "Toeristenbelasting", Price = 0.50m, AccommodationType = Accommodation.AccommodationType.Hotel }
-                
+
             );
 
 
@@ -69,24 +69,24 @@ namespace ClassLibrary.Data
                 new Accommodation { AccommodationId = 1, PlaceNumber = "1A", Capacity = 4, Type = Accommodation.AccommodationType.Camping, },
                 new Accommodation { AccommodationId = 2, PlaceNumber = "2A", Capacity = 4, Type = Accommodation.AccommodationType.Camping, },
                 new Accommodation { AccommodationId = 3, PlaceNumber = "3A", Capacity = 4, Type = Accommodation.AccommodationType.Camping },
-                new Accommodation { AccommodationId = 4, PlaceNumber = "4A", Capacity = 4, Type = Accommodation.AccommodationType.Camping },                               
+                new Accommodation { AccommodationId = 4, PlaceNumber = "4A", Capacity = 4, Type = Accommodation.AccommodationType.Camping },
                 new Accommodation { AccommodationId = 5, PlaceNumber = "5A", Capacity = 4, Type = Accommodation.AccommodationType.Camping }
             );
 
             modelBuilder.Entity<Accommodation>().HasData(
-                new Accommodation { AccommodationId = 6, PlaceNumber = "101", Capacity = 1, Type = Accommodation.AccommodationType.Hotel }, 
-                new Accommodation { AccommodationId = 7, PlaceNumber = "201", Capacity = 2, Type = Accommodation.AccommodationType.Hotel }, 
-                new Accommodation { AccommodationId = 8, PlaceNumber = "202", Capacity = 2, Type = Accommodation.AccommodationType.Hotel }, 
-                new Accommodation { AccommodationId = 9, PlaceNumber = "301", Capacity = 3, Type = Accommodation.AccommodationType.Hotel }, 
-                new Accommodation { AccommodationId = 10, PlaceNumber = "304", Capacity = 4, Type = Accommodation.AccommodationType.Hotel }, 
-                new Accommodation { AccommodationId = 11, PlaceNumber = "307", Capacity = 5, Type = Accommodation.AccommodationType.Hotel } 
+                new Accommodation { AccommodationId = 6, PlaceNumber = "101", Capacity = 1, Type = Accommodation.AccommodationType.Hotel },
+                new Accommodation { AccommodationId = 7, PlaceNumber = "201", Capacity = 2, Type = Accommodation.AccommodationType.Hotel },
+                new Accommodation { AccommodationId = 8, PlaceNumber = "202", Capacity = 2, Type = Accommodation.AccommodationType.Hotel },
+                new Accommodation { AccommodationId = 9, PlaceNumber = "301", Capacity = 3, Type = Accommodation.AccommodationType.Hotel },
+                new Accommodation { AccommodationId = 10, PlaceNumber = "304", Capacity = 4, Type = Accommodation.AccommodationType.Hotel },
+                new Accommodation { AccommodationId = 11, PlaceNumber = "307", Capacity = 5, Type = Accommodation.AccommodationType.Hotel }
             );
 
-            // admin account toevoegen voor endpoint tests
+            // admin account seeden voor admin-only endpoint tests
             modelBuilder.Entity<Account>().HasData(
                 new Account
                 {
-                    AccountId = 2,
+                    AccountId = 1,
                     Username = "Admin",
                     PasswordHash = "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==", // wachtwoord is 'admin'
                     AccountRole = Account.Role.Admin,
@@ -94,11 +94,44 @@ namespace ClassLibrary.Data
                     CustomerId = null
                 }
             );
-            
+
+            // customer account seeden voor endpoint tests
+            modelBuilder.Entity<Account>().HasData(
+                new Account
+                {
+                    AccountId = 2,
+                    Username = "Customer",
+                    PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", // wachtwoord is '1234'
+                    AccountRole = Account.Role.Customer,
+                    RegistrationDate = DateTime.Now,
+                    CustomerId = 1
+                });
+
+              modelBuilder.Entity<Customer>().HasData(
+                new Customer 
+                {
+                    CustomerId = 1,
+                    FirstName = "Test",
+                    Infix = null,
+                    LastName = "Customer",
+                    Email = "test.customer@gmail.com",
+                    Phone = "0612345678",
+                    RegistrationDate = DateTime.Now
+                });
 
             // database moet string opslaan ipv int for enum waarden 
             modelBuilder.Entity<Account>()
             .Property(a => a.AccountRole)
+            .HasConversion<string>()
+            .HasMaxLength(10);
+
+            modelBuilder.Entity<Accommodation>()
+            .Property(a => a.Type)
+            .HasConversion<string>()
+            .HasMaxLength(10);
+
+            modelBuilder.Entity<Tariff>()
+            .Property(a => a.AccommodationType)
             .HasConversion<string>()
             .HasMaxLength(10);
 
@@ -114,16 +147,16 @@ namespace ClassLibrary.Data
             // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()
                 .HasOne(r => r.Customer) // een reservation heeft precies 1 customer
-                .WithMany() // een customer kan meerdere reservations hebben 
+                .WithMany() // een customer kan meerdere reservations hebben (geen navigation property vanuit Customer om navigation loops te voorkomen)
                 .HasForeignKey(r => r.CustomerId);
 
 
             // reservation 0..* - 1..* accommodation
             modelBuilder.Entity<Reservation>()
                 .HasMany(r => r.Accommodations) // een reservation heeft 1 of meer accommodaties 
-                .WithMany(); // een accommodatie kan meerdere reservations gehad hebben
-                
-            
+                .WithMany(); // een accommodatie kan meerdere reservations gehad hebben  (geen navigation property vanuit Accommodation om navigation loops te voorkomen)
+
+
             // account 0..1 - 0..1 customer
             // Een customer hoeft niet altijd een account te hebben (bijv telefonisch en op locatie reserveren)
             modelBuilder.Entity<Account>()

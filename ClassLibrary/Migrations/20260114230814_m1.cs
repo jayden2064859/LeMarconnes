@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ClassLibrary.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class m1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PlaceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false)
+                    Type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +54,7 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    AccommodationType = table.Column<int>(type: "int", nullable: false)
+                    AccommodationType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,11 +121,11 @@ namespace ClassLibrary.Migrations
                 columns: table => new
                 {
                     AccommodationsAccommodationId = table.Column<int>(type: "int", nullable: false),
-                    ReservationsReservationId = table.Column<int>(type: "int", nullable: false)
+                    ReservationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AccommodationReservation", x => new { x.AccommodationsAccommodationId, x.ReservationsReservationId });
+                    table.PrimaryKey("PK_AccommodationReservation", x => new { x.AccommodationsAccommodationId, x.ReservationId });
                     table.ForeignKey(
                         name: "FK_AccommodationReservation_Accommodations_AccommodationsAccommodationId",
                         column: x => x.AccommodationsAccommodationId,
@@ -133,8 +133,8 @@ namespace ClassLibrary.Migrations
                         principalColumn: "AccommodationId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AccommodationReservation_Reservations_ReservationsReservationId",
-                        column: x => x.ReservationsReservationId,
+                        name: "FK_AccommodationReservation_Reservations_ReservationId",
+                        column: x => x.ReservationId,
                         principalTable: "Reservations",
                         principalColumn: "ReservationId",
                         onDelete: ReferentialAction.Cascade);
@@ -145,43 +145,58 @@ namespace ClassLibrary.Migrations
                 columns: new[] { "AccommodationId", "Capacity", "PlaceNumber", "Type" },
                 values: new object[,]
                 {
-                    { 1, 4, "1A", 1 },
-                    { 2, 4, "2A", 1 },
-                    { 3, 4, "3A", 1 },
-                    { 4, 4, "4A", 1 },
-                    { 5, 4, "5A", 1 },
-                    { 6, 1, "101", 2 },
-                    { 7, 2, "201", 2 },
-                    { 8, 2, "202", 2 },
-                    { 9, 3, "301", 2 },
-                    { 10, 4, "304", 2 },
-                    { 11, 5, "307", 2 }
+                    { 1, 4, "1A", "Camping" },
+                    { 2, 4, "2A", "Camping" },
+                    { 3, 4, "3A", "Camping" },
+                    { 4, 4, "4A", "Camping" },
+                    { 5, 4, "5A", "Camping" },
+                    { 6, 1, "101", "Hotel" },
+                    { 7, 2, "201", "Hotel" },
+                    { 8, 2, "202", "Hotel" },
+                    { 9, 3, "301", "Hotel" },
+                    { 10, 4, "304", "Hotel" },
+                    { 11, 5, "307", "Hotel" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Accounts",
+                columns: new[] { "AccountId", "AccountRole", "CustomerId", "PasswordHash", "RegistrationDate", "Username" },
+                values: new object[] { 1, "Admin", null, "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(5961), "Admin" });
+
+            migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "CustomerId", "Email", "FirstName", "Infix", "LastName", "Phone", "RegistrationDate" },
+                values: new object[] { 1, "test.customer@gmail.com", "Test", null, "Customer", "0612345678", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6030) });
 
             migrationBuilder.InsertData(
                 table: "Tariffs",
                 columns: new[] { "TariffId", "AccommodationType", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, 1, "Campingplaats", 7.50m },
-                    { 2, 1, "Volwassene", 6.00m },
-                    { 3, 1, "Kind_0_7", 4.00m },
-                    { 4, 1, "Kind_7_12", 5.00m },
-                    { 5, 1, "Hond", 2.50m },
-                    { 6, 1, "Electriciteit", 7.50m },
-                    { 7, 1, "Toeristenbelasting", 0.25m },
-                    { 8, 2, "Hotelkamer_1Persoon", 42.50m },
-                    { 9, 2, "Hotelkamer_2Personen", 55.00m },
-                    { 10, 2, "Hotelkamer_3Personen", 70.00m },
-                    { 11, 2, "Hotelkamer_4personen", 88.00m },
-                    { 12, 2, "Hotelkamer_5personen", 105.50m },
-                    { 13, 2, "Toeristenbelasting", 0.50m }
+                    { 1, "Camping", "Campingplaats", 7.50m },
+                    { 2, "Camping", "Volwassene", 6.00m },
+                    { 3, "Camping", "Kind_0_7", 4.00m },
+                    { 4, "Camping", "Kind_7_12", 5.00m },
+                    { 5, "Camping", "Hond", 2.50m },
+                    { 6, "Camping", "Electriciteit", 7.50m },
+                    { 7, "Camping", "Toeristenbelasting", 0.25m },
+                    { 8, "Hotel", "Hotelkamer_1Persoon", 42.50m },
+                    { 9, "Hotel", "Hotelkamer_2Personen", 55.00m },
+                    { 10, "Hotel", "Hotelkamer_3Personen", 70.00m },
+                    { 11, "Hotel", "Hotelkamer_4personen", 88.00m },
+                    { 12, "Hotel", "Hotelkamer_5personen", 105.50m },
+                    { 13, "Hotel", "Toeristenbelasting", 0.50m }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Accounts",
+                columns: new[] { "AccountId", "AccountRole", "CustomerId", "PasswordHash", "RegistrationDate", "Username" },
+                values: new object[] { 2, "Customer", 1, "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6014), "Customer" });
+
             migrationBuilder.CreateIndex(
-                name: "IX_AccommodationReservation_ReservationsReservationId",
+                name: "IX_AccommodationReservation_ReservationId",
                 table: "AccommodationReservation",
-                column: "ReservationsReservationId");
+                column: "ReservationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_CustomerId",

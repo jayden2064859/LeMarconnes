@@ -1,5 +1,4 @@
-﻿using Azure;
-using ClassLibrary.Data;
+﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;

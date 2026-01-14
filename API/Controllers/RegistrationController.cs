@@ -1,5 +1,4 @@
-﻿// RegisterController.cs - VOLLEDIG CONSISTENT
-using API.DbServices;
+﻿using API.DbServices;
 using ClassLibrary.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,47 +14,49 @@ namespace API.Controllers
 
         public RegistrationController(RegistrationDbService dbService)
         {
-            _dbService = dbService;
+            _dbService = dbService; // constructor injection
         }
 
-        [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> Register(RegistrationDTO dto)
+        [HttpPost]
+        public async Task<IActionResult> Register(RegistrationDTO dto)
         {
-
-            var usernameConflict = await _dbService.ValidUsernameAsync(dto.Username);
-            if (usernameConflict != null)
+            // username check
+            var usernameError = await _dbService.ValidateUsernameAsync(dto.Username);
+            if (usernameError != null)
             {
-                return Conflict(usernameConflict);
+                return Conflict(usernameError);
             }
 
-            var emailConflict = await _dbService.ValidateEmailAsync(dto.Email);
-            if (emailConflict != null)
+            // email check
+            var emailError = await _dbService.ValidateEmailAsync(dto.Email);
+            if (emailError != null)
             {
-                return Conflict(emailConflict);
+                return Conflict(emailError);
+
             }
 
-            var phoneConflict = await _dbService.ValidatePhoneAsync(dto.Phone);
-            if (phoneConflict != null)
+            // telefoonnummer check
+            var phoneError = await _dbService.ValidatePhoneAsync(dto.Phone);
+            if (phoneError != null)
             {
-                return Conflict(phoneConflict);
+                return Conflict(phoneError);
             }
-
+              
             try
             {
-                await _dbService.CreateUserAsync(dto); 
-
+                await _dbService.CreateUserAsync(dto);
                 return Ok("Registratie voltooid");
             }
-
-            catch (ArgumentException ex) // constructor validaties worden hier opgevangen
-            {
-                return Conflict(ex.Message); 
-            }
-            catch (DbUpdateException ex) // database errors worden hier opgevangen
+            catch (ArgumentException ex) // constructor validaties van account + customer object worden hier opgevangen
             {
                 return Conflict(ex.Message);
             }
+            catch (DbUpdateException) // database errors worden hier opgevangen
+            {
+                return Conflict("Er is iets misgegaan tijdens de registratie");
+            }
         }
+
     }
 }

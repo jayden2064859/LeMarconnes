@@ -13,7 +13,7 @@ namespace MVC.HttpServices
 
         public async Task<string?> RegisterAsync(RegistrationDTO dto)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/register", dto);
+            var response = await _httpClient.PostAsJsonAsync("/api/registration", dto);
 
             if (!response.IsSuccessStatusCode)
             {

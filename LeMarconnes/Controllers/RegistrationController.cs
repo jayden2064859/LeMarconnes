@@ -89,7 +89,7 @@ public class RegistrationController : Controller
         HttpContext.Session.Remove("RegisterUsername");
         HttpContext.Session.Remove("RegisterPassword");
 
-        TempData["Success"] = "Registratie voltooid! Je kunt nu inloggen.";
-        return RedirectToAction("CreateCustomer");
+        TempData["LoginSuccess"] = "Registratie voltooid! Je kunt nu inloggen.";
+        return View();
     }
 }

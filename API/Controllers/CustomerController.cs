@@ -1,10 +1,8 @@
-﻿using ClassLibrary.Data;
+﻿using API.DbServices;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace API.Controllers
 {
@@ -13,131 +11,94 @@ namespace API.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly LeMarconnesDbContext _context;
+        private readonly CustomerDbService _dbService;
 
-        public CustomerController(LeMarconnesDbContext context)
+        public CustomerController(CustomerDbService dbService)
         {
-            _context = context;
+            _dbService = dbService;
         }
 
+        // POST: api/customer
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(CustomerDTO dto)
         {
-            // valideren of email en telefoonnummer al bestaan in database
-            var customerExists = await _context.Customers
-                .Where(c => c.Email == dto.Email || c.Phone == dto.Phone)
-                .FirstOrDefaultAsync();
+            var (customer, error) = await _dbService.PostCustomerAsync(dto);
 
-            if (customerExists != null)
+            if (error != null)
             {
-                // conflict = voor wanneer de input qua syntax correct is, maar business rules het alsnog niet toelaten
-                if (customerExists.Email == dto.Email)
-                {
-                    return Conflict("Email is al geregistreerd");
-                }
-               
-                if (customerExists.Phone == dto.Phone)
-                {
-                    return Conflict("Telefoonnummer is al geregistreerd");
-                }                
+                return Conflict(error);
             }
-            try
-            {
 
-
-                // constructor in customer class gebruiken om object aan te maken
-                var newCustomer = new Customer(
-                    dto.FirstName,
-                    dto.LastName,
-                    dto.Email,
-                    dto.Phone,
-                    dto.Infix
-                );
-
-                _context.Customers.Add(newCustomer);
-                await _context.SaveChangesAsync();
-
-                return Ok(newCustomer);
-            }
-            catch (ArgumentException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            return Ok(customer);
         }
-
-
 
         // GET: api/customer
         [HttpGet]
         public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
-            var customers = await _context.Customers
-            .ToListAsync();
+            var (customers, error) = await _dbService.GetAllCustomersAsync();
 
-            return customers;
+            if (error != null)
+            {
+                return Conflict(error);
+            }
+
+            return Ok(customers); 
         }
 
         // GET: api/customer/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == id);
+            var (customer, error) = await _dbService.GetCustomerByIdAsync(id);
 
-            if (customer == null)
+            if (error != null)
             {
-                return NotFound();
+                return NotFound(error);
             }
 
-            return customer;
+            return Ok(customer);
         }
 
-        // PUT: api/customer
-        [Authorize]
+        // GET: api/customer/{id}/reservations
+        [HttpGet("{id}/reservations")]
+        public async Task<ActionResult<List<Reservation>>> GetCustomerReservations(int id)
+        {
+            var (reservations, error) = await _dbService.GetCustomerReservationsAsync(id);
+
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+
+            return Ok(reservations);
+        }
+
+        // PUT: api/customer/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
-            if (id != customer.CustomerId)
+            var (success, error) = await _dbService.UpdateCustomerAsync(id, customer);
+
+            if (!success)
             {
-                return NotFound();
+                return NotFound(error);
             }
-
-            _context.Entry(customer).State = EntityState.Modified;
- 
-            await _context.SaveChangesAsync();
-
-
-            if (!CustomerExists(id))
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            return Ok("Gegevens succesvol gewijzigd");
         }
 
-        // bool voor PUT method
-        private bool CustomerExists(int id)
-        {
-            var exits = _context.Customers.Any(e => e.CustomerId == id);
-
-            return exits;
-        }
-
-        // DELETE: api/customer
+        // DELETE: api/customer/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            
-            if (customer == null)
+            var (success, error) = await _dbService.DeleteCustomerAsync(id);
+
+            if (!success)
             {
-                return NotFound();
+                return NotFound(error);
             }
 
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            return Ok("Customer verwijderd");
         }
     }
 }

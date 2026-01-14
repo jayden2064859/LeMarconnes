@@ -8,11 +8,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// scoped = dezelfde instantie per request
-builder.Services.AddScoped<CampingReservationDbService>(); 
+// scoped = 1 instantie per request
+builder.Services.AddScoped<ReservationDbService>(); 
 builder.Services.AddScoped<AuthenticateDbService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<RegistrationDbService>();
+builder.Services.AddScoped<CustomerDbService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -56,7 +58,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<LeMarconnesDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// jwt authenticatie configuratie (voor api endpoints)
+// jwt authenticatie configuratie (voor api endpoints), specifieke instellingen staan in appsettings.json
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

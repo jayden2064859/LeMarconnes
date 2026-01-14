@@ -1,9 +1,9 @@
-﻿// RegisterDbService.cs - VOLLEDIG CONSISTENT
-using ClassLibrary.Data;
+﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace API.DbServices
 {
@@ -16,6 +16,17 @@ namespace API.DbServices
             _context = context;
         }
 
+        // check of username al bestaat
+        public async Task<string?> ValidateUsernameAsync(string username)
+        {
+            if (await _context.Accounts.AnyAsync(a => a.Username == username))
+            {
+                return "Username is al geregistreerd";
+            }
+            return null;
+        }
+
+        // check of email al bestaat
         public async Task<string?> ValidateEmailAsync(string email)
         {
             if (await _context.Customers.AnyAsync(c => c.Email == email))
@@ -25,30 +36,17 @@ namespace API.DbServices
             return null;
         }
 
-        public async Task<string?> ValidUsernameAsync(string username)
-        {
-            var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
-
-            if (existingUsername)
-            {
-                string error = "Username is al geregistreerd";
-                return error;
-            }
-            return null;
-        }
-
-
+        // check of telefoonnummer al bestaat
         public async Task<string?> ValidatePhoneAsync(string phone)
         {
             if (await _context.Customers.AnyAsync(c => c.Phone == phone))
             {
-                var error = "Telefoonnummer is al geregistreerd";
-                return error;
-            }              
+                return "Telefoonnummer is al geregistreerd";
+            }
             return null;
         }
 
-        // deze methode hoeft zelf niet per se validaties te doen, want die zijn al uitgevoerd voordat deze method gebruikt wordt
+        // customer + account object aanmaken
         public async Task CreateUserAsync(RegistrationDTO dto)
         {
             var customer = new Customer(
@@ -59,6 +57,7 @@ namespace API.DbServices
                 dto.Infix
             );
 
+            // toevoegen en opslaan in db
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
@@ -68,13 +67,13 @@ namespace API.DbServices
             var account = new Account(
                 dto.Username,
                 passwordHash,
-                customer
+                customer // customer wordt aan account gelinked via constructor 
             );
 
+            // toevoegen en opslaan in db
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
-
-            return; 
         }
     }
+
 }

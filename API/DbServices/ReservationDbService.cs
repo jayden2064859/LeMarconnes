@@ -8,16 +8,16 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 namespace API.DbServices
 {
     // LINQ queries (database communicatie via DbContext) worden alleen uitgevoerd in deze services, zodat de API controllers nooit directe communicatie hebben met de database (encapsulation)
-    public class CampingReservationDbService
+    public class ReservationDbService
     {
         private readonly LeMarconnesDbContext _context;
 
-        public CampingReservationDbService(LeMarconnesDbContext context)
+        public ReservationDbService(LeMarconnesDbContext context)
         {
             _context = context;
         }
 
-     // voor POST api/reservation/camping
+        // voor POST api/reservation/camping
         public async Task<string?> ValidateAccommodationAvailabilityAsync(DateOnly startDate, DateOnly endDate, List<int> accommodationIds)
         {
             // check gekozen accommodaties voor beschikbaarheid op basis van ingevoerde datum
@@ -94,7 +94,7 @@ namespace API.DbServices
         }
 
 
-     // voor GET /api/reservation (alle)
+        // voor GET /api/reservation (alle)
         public async Task<List<Reservation>> GetAllReservationsAsync()
         {
             var allReservations = await _context.Reservations
@@ -106,7 +106,7 @@ namespace API.DbServices
 
         }
 
-     // voor GET /api/reservation/{id}
+        // voor GET /api/reservation/{id}
         public async Task<(Reservation? reservation, string? errorMessage)> GetReservationByIdAsync(int id)
         {
             var reservation = await _context.Reservations
@@ -122,7 +122,7 @@ namespace API.DbServices
             return (reservation, null);
         }
 
-     // voor PUT /api/reservation/{id}
+        // voor PUT /api/reservation/{id}
 
         public async Task<(bool success, string? errorMessage)> UpdateReservationAsync(int id, Reservation updatedReservation)
         {
@@ -148,7 +148,7 @@ namespace API.DbServices
             return (true, null); 
         }
 
-     // voor DELETE /api/reservation/{id}
+        // voor DELETE /api/reservation/{id}
         public async Task<(bool success, string? errorMessage)> DeleteReservationAsync(int id)
         {
             // specifieke reservering ophalen uit db

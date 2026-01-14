@@ -14,9 +14,9 @@ namespace API.Controllers
     public class ReservationController : ControllerBase
     {
         // dependency injection van de camping service
-        private readonly CampingReservationDbService _dbService;
+        private readonly ReservationDbService _dbService;
 
-        public ReservationController(CampingReservationDbService dbService)
+        public ReservationController(ReservationDbService dbService)
         {
             _dbService = dbService;
         }
@@ -126,11 +126,10 @@ namespace API.Controllers
             }
         }
 
-
         // GET: api/reservation
         [Authorize(Roles = "Admin")] 
         [HttpGet]
-        public async Task<ActionResult<List<Reservation>>> GetReservations()
+        public async Task<ActionResult<List<Reservation>>> GetAllReservations()
         {
             var allReservations = await _dbService.GetAllReservationsAsync();
             return Ok(allReservations);
@@ -140,7 +139,7 @@ namespace API.Controllers
         // GET: api/reservation/{id}
         [Authorize(Roles = "Admin")] 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Reservation>> GetReservation(int id)
+        public async Task<ActionResult<Reservation>> GetReservationById(int id)
         {
             var (reservation, errorMessage) = await _dbService.GetReservationByIdAsync(id);
 

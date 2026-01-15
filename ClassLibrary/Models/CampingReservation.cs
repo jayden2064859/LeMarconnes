@@ -62,9 +62,8 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
         {
             throw new ArgumentException("Aantal dagen elektriciteit kan niet hoger zijn dan aantal overnachtingen");
         }
-       
 
-        AccommodationTypeId = 1; // camping typeid is altijd 1
+
         AdultsCount = adultsCount;
         Children0_7Count = children0_7Count;
         Children7_12Count = children7_12Count;
@@ -72,6 +71,19 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
         HasElectricity = hasElectricity;
         ElectricityDays = electricityDays;
     }
+
+    public override void AddAccommodation(Accommodation campingAccommodation)
+    {
+        // eigen logica toevoegen
+        if (campingAccommodation.Type != Accommodation.AccommodationType.Camping) // type moet camping zijn
+        {
+            throw new ArgumentException("Alleen camping accommodaties mogelijk voor dit type reservering");
+        }
+
+        // de logica van de virtual method in de base class wordt uitgevoerd 
+        base.AddAccommodation(campingAccommodation);
+    }
+
 
     // camping class erft de method van de base abstract class Reservation over om zijn eigen logica van tarief berekening te implementeren
     public override decimal CalculatePrice(List<Tariff> tariffs)

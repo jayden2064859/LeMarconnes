@@ -17,22 +17,35 @@ public class HotelReservation : Reservation
             throw new ArgumentException("Minimaal 1, Maximaal 10 personen voor reservering");
         }
 
-        AccommodationTypeId = 2; // hotel typeid is altijd 2
         PersonCount = personCount;
-
     }
 
     // method om te valideren dat het totaal aantal personen voor reservering niet groter is dan totale capaciteit van de gereserveerde hotelkamers 
     public void ValidateCapacity()
-    {
-        // de capaciteit van alle accommodations (max 2) gekoppeld aan de reservering worden opgetelt om het met personcount te vergelijken
-        var totalCapacity = Accommodations.Sum(a => a.Capacity);
-
-        if (PersonCount > totalCapacity)
         {
-            throw new Exception($"Aantal personen ({PersonCount}) overschrijdt capaciteit ({totalCapacity})");
+            // de capaciteit van alle accommodations (max 2) gekoppeld aan de reservering worden opgetelt om het met personcount te vergelijken
+            var totalCapacity = Accommodations.Sum(a => a.Capacity);
+
+            if (PersonCount > totalCapacity)
+            {
+                throw new Exception($"Aantal personen ({PersonCount}) overschrijdt capaciteit ({totalCapacity})");
+            }
         }
+
+
+    // override van virtual method in base class 
+    public override void AddAccommodation(Accommodation hotelAccommodation)
+    {
+        // eigen logica toevoegen
+        if (hotelAccommodation.Type != Accommodation.AccommodationType.Hotel) // type van elke accommodatie moet Hotel type zijn 
+        {
+            throw new ArgumentException("Alleen hotel accommodaties mogelijk voor dit type reservering");
+        }
+
+        // standaard validatie van de virtual method in de base class wordt hier ook uitgevoerd
+        base.AddAccommodation(hotelAccommodation);
     }
+
 
     // hotel class erft de method van de base abstract class Reservation over om zijn eigen logica van tarief berekening te implementeren
     public override decimal CalculatePrice(List<Tariff> tariffs)

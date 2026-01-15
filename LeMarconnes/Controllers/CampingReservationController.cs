@@ -22,12 +22,11 @@ namespace MVC.Controllers
         [HttpGet]
         public IActionResult CreateReservation1()
         {
-            var customerId = HttpContext.Session.GetString("CustomerId"); 
             var existingToken = HttpContext.Session.GetString("JwtToken"); // bestaat alleen wanneer gebruiker correct geauthenticeerd is
 
-            if (string.IsNullOrEmpty(existingToken) || string.IsNullOrEmpty(customerId)) // alleen een ingelogde klant met een jwt token mag reserveringen plaatsen
+            if (string.IsNullOrEmpty(existingToken)) // alleen een authencated user met een jwt token mag reserveringen plaatsen
             {
-                return RedirectToAction("Login", "Login");
+                return RedirectToAction("Home", "Homepage");
             }
             return View();
         }

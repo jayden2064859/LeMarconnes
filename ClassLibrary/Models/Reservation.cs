@@ -18,7 +18,6 @@ namespace ClassLibrary.Models
 
         public int CustomerId { get; set; }
         public List<Accommodation> Accommodations { get; set; } = new List<Accommodation>(); 
-        public int AccommodationTypeId { get; set; }
 
         // constructors
         public Reservation() // parameterloze constructor (nodig voor EF)
@@ -61,18 +60,21 @@ namespace ClassLibrary.Models
             return EndDate.DayNumber - StartDate.DayNumber;
         }
 
-        public void AddAccommodation(Accommodation accommodation)
+        // virtual methode: er is een basis implementatie, en subclasses mogen eraan toevoegen of vervangen met hun eigen logica
+        public virtual void AddAccommodation(Accommodation accommodation) 
         {
+            // logica die voor alle subtypes geldt 
             if (accommodation == null)
             {
                 throw new ArgumentException("Geen accommodatie gevonden om toe te voegen");
             }
-            if (Accommodations.Count >= 2) 
+            if (Accommodations.Count >= 2)
             {
                 throw new ArgumentException("Maximaal 2 accommodaties per reservering");
             }
             Accommodations.Add(accommodation);
         }
+
 
         // elke soort reservering heeft een eigen total price calculator nodig met zijn eigen implementatie ervan
         public abstract decimal CalculatePrice(List<Tariff> tariffs);

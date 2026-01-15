@@ -22,7 +22,10 @@ namespace MVC.Controllers
         [HttpGet]
         public IActionResult CreateReservation1()
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("CustomerId")))
+            var customerId = HttpContext.Session.GetString("CustomerId"); 
+            var existingToken = HttpContext.Session.GetString("JwtToken"); // bestaat alleen wanneer gebruiker correct geauthenticeerd is
+
+            if (string.IsNullOrEmpty(existingToken) || string.IsNullOrEmpty(customerId)) // alleen een ingelogde klant met een jwt token mag reserveringen plaatsen
             {
                 return RedirectToAction("Login", "Login");
             }
@@ -69,7 +72,6 @@ namespace MVC.Controllers
             }
 
             // viewmodel voor deze view aanmaken en vullen met de ontvangen datums (session strings) en accommodation lijst (api response)
-            // deze data wordt gebruikt om bijv de ingevoerde datums weer terug te zetten wanneer de view herlaadt door een invoer error
             var viewModel = new CreateReservation2ViewModel
             {
                 StartDate = startDate,
@@ -154,7 +156,7 @@ namespace MVC.Controllers
             DateOnly startDate = DateOnly.Parse(startDateStr);
             DateOnly endDate = DateOnly.Parse(endDateStr);
 
-            // string van accommodationIds terug converten naar List<int>
+            // json array van accommodationIds terug converten naar List<int>
             var accommodationIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(accommodationIdsStr);
 
             // customerId string terug naar int 

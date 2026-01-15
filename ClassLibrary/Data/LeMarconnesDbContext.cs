@@ -82,7 +82,9 @@ namespace ClassLibrary.Data
                 new Accommodation { AccommodationId = 11, PlaceNumber = "307", Capacity = 5, Type = Accommodation.AccommodationType.Hotel }
             );
 
-            // admin account seeden voor admin-only endpoint tests
+            // account table seeden met admin, employee en customer accounts voor api endpoint tests
+            
+            // admin account - toegang tot alle endpoints
             modelBuilder.Entity<Account>().HasData(
                 new Account
                 {
@@ -95,7 +97,19 @@ namespace ClassLibrary.Data
                 }
             );
 
-            // customer account seeden voor endpoint tests
+            // employee account - heeft toegang tot alle publieke endpoints + GET voor Account + Customer
+            modelBuilder.Entity<Account>().HasData(
+            new Account
+            {
+                AccountId = 3,
+                Username = "Employee",
+                PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", // wachtwoord is '1234"
+                AccountRole = Account.Role.Employee,
+                RegistrationDate = DateTime.Now,
+                CustomerId = null
+            });
+
+            // customer account - toegang tot alle publieke endpoints + POST reservering endpoints
             modelBuilder.Entity<Account>().HasData(
                 new Account
                 {

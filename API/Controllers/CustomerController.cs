@@ -18,7 +18,8 @@ namespace API.Controllers
             _dbService = dbService;
         }
 
-        // POST: api/customer
+        // POST: api/customer - customer aanmaken
+        [Authorize(Roles = "Admin")] // alleen admin mag individuele customers aanmaken. normale gebruikers doen dit via de registration endpoint
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(CustomerDTO dto)
         {
@@ -32,7 +33,8 @@ namespace API.Controllers
             return Ok(customer);
         }
 
-        // GET: api/customer
+        // GET: api/customer - alle customers ophalen
+        [Authorize(Roles = "Admin,Employee")] // medewerkers mogen customer info inzien
         [HttpGet]
         public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
@@ -46,7 +48,8 @@ namespace API.Controllers
             return Ok(customers); 
         }
 
-        // GET: api/customer/{id}
+        // GET: api/customer/{id} - specifieke customer ophalen
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
@@ -60,7 +63,8 @@ namespace API.Controllers
             return Ok(customer);
         }
 
-        // GET: api/customer/{id}/reservations
+        // GET: api/customer/{id}/reservations - reserveringen van specifieke customer ophalen
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id}/reservations")]
         public async Task<ActionResult<List<Reservation>>> GetCustomerReservations(int id)
         {
@@ -74,7 +78,8 @@ namespace API.Controllers
             return Ok(reservations);
         }
 
-        // PUT: api/customer/{id}
+        // PUT: api/customer/{id} - gegevens van specifieke customer bewerken
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
@@ -87,7 +92,8 @@ namespace API.Controllers
             return Ok("Gegevens succesvol gewijzigd");
         }
 
-        // DELETE: api/customer/{id}
+        // DELETE: api/customer/{id} - specifieke customer verwijderen
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {

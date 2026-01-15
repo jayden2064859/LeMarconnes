@@ -74,7 +74,7 @@ namespace API.Controllers
         }
 
         // GET: api/account
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Employee")] // medewerkers mogen accountgegevens inzien (niet bewerken)
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
@@ -86,7 +86,7 @@ namespace API.Controllers
 
 
         // GET: api/account/{id}
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Employee")]  
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(int id)
         {

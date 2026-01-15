@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    [AllowAnonymous] // public endpoint
     [Route("api/[controller]")]
     [ApiController]
     public class RegistrationController : ControllerBase
@@ -17,7 +18,6 @@ namespace API.Controllers
             _dbService = dbService; // constructor injection
         }
 
-        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationDTO dto)
         {

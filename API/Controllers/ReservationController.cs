@@ -21,8 +21,8 @@ namespace API.Controllers
             _dbService = dbService;
         }
 
-        // POST: api/reservation/camping
-        [Authorize] // alleen het accountrol Customer mag deze endpoint gebruiken
+        // POST: api/reservation/camping - nieuwe reservering aanmaken
+        [Authorize(Roles = "Admin,Customer")] // endpoint is alleen voor klanten bedoelt, maar admin mag nog steeds access
         [HttpPost("camping")]
         public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {
@@ -126,7 +126,7 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/reservation
+        // GET: api/reservation - alle reserveringen ophalen
         [Authorize(Roles = "Admin")] 
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetAllReservations()
@@ -136,7 +136,7 @@ namespace API.Controllers
         }
 
 
-        // GET: api/reservation/{id}
+        // GET: api/reservation/{id} - specifieke reservering ophalen
         [Authorize(Roles = "Admin")] 
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservationById(int id)
@@ -151,7 +151,7 @@ namespace API.Controllers
 
         }
 
-        // PUT: api/Reservation/{id}
+        // PUT: api/Reservation/{id} - specifieke reservering bewerken
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
@@ -166,7 +166,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        // DELETE: api/Reservation/5
+        // DELETE: api/Reservation/5 - specifieke reservering verwijderen
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)

@@ -7,11 +7,7 @@ namespace ClassLibrary.Models
         public string PlaceNumber { get; set; }
         public int Capacity { get; set; }
 
-        public AccommodationType Type { get; set; }
-        public enum AccommodationType
-        {
-            Camping = 1,
-            Hotel = 2
-        }      
+        // fk naar AccommodationType
+        public int AccommodationTypeId { get; set; }  
     }
 }

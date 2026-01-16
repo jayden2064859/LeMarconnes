@@ -9,6 +9,6 @@ namespace ClassLibrary.DTOs
         public int AccommodationId { get; set; }
         public string PlaceNumber { get; set; }
         public int Capacity { get; set; }
-        public Accommodation.AccommodationType Type { get; set; }
+        public int AccommodationTypeId { get; set; }
     }
 }

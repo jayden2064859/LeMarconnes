@@ -55,7 +55,7 @@ namespace API.Controllers
             }
 
             // tarieven voor camping ophalen 
-            var (tariffs, tariffsNotFoundMessage) = await _dbService.GetCampingTariffsAsync(Accommodation.AccommodationType.Camping);
+            var (tariffs, tariffsNotFoundMessage) = await _dbService.GetCampingTariffsAsync(1); // 1 = AccommodationTypeId 1 (Camping tarieven)
 
             if (tariffsNotFoundMessage != null)
             {

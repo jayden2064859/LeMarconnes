@@ -37,7 +37,7 @@ public class HotelReservation : Reservation
     public override void AddAccommodation(Accommodation hotelAccommodation)
     {
         // eigen logica toevoegen
-        if (hotelAccommodation.Type != Accommodation.AccommodationType.Hotel) // type van elke accommodatie moet Hotel type zijn 
+        if (hotelAccommodation.AccommodationTypeId != 2) // type van elke accommodatie moet Hotel type zijn 
         {
             throw new ArgumentException("Alleen hotel accommodaties mogelijk voor dit type reservering");
         }
@@ -54,7 +54,7 @@ public class HotelReservation : Reservation
         decimal total = 0;
 
         var hotelTariffs = tariffs
-            .Where(t => t.AccommodationType == Accommodation.AccommodationType.Hotel)
+            .Where(t => t.AccommodationTypeId == 2)
             .ToList();
 
         foreach (var accommodation in Accommodations)

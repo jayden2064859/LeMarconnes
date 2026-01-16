@@ -62,7 +62,7 @@ namespace MVC.Controllers
             DateOnly endDate = DateOnly.Parse(endDateStr);
 
             var (accommodations, errorMessage) = await _httpService.GetAvailableAccommodationsAsync
-                                                                            (startDate, endDate, Accommodation.AccommodationType.Camping);
+                                                                            (startDate, endDate, 1); // 1 = Camping accommodationType
 
             if (accommodations == null)
             {

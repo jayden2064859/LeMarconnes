@@ -57,7 +57,7 @@ namespace API.DbServices
             // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
                 .Where(a => accommodationIds.Contains(a.AccommodationId))
-                .Where(a => a.Type == Accommodation.AccommodationType.Camping)
+                .Where(a => a.AccommodationTypeId == 1)
                 .ToListAsync();
 
             if (!accommodations.Any())
@@ -69,11 +69,11 @@ namespace API.DbServices
         }
 
 
-        public async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffsAsync(Accommodation.AccommodationType type)
+        public async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffsAsync(int accommodationTypeId)
         {
             // haal tarieven op voor camping 
             var tariffs = await _context.Tariffs
-                .Where(t => t.AccommodationType == Accommodation.AccommodationType.Camping)
+                .Where(t => t.AccommodationTypeId == 1)
                 .ToListAsync();
 
             if (!tariffs.Any())

@@ -24,12 +24,24 @@ namespace API.Controllers
         [AllowAnonymous]
         [HttpGet("available-for-dates")]
         public async Task<ActionResult<List<AvailableAccommodationDTO>>> GetAvailableAccommodationsForDates(
-            Accommodation.AccommodationType type,
+            int accommodationTypeId,
             DateOnly startDate,
             DateOnly endDate)
         {
+            if (endDate <= startDate)
+            {
+                return Conflict("Einddatum moet voor startdatum zijn");
+            }
+
+            // huidige dag bepalen met datetime, en terug converten naar dateonly om te kunnen vergelijken
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            if (startDate < today || endDate < today)
+            {
+                return Conflict("Datums mogen niet in het verleden zijn");
+            }
+
             var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
-                .Where(a => a.Type == type &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
+                .Where(a => a.AccommodationTypeId == accommodationTypeId &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
                     !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) && 
                     r.StartDate <= endDate && r.EndDate >= startDate))  // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
                 .Select(a => new AvailableAccommodationDTO
@@ -37,7 +49,7 @@ namespace API.Controllers
                     AccommodationId = a.AccommodationId,
                     PlaceNumber = a.PlaceNumber,
                     Capacity = a.Capacity,
-                    Type = a.Type
+                    AccommodationTypeId = a.AccommodationTypeId
 
                 }).ToListAsync();
 

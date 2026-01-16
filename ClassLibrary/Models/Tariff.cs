@@ -7,8 +7,8 @@ namespace ClassLibrary.Models
         public string Name { get; set; }
         public decimal Price { get; set; }
 
-        // navigation property 
-        public Accommodation.AccommodationType AccommodationType { get; set; }
+        // navigation property - elk tarief hoort bij een type (camping of hotel)
+        public int AccommodationTypeId { get; set; }
 
     }
 }

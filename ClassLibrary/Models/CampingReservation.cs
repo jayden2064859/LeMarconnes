@@ -75,7 +75,7 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
     public override void AddAccommodation(Accommodation campingAccommodation)
     {
         // eigen logica toevoegen
-        if (campingAccommodation.Type != Accommodation.AccommodationType.Camping) // type moet camping zijn
+        if (campingAccommodation.AccommodationTypeId != 1) // type moet camping zijn
         {
             throw new ArgumentException("Alleen camping accommodaties mogelijk voor dit type reservering");
         }
@@ -93,7 +93,7 @@ public class CampingReservation : Reservation // CampingReservation erft alle ei
         decimal total = 0;
 
         var campingTariffs = tariffs
-            .Where(t => t.AccommodationType == Accommodation.AccommodationType.Camping)
+            .Where(t => t.AccommodationTypeId == 1)
             .ToList();
 
         total += GetTariff(campingTariffs, "Campingplaats") * nights * numAccommodations;

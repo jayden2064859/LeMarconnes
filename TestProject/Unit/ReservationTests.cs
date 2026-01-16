@@ -162,7 +162,7 @@ namespace TestProject.Unit
                 AccommodationId = 1,
                 PlaceNumber = "A1",
                 Capacity = 2,
-                Type = Accommodation.AccommodationType.Hotel
+                AccommodationTypeId = 2 // 2 = hotel
             };
 
             // act

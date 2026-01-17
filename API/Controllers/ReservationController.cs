@@ -78,6 +78,14 @@ namespace API.Controllers
                     dto.ElectricityDays
                 );
 
+                // class method van abstract Reservation wordt gebruikt om aantal overnachtingen te valideren 
+                bool valid = campingReservation.ValidateNumberOfNights(dto.StartDate, dto.EndDate);
+
+                if (!valid)
+                {
+                    return Conflict("Maximaal voor 4 weken reserveren toegestaan");
+                }
+                             
                 // specifieke customer linken aan reservation
                 campingReservation.Customer = customer;
 

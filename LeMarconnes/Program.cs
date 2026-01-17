@@ -1,8 +1,4 @@
-using ClassLibrary.Data;
 using MVC.HttpServices;
-using ClassLibrary.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +17,7 @@ builder.Services.AddHttpClient<ReservationHttpService>(client =>
 
 builder.Services.AddHttpClient<RegistrationHttpService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7290");
+    client.BaseAddress = baseAdress;
 });
 
 builder.Services.AddHttpContextAccessor();

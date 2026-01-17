@@ -28,6 +28,11 @@ namespace API.Controllers
             DateOnly startDate,
             DateOnly endDate)
         {
+
+            if (accommodationTypeId != 1 || accommodationTypeId != 2)
+            {
+                return Conflict("Ongeldig type (1 = Camping, 2 = Hotel)");
+            }
             if (endDate <= startDate)
             {
                 return Conflict("Einddatum moet voor startdatum zijn");

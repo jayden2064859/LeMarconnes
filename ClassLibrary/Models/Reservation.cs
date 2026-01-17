@@ -55,9 +55,12 @@ namespace ClassLibrary.Models
         }
 
         // methods
+
+        // inherited CalculatePrice methodes in subclasses gebruiken deze method voor prijsberekening
         public int GetNumberOfNights() 
         {
-            return EndDate.DayNumber - StartDate.DayNumber;
+            int numberOfNights =  EndDate.DayNumber - StartDate.DayNumber;
+            return numberOfNights;
         }
 
         // virtual methode: er is een basis implementatie, en subclasses mogen eraan toevoegen of vervangen met hun eigen logica
@@ -78,5 +81,21 @@ namespace ClassLibrary.Models
 
         // elke soort reservering heeft een eigen total price calculator nodig met zijn eigen implementatie ervan
         public abstract decimal CalculatePrice(List<Tariff> tariffs);
+
+
+        // method om ervoor te zorgen dat er een limiet is op hoe lang iemand accommodaties kan reserveren   
+        public bool ValidateNumberOfNights(DateOnly startDate, DateOnly endDate)
+        {
+            // totaal aantal dagen van start en einddatum definieren
+            int totalReservedDays = EndDate.DayNumber - StartDate.DayNumber;
+
+            int maxAllowedDays = 28;
+            
+            if (totalReservedDays > maxAllowedDays)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

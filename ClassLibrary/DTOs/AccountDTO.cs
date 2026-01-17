@@ -5,15 +5,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ClassLibrary.DTOs
 {
-    public class AccountDTO
+    public class AccountDTO // voor admin only endpoint om employee/admin accounts aan te maken
     {
-        [Required]
-        public int? CustomerId { get; set; }
         [Required]
         public string Username { get; set; }
         [Required]
         public string PlainPassword { get; set; }
 
-        public Account.Role? Role { get; set; }      
+        [Required]
+        public Account.Role Role { get; set; }      
     }
 }

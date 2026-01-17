@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestProject.Unit
 {
-    public class HotelReservationTests
+    public class HotelReservationConstructorTests
     {
 
         // UTC-08: valid reservering

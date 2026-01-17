@@ -1,6 +1,7 @@
 ﻿using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -49,30 +50,40 @@ namespace API.DbServices
         // customer + account object aanmaken
         public async Task CreateUserAsync(RegistrationDTO dto)
         {
-            var customer = new Customer(
-                dto.FirstName,
-                dto.LastName,
-                dto.Email,
-                dto.Phone,
-                dto.Infix
-            );
+            // transaction beginnen om ervoor te zorgen dat beide klant EN accountobject succesvol aangemaakt worden. als 1 mislukt, dan wordt niks toegevoegd (rollback)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var customer = new Customer(
+                    dto.FirstName,
+                    dto.LastName,
+                    dto.Email,
+                    dto.Phone,
+                    dto.Infix
+                );
 
-            // toevoegen en opslaan in db
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
+                var hasher = new PasswordHasher<Account>();
+                var passwordHash = hasher.HashPassword(null, dto.Password);
 
-            var hasher = new PasswordHasher<Account>();
-            var passwordHash = hasher.HashPassword(null, dto.Password);
+                var account = new Account(
+                    dto.Username,
+                    passwordHash,
+                    customer // customer wordt aan account gelinked via constructor 
+                );
 
-            var account = new Account(
-                dto.Username,
-                passwordHash,
-                customer // customer wordt aan account gelinked via constructor 
-            );
+                _context.Customers.Add(customer);
+                _context.Accounts.Add(account);
 
-            // toevoegen en opslaan in db
-            _context.Accounts.Add(account);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (DbUpdateException) // als er iets misgaat tijdens transaction wordt er een rollback van alles binnen de transactie gedaan
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+
         }
     }
 

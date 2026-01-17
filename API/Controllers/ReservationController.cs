@@ -127,11 +127,6 @@ namespace API.Controllers
             {
                 return Conflict(ex.Message);
             }
-            catch (DbUpdateException ex) // vangt database conflicten op
-            {
-
-                return Conflict(ex.Message);
-            }
         }
 
         // GET: api/reservation - alle reserveringen ophalen

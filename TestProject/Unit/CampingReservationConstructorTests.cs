@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using ClassLibrary.Models;
 using Xunit;
 
+// test alleen de constructor business rule validations
 namespace TestProject.Unit
 {
-    public class CampingReservationTests
+    public class CampingReservationConstructorTests
     {
         // UCT-01: valid aantal volwassenen
         [Fact]

@@ -52,10 +52,6 @@ namespace API.Controllers
             {
                 return Conflict(ex.Message);
             }
-            catch (DbUpdateException) // database errors worden hier opgevangen
-            {
-                return Conflict("Er is iets misgegaan tijdens de registratie");
-            }
         }
 
     }

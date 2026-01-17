@@ -7,7 +7,7 @@ using ClassLibrary.Models;
 
 namespace TestProject.Unit
 {
-    public class ReservationTests
+    public class ReservationConstructorTests
     {
         // UTC-11: invalid customerId (0 of negatief getal)
         [Fact]

@@ -38,29 +38,27 @@ namespace API.Controllers
             return Ok("Gebruikersnaam is beschikbaar");          
         }
 
-        // POST: api/account
+        // POST: api/account - endpoint voor admins only om handmatig non-customer accounts aan te maken
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(AccountDTO dto)
         {
-            var customer = await _context.Customers.FindAsync(dto.CustomerId);
-            if (customer == null)
+            if (dto.Role == Account.Role.Customer)
             {
-                return NotFound("Customer bestaat niet");
+                return Conflict("Gebruik registratie endpoint om klantaccounts aan te maken");
             }
-                           
+
             // wachtwoord hashen 
             var hasher = new PasswordHasher<Account>();
             var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
 
             try
             {
-
-                // constructor gebruiken om account object aan te maken
+                // 2e account constructor gebruiken voor non customers 
                 var account = new Account(
                     dto.Username,
                     passwordHash,
-                    customer);
+                    dto.Role);
 
                 _context.Accounts.Add(account);
                 await _context.SaveChangesAsync();

@@ -1,13 +1,10 @@
-﻿using ClassLibrary.Data;
-using ClassLibrary.DTOs;
-using ClassLibrary.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using ClassLibrary.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace API.DbServices
+namespace API.Services
 {
     // de jwt service is bedoeld voor API authenticatie. Pas wanneer een gebruiker ingelogd is, mag hij toegang tot bepaalde
     // api endpoints, zodat niet alles publiekelijk bereikbaar is
@@ -26,10 +23,7 @@ namespace API.DbServices
             var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:Key"]);
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, account.Username),
             new Claim(ClaimTypes.Role, account.AccountRole.ToString()),
-            new Claim("CustomerId", account.CustomerId?.ToString() ?? "")
-
         };
 
             var token = new JwtSecurityToken(

@@ -1,9 +1,7 @@
 ﻿using API.DbServices;
-using ClassLibrary.Data;
+using API.Services;
 using ClassLibrary.DTOs;
-using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

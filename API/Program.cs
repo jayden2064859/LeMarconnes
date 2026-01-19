@@ -1,4 +1,5 @@
 using API.DbServices;
+using API.Services;
 using ClassLibrary.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -65,10 +66,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.SaveToken = true;
+    options.SaveToken = true; 
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
+        ValidIssuer = builder.Configuration["JwtConfig:Issuer"], 
         ValidAudience = builder.Configuration["JwtConfig:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]!)),
         ValidateIssuer = true,

@@ -19,7 +19,7 @@ namespace MVC.HttpServices
         // available-for-dates api call waarbij response meteen teruggegeven wordt
         public async Task<(List<Accommodation>?, string?)> GetAvailableAccommodationsAsync(DateOnly startDate, DateOnly endDate, int accommodationTypeId)
         {
-            var available = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?type={accommodationTypeId}&startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+            var available = await _httpClient.GetAsync($"/api/Accommodation/available-for-dates?accommodationTypeId={accommodationTypeId}&startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
             if (!available.IsSuccessStatusCode)
             {
                 var errorContent = await available.Content.ReadAsStringAsync();

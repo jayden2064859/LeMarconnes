@@ -9,5 +9,7 @@ namespace ClassLibrary.Models
 
         // fk naar AccommodationType
         public int AccommodationTypeId { get; set; }  
+        // navigation property
+        public AccommodationType AccommodationType { get; set; }
     }
 }

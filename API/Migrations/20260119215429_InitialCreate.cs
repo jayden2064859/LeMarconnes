@@ -5,27 +5,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ClassLibrary.Migrations
+namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class m1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Accommodations",
+                name: "AccommodationTypes",
                 columns: table => new
                 {
-                    AccommodationId = table.Column<int>(type: "int", nullable: false)
+                    AccommodationTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PlaceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Capacity = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                    TypeName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Accommodations", x => x.AccommodationId);
+                    table.PrimaryKey("PK_AccommodationTypes", x => x.AccommodationTypeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,6 +45,27 @@ namespace ClassLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Accommodations",
+                columns: table => new
+                {
+                    AccommodationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlaceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    AccommodationTypeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Accommodations", x => x.AccommodationId);
+                    table.ForeignKey(
+                        name: "FK_Accommodations_AccommodationTypes_AccommodationTypeId",
+                        column: x => x.AccommodationTypeId,
+                        principalTable: "AccommodationTypes",
+                        principalColumn: "AccommodationTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tariffs",
                 columns: table => new
                 {
@@ -54,11 +73,17 @@ namespace ClassLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    AccommodationType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                    AccommodationTypeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tariffs", x => x.TariffId);
+                    table.ForeignKey(
+                        name: "FK_Tariffs_AccommodationTypes_AccommodationTypeId",
+                        column: x => x.AccommodationTypeId,
+                        principalTable: "AccommodationTypes",
+                        principalColumn: "AccommodationTypeId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -95,7 +120,6 @@ namespace ClassLibrary.Migrations
                     TotalPrice = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
-                    AccommodationTypeId = table.Column<int>(type: "int", nullable: false),
                     ReservationType = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     AdultsCount = table.Column<int>(type: "int", nullable: true),
                     Children0_7Count = table.Column<int>(type: "int", nullable: true),
@@ -141,62 +165,80 @@ namespace ClassLibrary.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Accommodations",
-                columns: new[] { "AccommodationId", "Capacity", "PlaceNumber", "Type" },
+                table: "AccommodationTypes",
+                columns: new[] { "AccommodationTypeId", "TypeName" },
                 values: new object[,]
                 {
-                    { 1, 4, "1A", "Camping" },
-                    { 2, 4, "2A", "Camping" },
-                    { 3, 4, "3A", "Camping" },
-                    { 4, 4, "4A", "Camping" },
-                    { 5, 4, "5A", "Camping" },
-                    { 6, 1, "101", "Hotel" },
-                    { 7, 2, "201", "Hotel" },
-                    { 8, 2, "202", "Hotel" },
-                    { 9, 3, "301", "Hotel" },
-                    { 10, 4, "304", "Hotel" },
-                    { 11, 5, "307", "Hotel" }
+                    { 1, "Camping" },
+                    { 2, "Hotel" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Accounts",
                 columns: new[] { "AccountId", "AccountRole", "CustomerId", "PasswordHash", "RegistrationDate", "Username" },
-                values: new object[] { 1, "Admin", null, "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(5961), "Admin" });
+                values: new object[,]
+                {
+                    { 1, "Admin", null, "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==", new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4186), "Admin" },
+                    { 3, "Employee", null, "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4215), "Employee" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Customers",
                 columns: new[] { "CustomerId", "Email", "FirstName", "Infix", "LastName", "Phone", "RegistrationDate" },
-                values: new object[] { 1, "test.customer@gmail.com", "Test", null, "Customer", "0612345678", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6030) });
+                values: new object[] { 1, "test.customer@gmail.com", "Test", null, "Customer", "0612345678", new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4240) });
 
             migrationBuilder.InsertData(
-                table: "Tariffs",
-                columns: new[] { "TariffId", "AccommodationType", "Name", "Price" },
+                table: "Accommodations",
+                columns: new[] { "AccommodationId", "AccommodationTypeId", "Capacity", "PlaceNumber" },
                 values: new object[,]
                 {
-                    { 1, "Camping", "Campingplaats", 7.50m },
-                    { 2, "Camping", "Volwassene", 6.00m },
-                    { 3, "Camping", "Kind_0_7", 4.00m },
-                    { 4, "Camping", "Kind_7_12", 5.00m },
-                    { 5, "Camping", "Hond", 2.50m },
-                    { 6, "Camping", "Electriciteit", 7.50m },
-                    { 7, "Camping", "Toeristenbelasting", 0.25m },
-                    { 8, "Hotel", "Hotelkamer_1Persoon", 42.50m },
-                    { 9, "Hotel", "Hotelkamer_2Personen", 55.00m },
-                    { 10, "Hotel", "Hotelkamer_3Personen", 70.00m },
-                    { 11, "Hotel", "Hotelkamer_4personen", 88.00m },
-                    { 12, "Hotel", "Hotelkamer_5personen", 105.50m },
-                    { 13, "Hotel", "Toeristenbelasting", 0.50m }
+                    { 1, 1, 4, "1A" },
+                    { 2, 1, 4, "2A" },
+                    { 3, 1, 4, "3A" },
+                    { 4, 1, 4, "4A" },
+                    { 5, 1, 4, "5A" },
+                    { 6, 2, 1, "101" },
+                    { 7, 2, 2, "201" },
+                    { 8, 2, 2, "202" },
+                    { 9, 2, 3, "301" },
+                    { 10, 2, 4, "304" },
+                    { 11, 2, 5, "307" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Accounts",
                 columns: new[] { "AccountId", "AccountRole", "CustomerId", "PasswordHash", "RegistrationDate", "Username" },
-                values: new object[] { 2, "Customer", 1, "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6014), "Customer" });
+                values: new object[] { 2, "Customer", 1, "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==", new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4225), "Customer" });
+
+            migrationBuilder.InsertData(
+                table: "Tariffs",
+                columns: new[] { "TariffId", "AccommodationTypeId", "Name", "Price" },
+                values: new object[,]
+                {
+                    { 1, 1, "Campingplaats", 7.50m },
+                    { 2, 1, "Volwassene", 6.00m },
+                    { 3, 1, "Kind_0_7", 4.00m },
+                    { 4, 1, "Kind_7_12", 5.00m },
+                    { 5, 1, "Hond", 2.50m },
+                    { 6, 1, "Electriciteit", 7.50m },
+                    { 7, 1, "Toeristenbelasting", 0.25m },
+                    { 8, 2, "Hotelkamer_1Persoon", 42.50m },
+                    { 9, 2, "Hotelkamer_2Personen", 55.00m },
+                    { 10, 2, "Hotelkamer_3Personen", 70.00m },
+                    { 11, 2, "Hotelkamer_4personen", 88.00m },
+                    { 12, 2, "Hotelkamer_5personen", 105.50m },
+                    { 13, 2, "Toeristenbelasting", 0.50m }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AccommodationReservation_ReservationId",
                 table: "AccommodationReservation",
                 column: "ReservationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Accommodations_AccommodationTypeId",
+                table: "Accommodations",
+                column: "AccommodationTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_CustomerId",
@@ -215,6 +257,11 @@ namespace ClassLibrary.Migrations
                 name: "IX_Reservations_CustomerId",
                 table: "Reservations",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tariffs_AccommodationTypeId",
+                table: "Tariffs",
+                column: "AccommodationTypeId");
         }
 
         /// <inheritdoc />
@@ -234,6 +281,9 @@ namespace ClassLibrary.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reservations");
+
+            migrationBuilder.DropTable(
+                name: "AccommodationTypes");
 
             migrationBuilder.DropTable(
                 name: "Customers");

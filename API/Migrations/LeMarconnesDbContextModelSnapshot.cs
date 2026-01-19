@@ -4,19 +4,16 @@ using ClassLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ClassLibrary.Migrations
+namespace API.Migrations
 {
     [DbContext(typeof(LeMarconnesDbContext))]
-    [Migration("20260114230814_m1")]
-    partial class m1
+    partial class LeMarconnesDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,6 +45,9 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccommodationId"));
 
+                    b.Property<int>("AccommodationTypeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
@@ -55,12 +55,9 @@ namespace ClassLibrary.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
                     b.HasKey("AccommodationId");
+
+                    b.HasIndex("AccommodationTypeId");
 
                     b.ToTable("Accommodations");
 
@@ -68,79 +65,108 @@ namespace ClassLibrary.Migrations
                         new
                         {
                             AccommodationId = 1,
+                            AccommodationTypeId = 1,
                             Capacity = 4,
-                            PlaceNumber = "1A",
-                            Type = "Camping"
+                            PlaceNumber = "1A"
                         },
                         new
                         {
                             AccommodationId = 2,
+                            AccommodationTypeId = 1,
                             Capacity = 4,
-                            PlaceNumber = "2A",
-                            Type = "Camping"
+                            PlaceNumber = "2A"
                         },
                         new
                         {
                             AccommodationId = 3,
+                            AccommodationTypeId = 1,
                             Capacity = 4,
-                            PlaceNumber = "3A",
-                            Type = "Camping"
+                            PlaceNumber = "3A"
                         },
                         new
                         {
                             AccommodationId = 4,
+                            AccommodationTypeId = 1,
                             Capacity = 4,
-                            PlaceNumber = "4A",
-                            Type = "Camping"
+                            PlaceNumber = "4A"
                         },
                         new
                         {
                             AccommodationId = 5,
+                            AccommodationTypeId = 1,
                             Capacity = 4,
-                            PlaceNumber = "5A",
-                            Type = "Camping"
+                            PlaceNumber = "5A"
                         },
                         new
                         {
                             AccommodationId = 6,
+                            AccommodationTypeId = 2,
                             Capacity = 1,
-                            PlaceNumber = "101",
-                            Type = "Hotel"
+                            PlaceNumber = "101"
                         },
                         new
                         {
                             AccommodationId = 7,
+                            AccommodationTypeId = 2,
                             Capacity = 2,
-                            PlaceNumber = "201",
-                            Type = "Hotel"
+                            PlaceNumber = "201"
                         },
                         new
                         {
                             AccommodationId = 8,
+                            AccommodationTypeId = 2,
                             Capacity = 2,
-                            PlaceNumber = "202",
-                            Type = "Hotel"
+                            PlaceNumber = "202"
                         },
                         new
                         {
                             AccommodationId = 9,
+                            AccommodationTypeId = 2,
                             Capacity = 3,
-                            PlaceNumber = "301",
-                            Type = "Hotel"
+                            PlaceNumber = "301"
                         },
                         new
                         {
                             AccommodationId = 10,
+                            AccommodationTypeId = 2,
                             Capacity = 4,
-                            PlaceNumber = "304",
-                            Type = "Hotel"
+                            PlaceNumber = "304"
                         },
                         new
                         {
                             AccommodationId = 11,
+                            AccommodationTypeId = 2,
                             Capacity = 5,
-                            PlaceNumber = "307",
-                            Type = "Hotel"
+                            PlaceNumber = "307"
+                        });
+                });
+
+            modelBuilder.Entity("ClassLibrary.Models.AccommodationType", b =>
+                {
+                    b.Property<int>("AccommodationTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccommodationTypeId"));
+
+                    b.Property<string>("TypeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AccommodationTypeId");
+
+                    b.ToTable("AccommodationTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            AccommodationTypeId = 1,
+                            TypeName = "Camping"
+                        },
+                        new
+                        {
+                            AccommodationTypeId = 2,
+                            TypeName = "Hotel"
                         });
                 });
 
@@ -188,8 +214,16 @@ namespace ClassLibrary.Migrations
                             AccountId = 1,
                             AccountRole = "Admin",
                             PasswordHash = "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==",
-                            RegistrationDate = new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(5961),
+                            RegistrationDate = new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4186),
                             Username = "Admin"
+                        },
+                        new
+                        {
+                            AccountId = 3,
+                            AccountRole = "Employee",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==",
+                            RegistrationDate = new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4215),
+                            Username = "Employee"
                         },
                         new
                         {
@@ -197,7 +231,7 @@ namespace ClassLibrary.Migrations
                             AccountRole = "Customer",
                             CustomerId = 1,
                             PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==",
-                            RegistrationDate = new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6014),
+                            RegistrationDate = new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4225),
                             Username = "Customer"
                         });
                 });
@@ -244,7 +278,7 @@ namespace ClassLibrary.Migrations
                             FirstName = "Test",
                             LastName = "Customer",
                             Phone = "0612345678",
-                            RegistrationDate = new DateTime(2026, 1, 15, 0, 8, 13, 834, DateTimeKind.Local).AddTicks(6030)
+                            RegistrationDate = new DateTime(2026, 1, 19, 22, 54, 29, 695, DateTimeKind.Local).AddTicks(4240)
                         });
                 });
 
@@ -255,9 +289,6 @@ namespace ClassLibrary.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationId"));
-
-                    b.Property<int>("AccommodationTypeId")
-                        .HasColumnType("int");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -299,10 +330,8 @@ namespace ClassLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TariffId"));
 
-                    b.Property<string>("AccommodationType")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int>("AccommodationTypeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -314,97 +343,99 @@ namespace ClassLibrary.Migrations
 
                     b.HasKey("TariffId");
 
+                    b.HasIndex("AccommodationTypeId");
+
                     b.ToTable("Tariffs");
 
                     b.HasData(
                         new
                         {
                             TariffId = 1,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Campingplaats",
                             Price = 7.50m
                         },
                         new
                         {
                             TariffId = 2,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Volwassene",
                             Price = 6.00m
                         },
                         new
                         {
                             TariffId = 3,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Kind_0_7",
                             Price = 4.00m
                         },
                         new
                         {
                             TariffId = 4,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Kind_7_12",
                             Price = 5.00m
                         },
                         new
                         {
                             TariffId = 5,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Hond",
                             Price = 2.50m
                         },
                         new
                         {
                             TariffId = 6,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Electriciteit",
                             Price = 7.50m
                         },
                         new
                         {
                             TariffId = 7,
-                            AccommodationType = "Camping",
+                            AccommodationTypeId = 1,
                             Name = "Toeristenbelasting",
                             Price = 0.25m
                         },
                         new
                         {
                             TariffId = 8,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Hotelkamer_1Persoon",
                             Price = 42.50m
                         },
                         new
                         {
                             TariffId = 9,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Hotelkamer_2Personen",
                             Price = 55.00m
                         },
                         new
                         {
                             TariffId = 10,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Hotelkamer_3Personen",
                             Price = 70.00m
                         },
                         new
                         {
                             TariffId = 11,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Hotelkamer_4personen",
                             Price = 88.00m
                         },
                         new
                         {
                             TariffId = 12,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Hotelkamer_5personen",
                             Price = 105.50m
                         },
                         new
                         {
                             TariffId = 13,
-                            AccommodationType = "Hotel",
+                            AccommodationTypeId = 2,
                             Name = "Toeristenbelasting",
                             Price = 0.50m
                         });
@@ -460,6 +491,17 @@ namespace ClassLibrary.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ClassLibrary.Models.Accommodation", b =>
+                {
+                    b.HasOne("ClassLibrary.Models.AccommodationType", "AccommodationType")
+                        .WithMany()
+                        .HasForeignKey("AccommodationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccommodationType");
+                });
+
             modelBuilder.Entity("ClassLibrary.Models.Account", b =>
                 {
                     b.HasOne("ClassLibrary.Models.Customer", "Customer")
@@ -479,6 +521,17 @@ namespace ClassLibrary.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("ClassLibrary.Models.Tariff", b =>
+                {
+                    b.HasOne("ClassLibrary.Models.AccommodationType", "AccommodationType")
+                        .WithMany()
+                        .HasForeignKey("AccommodationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccommodationType");
                 });
 #pragma warning restore 612, 618
         }

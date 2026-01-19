@@ -29,27 +29,27 @@ namespace API.Controllers
             DateOnly endDate)
         {
 
-            if (accommodationTypeId != 1 || accommodationTypeId != 2)
+            if (accommodationTypeId != 1 && accommodationTypeId != 2)
             {
                 return Conflict("Ongeldig type (1 = Camping, 2 = Hotel)");
             }
             if (endDate <= startDate)
             {
-                return Conflict("Einddatum moet voor startdatum zijn");
+                return Conflict("Einddatum moet minimaal 1 dag na startdatum zijn");
             }
 
             // huidige dag bepalen met datetime, en terug converten naar dateonly om te kunnen vergelijken
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            if (startDate < today || endDate < today)
+            if (startDate < today || endDate < today.AddDays(1))
             {
                 return Conflict("Datums mogen niet in het verleden zijn");
             }
 
             var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
                 .Where(a => a.AccommodationTypeId == accommodationTypeId &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
-                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) && 
-                    r.StartDate <= endDate && r.EndDate >= startDate))  // niet gekoppeld reserveringen die overlappen met de gevraagde datum periode
-                .Select(a => new AvailableAccommodationDTO
+                    !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&  // implicit junction table wordt hier doorzocht 
+                    r.StartDate <= endDate && r.EndDate >= startDate))  // niet gekoppeld aan reserveringen die overlappen met de gevraagde datum periode
+                .Select(a => new AvailableAccommodationDTO // voor elke accommodatie die aan bovenstaande regels voldoet, voeg de gevraagde properties toe aan een Dto
                 {
                     AccommodationId = a.AccommodationId,
                     PlaceNumber = a.PlaceNumber,

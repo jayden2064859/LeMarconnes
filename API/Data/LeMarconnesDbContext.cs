@@ -9,9 +9,6 @@ namespace ClassLibrary.Data
         public LeMarconnesDbContext(DbContextOptions<LeMarconnesDbContext> options) : base(options) 
         {        
         }
-        public LeMarconnesDbContext() 
-        { 
-        }
 
         // initialise alle models die aan de db toegevoegd moeten worden
         public DbSet<Accommodation> Accommodations { get; set; }
@@ -19,13 +16,7 @@ namespace ClassLibrary.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Tariff> Tariffs { get; set; }
-
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(
-                "Server=(localdb)\\mssqllocaldb;Database=LeMarconnesDB;Trusted_Connection=True;");
-        }
+        public DbSet<AccommodationType> AccommodationTypes { get; set; }
 
 
         // OnModelCreating is standaard een override method, omdat we de parent class DbContext gebruiken
@@ -60,8 +51,6 @@ namespace ClassLibrary.Data
                 new AccommodationType { AccommodationTypeId = 2, TypeName = "Hotel" }
 
             );
-
-
 
 
             // db seeden met accommodaties
@@ -147,6 +136,16 @@ namespace ClassLibrary.Data
                 .HasDiscriminator<string>("ReservationType")
                 .HasValue<CampingReservation>("Camping")
                 .HasValue<HotelReservation>("Hotel");
+
+            // Accommodation 0..* - 1 AccommodationType 
+            modelBuilder.Entity<Accommodation>()
+                .HasOne(t => t.AccommodationType)
+                .WithMany();
+
+            // Tariff 0..* - 1 AccommodationType
+            modelBuilder.Entity<Tariff>()
+                .HasOne(t => t.AccommodationType)
+                .WithMany(); 
 
             // customer 1 - 0..* reservation
             modelBuilder.Entity<Reservation>()

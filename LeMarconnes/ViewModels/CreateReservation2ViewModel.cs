@@ -1,4 +1,5 @@
-﻿using ClassLibrary.Models;
+﻿using ClassLibrary.DTOs;
+using ClassLibrary.Models;
 
 namespace ClassLibrary.ViewModels
 {
@@ -6,6 +7,6 @@ namespace ClassLibrary.ViewModels
     {
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        public List<Accommodation> AvailableAccommodations { get; set; } = new();
+        public List<AvailableAccommodationDTO> AvailableAccommodations { get; set; } = new List<AvailableAccommodationDTO>();
     }
 }

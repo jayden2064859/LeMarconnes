@@ -84,7 +84,7 @@ namespace API.DbServices
             return (tariffs, null);
         }
 
-        public async Task<CampingReservation> AddCampingReservationAsync(CampingReservation reservation)
+        public async Task<Reservation> AddReservationAsync(Reservation reservation)  // kan voor alle subtypes gebruikt worden 
         {
             // resevering toevoegen aan db
             _context.Reservations.Add(reservation);

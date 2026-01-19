@@ -20,7 +20,7 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/account/exists/{username}
+        // GET: api/account/available/{username}
         [AllowAnonymous] 
         [HttpGet("available/{username}")]
         public async Task<IActionResult> CheckUsernameExists(string username)

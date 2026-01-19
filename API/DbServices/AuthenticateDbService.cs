@@ -18,7 +18,6 @@ namespace API.DbServices
         {
             // zoek account op basis van gebruikersnaam
             var account = await _context.Accounts
-                .Include(a => a.Customer) // "include" is mogelijk door navigation property in model
                 .FirstOrDefaultAsync(a => a.Username == username);
 
             if (account == null)

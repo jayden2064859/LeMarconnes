@@ -99,7 +99,7 @@ namespace API.Controllers
                 campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
 
 
-                var reservationCreated = await _dbService.AddCampingReservationAsync(campingReservation);
+                var reservationCreated = await _dbService.AddReservationAsync(campingReservation);
 
                 var responseDto = new CampingReservationResponseDTO
                 {

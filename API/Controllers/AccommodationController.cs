@@ -65,14 +65,21 @@ namespace API.Controllers
         // GET: api/accommodation
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<List<Accommodation>>> GetAccommodations()
+        public async Task<ActionResult<List<GetAllAccommodationsDTO>>> GetAllAccommodations()
         {
-            return await _context.Accommodations
-            .ToListAsync();
+            var accommodations = await _context.Accommodations
+                .Select(a => new GetAllAccommodationsDTO
+                {
+                    PlaceNumber = a.PlaceNumber,
+                    Capacity = a.Capacity,
+                    AccommodationTypeName = a.AccommodationType.TypeName,
+                }
+                ).ToListAsync();
+            return Ok(accommodations);
         }
 
         // GET: api/accommodation/{id} 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Accommodation>> GetAccommodation(int id)
         {

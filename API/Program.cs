@@ -84,12 +84,7 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
-    c.RoutePrefix = string.Empty; // dit opent Swagger direct op /
-});
-
+app.UseSwaggerUI();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

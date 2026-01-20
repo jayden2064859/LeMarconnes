@@ -214,7 +214,7 @@ namespace API.Migrations
                             AccountId = 1,
                             AccountRole = "Admin",
                             PasswordHash = "AQAAAAIAAYagAAAAED40poWknsiW1HtrueqpONicGpEl+0PpLBHkmcd2Pia8jyo2ZarTY7CqSz8gfUyPLQ==",
-                            RegistrationDate = new DateTime(2026, 1, 20, 2, 27, 58, 883, DateTimeKind.Local).AddTicks(4917),
+                            RegistrationDate = new DateTime(2026, 1, 20, 15, 40, 40, 120, DateTimeKind.Local).AddTicks(8949),
                             Username = "Admin"
                         },
                         new
@@ -222,7 +222,7 @@ namespace API.Migrations
                             AccountId = 3,
                             AccountRole = "Employee",
                             PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==",
-                            RegistrationDate = new DateTime(2026, 1, 20, 2, 27, 58, 883, DateTimeKind.Local).AddTicks(4967),
+                            RegistrationDate = new DateTime(2026, 1, 20, 15, 40, 40, 120, DateTimeKind.Local).AddTicks(8999),
                             Username = "Employee"
                         },
                         new
@@ -231,7 +231,7 @@ namespace API.Migrations
                             AccountRole = "Customer",
                             CustomerId = 1,
                             PasswordHash = "AQAAAAIAAYagAAAAEJkbsW3FiATzLlh0GWtFksdZjlDSF6B4FCQvRoSbI9k2kSYzKDnSHFrYKNkhsTxKqw==",
-                            RegistrationDate = new DateTime(2026, 1, 20, 2, 27, 58, 883, DateTimeKind.Local).AddTicks(4977),
+                            RegistrationDate = new DateTime(2026, 1, 20, 15, 40, 40, 120, DateTimeKind.Local).AddTicks(9009),
                             Username = "Customer"
                         });
                 });
@@ -246,7 +246,7 @@ namespace API.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -261,12 +261,18 @@ namespace API.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Phone")
+                        .IsUnique();
 
                     b.ToTable("Customers");
 
@@ -278,7 +284,7 @@ namespace API.Migrations
                             FirstName = "Test",
                             LastName = "Customer",
                             Phone = "0612345678",
-                            RegistrationDate = new DateTime(2026, 1, 20, 2, 27, 58, 883, DateTimeKind.Local).AddTicks(4992)
+                            RegistrationDate = new DateTime(2026, 1, 20, 15, 40, 40, 120, DateTimeKind.Local).AddTicks(9025)
                         });
                 });
 

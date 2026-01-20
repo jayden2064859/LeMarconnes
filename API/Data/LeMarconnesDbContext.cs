@@ -186,6 +186,17 @@ namespace ClassLibrary.Data
             modelBuilder.Entity<Account>()
              .HasIndex(a => a.Username)
              .IsUnique();
+
+            // elk emailadres moet uniek zijn
+            modelBuilder.Entity<Customer>()
+                .HasIndex(c => c.Email)
+                .IsUnique();
+
+            // elk telefoonnummer moet uniek zijn
+            modelBuilder.Entity<Customer>()
+            .HasIndex(c => c.Phone)
+            .IsUnique();
+
         }
     }
 }

@@ -54,6 +54,8 @@ namespace MVC.HttpServices
                 var errorContent = await response.Content.ReadAsStringAsync();
                 return (null, errorContent);
             }
+            var raw = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(raw);
 
             var responseDto = await response.Content.ReadFromJsonAsync<CampingReservationResponseDTO>();
             return (responseDto, null);

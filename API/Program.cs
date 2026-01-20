@@ -84,7 +84,12 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+    c.RoutePrefix = string.Empty; // dit opent Swagger direct op /
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -96,6 +101,5 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapGet("/", () => Results.Redirect("/swagger/index.html")); // redirect naar swagger interface ipv root endpoint (api controllers hebben geen interface zelf)
 app.Run();
 

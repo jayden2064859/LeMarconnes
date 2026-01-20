@@ -169,7 +169,6 @@ namespace ClassLibrary.Data
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade); // Als een customer gedelete wordt, wordt het gelinkte account ook ge-delete (anders zijn er accounts in een invalid state)
 
-
             
             modelBuilder.Entity<Reservation>()
                 .Property(r => r.TotalPrice)

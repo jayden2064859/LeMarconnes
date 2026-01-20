@@ -1,11 +1,10 @@
-name: Build and deploy ASP.Net Core app to Azure Web App - LeMarconnesAPI
+name: Build and deploy ASP.NET Core app to Azure Web App - LeMarconnesAPI
 
 on:
   push:
     branches:
-      
-main
-workflow_dispatch:
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,45 +13,40 @@ jobs:
       contents: read
 
     steps:
-      
-uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      
-name: Set up .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.x'
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
 
-      
-name: Build with dotnet
-      run: dotnet build ./API/API.csproj --configuration Release
+      - name: Build API
+        run: dotnet build ./LeMarconnesAPI/LeMarconnesAPI.csproj --configuration Release
 
-      
-name: dotnet publish
-      run: dotnet publish ./API/API.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      - name: Publish API
+        run: dotnet publish ./LeMarconnesAPI/LeMarconnesAPI.csproj -c Release -o "${{ env.DOTNET_ROOT }}/myapp"
 
-      
-name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v4
-      with:
-        name: .net-app
-        path: ${{env.DOTNET_ROOT}}/myapp
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-app
+          path: ${{ env.DOTNET_ROOT }}/myapp
 
   deploy:
     runs-on: windows-latest
     needs: build
 
     steps:
-      
-name: Download artifact from build job
-      uses: actions/download-artifact@v4
-      with:
-        name: .net-app
-name: Deploy to Azure Web App
-id: deploy-to-webapp
-uses: azure/webapps-deploy@v3
-with:
-  app-name: 'LeMarconnesAPI'
-  slot-name: 'Production'
-  package: .
-  publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8BCA3F9266BB4E0F9D8AA5FE2A23C64A }}
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-app
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'LeMarconnesAPI'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8BCA3F9266BB4E0F9D8AA5FE2A23C64A }}

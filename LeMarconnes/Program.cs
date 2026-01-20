@@ -2,7 +2,7 @@ using MVC.HttpServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var baseAdress = new Uri("https://localhost:7290");
+var baseAdress = new Uri("https://lemarconnesapi-fmevbzcmbaerffa3.westeurope-01.azurewebsites.net");
 
 // dependency injection voor service api connecties
 builder.Services.AddHttpClient<LoginHttpService>(client =>

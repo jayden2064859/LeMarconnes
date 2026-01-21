@@ -217,7 +217,7 @@ namespace TestProject.Unit
             // arrange
             int customerId = 1;
             DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
-            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(11)); // 10 overnachtingen
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(29)); // 28 overnachtingen (max)
 
             // act
             var reservation = new CampingReservation(
@@ -229,11 +229,46 @@ namespace TestProject.Unit
             children7_12Count: 2,
             dogsCount: 2,
             hasElectricity: true,
-            electricityDays: 10 
+            electricityDays: 28 
             );
 
+            var validReservation = reservation.ValidateNumberOfNights(startDate, endDate);
+
+            if (!validReservation)
+            {
+                Assert.Fail();
+            }
             // assert
             Assert.NotNull(reservation);
+
+        }
+
+        // UTC-08: invalid aantal nachten (max 28, input 30)
+        [Fact]
+        public void CampingReservation_InvalidNumberOfNights_ShouldNotCreateObject()
+        {
+            // arrange
+            int customerId = 1;
+            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(30)); // 30 overnachtingen (over de max)
+
+            // act
+            var reservation = new CampingReservation(
+            customerId,
+            startDate,
+            endDate,
+            adultsCount: 4,
+            children0_7Count: 2,
+            children7_12Count: 2,
+            dogsCount: 2,
+            hasElectricity: true,
+            electricityDays: 28
+            );
+
+            var validReservation = reservation.ValidateNumberOfNights(startDate, endDate);
+
+            // assert
+            Assert.False(validReservation);
 
         }
     }

@@ -81,15 +81,28 @@ namespace API.Controllers
         // PUT: api/customer/{id} - gegevens van specifieke customer bewerken
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, Customer customer)
+        public async Task<ActionResult<Customer>> PutCustomer(int id, UpdateCustomerDTO dto)
         {
-            var (success, error) = await _dbService.UpdateCustomerAsync(id, customer);
-
-            if (!success)
+            // email en phone check doen om te controleren of de ingevoerde email/phone al wordt gebruikt door andere klanten 
+            var emailConflict = await _dbService.ValidateEmailAsync(dto.Email, id);
+            if (emailConflict != null)
             {
-                return NotFound(error);
+                return Conflict(emailConflict);
             }
-            return Ok("Gegevens succesvol gewijzigd");
+
+            var phoneConflict = await _dbService.ValidatePhoneAsync(dto.Phone, id);
+            if (phoneConflict != null)
+            {
+                return Conflict(phoneConflict);
+            }
+
+            var (updatedCustomer, errorMessage) = await _dbService.UpdateCustomerAsync(id, dto);
+
+            if (updatedCustomer == null)
+            {
+                return Conflict(errorMessage);
+            }
+            return Ok(updatedCustomer);
         }
 
         // DELETE: api/customer/{id} - specifieke customer verwijderen

@@ -101,30 +101,75 @@ namespace API.DbServices
         }
 
         // voor PUT /api/customer
-        public async Task<(bool success, string? error)> UpdateCustomerAsync(int id, Customer customer)
+        public async Task<(Customer? customer, string? error)> UpdateCustomerAsync(int customerId, UpdateCustomerDTO dto)
         {
-            // ingevoerde id moet overeenkomen met het customerId in het nieuwe customer object 
-            if (id != customer.CustomerId)
+            var emailExists = await ValidateEmailAsync(dto.Email, customerId);
+            if (emailExists)
             {
-                string error = "Customer ID mismatch";
-                return (false, error);
+                string error = "Email is al geregistreerd";
+                return (null, error);
+            }
+            var phoneExists = await ValidatePhoneAsync(dto.Email, customerId);
+            if (phoneExists)
+            {
+                string error = "Telefoonnummer is al geregistreerd";
+                return (null, error);
             }
 
             // customer ophalen uit db
-            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == id);
-
-            if (!customerExists)
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            
+            if (customer == null)
             {
-                string error = $"Customer met id {id} niet gevonden";
-                return (false, error);
+                string error = $"Klant met id {customerId} niet gevonden";
+                return (null, error);
             }
 
-            _context.Entry(customer).State = EntityState.Modified;
+            // update customer met de nieuwe input van de dto
+            customer.FirstName = dto.FirstName;
+            customer.Infix = dto.Infix;
+            customer.LastName = dto.LastName;
+            customer.Email = dto.Email;
+            customer.Phone = dto.Phone;
+
+            // wijzigingen opslaan 
             await _context.SaveChangesAsync();
 
-            return (true, null);
+            // customer ophalen na wijzigingen om terug te laten zien aan de client
+            var updatedCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            // hier zou beter ook een response DTO kunnen worden gebruikt om niet de volledige interne data te tonen,
+            // maar omdat deze endpoint alleen gebruikt wordt door de admin, kan het hier wel zonder groot risico
+
+            return (updatedCustomer, null);
         }
 
+
+        // valideren of email en telefoonnummer al bestaan in database bij andere klanten
+        private async Task<bool> ValidateEmailAsync(string email, int customerId)
+        {
+            var emailExists = await _context.Customers
+                .AnyAsync(c => c.Email == email && c.CustomerId != customerId);
+            
+            if (emailExists)
+            {
+                return true;
+            }
+            return false; 
+
+        }
+        private async Task<bool> ValidatePhoneAsync(string phone, int customerId)
+        {
+            var phoneExists = await _context.Customers
+                .AnyAsync(c => c.Phone == phone && c.CustomerId != customerId);
+
+            if (phoneExists)
+            {                
+                return true;
+            }
+            return false; 
+        }
 
         // voor DELETE /api/customer
         public async Task<(bool success, string? error)> DeleteCustomerAsync(int id)

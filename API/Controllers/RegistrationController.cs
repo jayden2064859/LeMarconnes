@@ -15,34 +15,12 @@ namespace API.Controllers
 
         public RegistrationController(RegistrationDbService dbService)
         {
-            _dbService = dbService; // constructor injection
+            _dbService = dbService; 
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationDTO dto)
-        {
-            // username check
-            var usernameError = await _dbService.ValidateUsernameAsync(dto.Username);
-            if (usernameError != null)
-            {
-                return Conflict(usernameError);
-            }
-
-            // email check
-            var emailError = await _dbService.ValidateEmailAsync(dto.Email);
-            if (emailError != null)
-            {
-                return Conflict(emailError);
-
-            }
-
-            // telefoonnummer check
-            var phoneError = await _dbService.ValidatePhoneAsync(dto.Phone);
-            if (phoneError != null)
-            {
-                return Conflict(phoneError);
-            }
-              
+        {            
             try
             {
                 await _dbService.CreateUserAsync(dto);
@@ -51,6 +29,10 @@ namespace API.Controllers
             catch (ArgumentException ex) // constructor validaties van account + customer object worden hier opgevangen
             {
                 return Conflict(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict("Er ging iets mis tijdens het registreren. Probeer het opnieuw.");
             }
         }
 

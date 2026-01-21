@@ -20,24 +20,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/account/available/{username}
-        [AllowAnonymous] 
-        [HttpGet("available/{username}")]
-        public async Task<IActionResult> CheckUsernameExists(string username)
-        {
-            if (username.Length <= 3 || username.Length > 15 || !username.All(char.IsLetterOrDigit))
-            {
-                return Conflict("Ongeldige usernameinput");
-            }
-            var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
-
-            if (existingUsername)
-            {
-                return Conflict("Gebruikersnaam bestaat al");
-            }
-            return Ok("Gebruikersnaam is beschikbaar");          
-        }
-
         // POST: api/account - endpoint voor admins only om handmatig non-customer accounts aan te maken
         [Authorize(Roles = "Admin")]
         [HttpPost]

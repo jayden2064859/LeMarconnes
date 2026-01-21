@@ -23,7 +23,11 @@ namespace API.Controllers
         {            
             try
             {
-                await _dbService.CreateUserAsync(dto);
+                var registrationError = await _dbService.CreateUserAsync(dto);
+                if (registrationError != null)
+                {
+                    return Conflict(registrationError);
+                }
                 return Ok("Registratie voltooid");
             }
             catch (ArgumentException ex) // constructor validaties van account + customer object worden hier opgevangen

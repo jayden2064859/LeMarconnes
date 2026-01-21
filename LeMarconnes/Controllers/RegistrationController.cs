@@ -27,14 +27,6 @@ public class RegistrationController : Controller
             return View();
         }
 
-        var usernameConflict = await _registerService.CheckUsernameExistsAsync(username);
-
-        if (usernameConflict != null)
-        {
-            TempData["Error"] = "Gebruikersnaam bestaat al";
-            return View();
-        }
-
         HttpContext.Session.SetString("RegisterUsername", username);
         HttpContext.Session.SetString("RegisterPassword", password);
 
@@ -47,7 +39,7 @@ public class RegistrationController : Controller
         string username = HttpContext.Session.GetString("RegisterUsername");
         string password = HttpContext.Session.GetString("RegisterPassword");
 
-        if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password))
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             return RedirectToAction("CreateAccount");
         }

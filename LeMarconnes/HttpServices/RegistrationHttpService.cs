@@ -22,18 +22,5 @@ namespace MVC.HttpServices
             }
             return null;
         }
-
-        public async Task<string?> CheckUsernameExistsAsync(string username)
-        {
-            var usernameCheck = await _httpClient.GetAsync($"/api/Account/available/{username}");
-
-            if (!usernameCheck.IsSuccessStatusCode)
-            {
-                var errorContent = await usernameCheck.Content.ReadAsStringAsync();
-                return errorContent;
-            }
-
-            return null;
-        }
     }
 }

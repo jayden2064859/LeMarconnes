@@ -26,8 +26,7 @@ namespace API.DbServices
 
             if (!customerReservations.Any())
             {
-                string error = "Geen reserveringen gevonden";
-                return (null, error);
+                return (null, "Geen reserveringen gevonden");
             }
 
             return (customerReservations, null);
@@ -41,8 +40,7 @@ namespace API.DbServices
 
             if (!customers.Any())
             {
-                string error = "Geen customers gevonden";
-                return (null, error);
+                return (null, "Geen customers gevonden");
             }
             return (customers, null);
         }
@@ -54,8 +52,7 @@ namespace API.DbServices
 
             if (customer == null)
             {
-                string error = $"Customer met id {customerId} niet gevonden";
-                return (null, error);
+                return (null, $"Customer met id {customerId} niet gevonden");
             }
 
             return (customer, null);
@@ -74,14 +71,12 @@ namespace API.DbServices
                 // conflict = voor wanneer de input qua syntax correct is, maar business rules het alsnog niet toelaten
                 if (customerExists.Email == dto.Email)
                 {
-                    string error = "Email is al geregistreerd";
-                    return (null, error);
+                    return (null, "Email is al geregistreerd");
                 }
 
                 if (customerExists.Phone == dto.Phone)
                 {
-                    string error = "Telefoonnummer is al geregistreerd";
-                    return (null, error);
+                    return (null, "Telefoonnummer is al geregistreerd");
                 }
             }
 
@@ -106,14 +101,12 @@ namespace API.DbServices
             var emailExists = await ValidateEmailAsync(dto.Email, customerId);
             if (emailExists)
             {
-                string error = "Email is al geregistreerd";
-                return (null, error);
+                return (null, "Email is al geregistreerd");
             }
             var phoneExists = await ValidatePhoneAsync(dto.Email, customerId);
             if (phoneExists)
             {
-                string error = "Telefoonnummer is al geregistreerd";
-                return (null, error);
+                return (null, "Telefoonnummer is al geregistreerd");
             }
 
             // customer ophalen uit db
@@ -122,8 +115,7 @@ namespace API.DbServices
             
             if (customer == null)
             {
-                string error = $"Klant met id {customerId} niet gevonden";
-                return (null, error);
+                return (null, $"Klant met id {customerId} niet gevonden");
             }
 
             // update customer met de nieuwe input van de dto

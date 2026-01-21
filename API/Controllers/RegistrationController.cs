@@ -32,7 +32,7 @@ namespace API.Controllers
             }
             catch (DbUpdateException)
             {
-                return Conflict("Er ging iets mis tijdens het registreren. Probeer het opnieuw.");
+                return StatusCode(500, "Er is een fout opgetreden tijdens het opslaan van de registratie.");
             }
         }
 

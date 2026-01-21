@@ -23,8 +23,7 @@ namespace API.DbServices
         {
             if (await _context.Accounts.AnyAsync(a => a.Username == username))
             {
-                string error = "Username is al geregistreerd";
-                return error;
+                return "Username is al geregistreerd";
             }
             return null;
         }
@@ -34,8 +33,7 @@ namespace API.DbServices
         {
             if (await _context.Customers.AnyAsync(c => c.Email == email))
             {
-                string error = "Email is al geregistreerd";
-                return error;
+                return "Email is al geregistreerd";
             }
             return null;
         }
@@ -45,8 +43,7 @@ namespace API.DbServices
         {
             if (await _context.Customers.AnyAsync(c => c.Phone == phone))
             {
-                string error = "Telefoonnummer is al geregistreerd";
-                return error;
+                return "Telefoonnummer is al geregistreerd";
             }
             return null;
         }

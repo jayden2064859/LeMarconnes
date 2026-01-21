@@ -29,7 +29,6 @@ namespace API.Controllers
             {
                 return Conflict(error);
             }
-
             return Ok(customer);
         }
 
@@ -44,7 +43,6 @@ namespace API.Controllers
             {
                 return Conflict(error);
             }
-
             return Ok(customers); 
         }
 
@@ -59,7 +57,6 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok(customer);
         }
 
@@ -74,7 +71,6 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok(reservations);
         }
 
@@ -83,24 +79,11 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<Customer>> PutCustomer(int id, UpdateCustomerDTO dto)
         {
-            // email en phone check doen om te controleren of de ingevoerde email/phone al wordt gebruikt door andere klanten 
-            var emailConflict = await _dbService.ValidateEmailAsync(dto.Email, id);
-            if (emailConflict != null)
-            {
-                return Conflict(emailConflict);
-            }
-
-            var phoneConflict = await _dbService.ValidatePhoneAsync(dto.Phone, id);
-            if (phoneConflict != null)
-            {
-                return Conflict(phoneConflict);
-            }
-
-            var (updatedCustomer, errorMessage) = await _dbService.UpdateCustomerAsync(id, dto);
+            var (updatedCustomer, notFoundMsg) = await _dbService.UpdateCustomerAsync(id, dto);
 
             if (updatedCustomer == null)
             {
-                return Conflict(errorMessage);
+                return NotFound(notFoundMsg);
             }
             return Ok(updatedCustomer);
         }
@@ -116,7 +99,6 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok("Customer verwijderd");
         }
     }

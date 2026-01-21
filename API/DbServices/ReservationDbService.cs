@@ -4,6 +4,7 @@ using ClassLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System.Numerics;
 
 namespace API.DbServices
 {
@@ -17,8 +18,113 @@ namespace API.DbServices
             _context = context;
         }
 
-        // voor POST api/reservation/camping
-        public async Task<string?> ValidateAccommodationAvailabilityAsync(DateOnly startDate, DateOnly endDate, List<int> accommodationIds)
+        public async Task<(CampingReservationResponseDTO? dto, string? error)> AddCampingReservationAsync(CampingReservationDTO dto)  // kan voor alle subtypes gebruikt worden 
+        {
+            // checken of accommodaties al gekoppeld zijn aan de reservering die overlappen met de ingevoerde datums
+            var accommodationConflictMessage = await ValidateAccommodationAvailabilityAsync(
+                dto.StartDate,
+                dto.EndDate,
+                dto.AccommodationIds);
+
+            if (accommodationConflictMessage != null)
+            {
+                return (null, accommodationConflictMessage);
+            }
+
+            // specifieke customer ophalen
+            var (customer, notFoundError) = await GetCustomerAsync(dto.CustomerId);
+
+            if (notFoundError != null)
+            {
+                return (null, notFoundError);
+            }
+
+            // geselecteerde accommodaties ophalen
+            var (accommodations, accommodationsError) = await GetSelectedAccommodationsAsync(dto.AccommodationIds);
+
+            if (accommodationsError != null)
+            {
+                return (null, accommodationsError);
+            }
+
+            // tarieven voor specifieke reserveringstype ophalen
+            var (tariffs, tariffsError) = await GetCampingTariffsAsync(1); // accommodatieTypeId 1 = camping
+
+            if (tariffsError != null)
+            {
+                return (null, tariffsError);
+            }
+
+            // campingreservation object aanmaken 
+            var campingReservation = CreateCampingReservationObject(dto);
+
+            // Reservation base class method gebruiken om max aantal overnachtingen te valideren
+            var validAmountOfNights = campingReservation.ValidateNumberOfNights(dto.StartDate, dto.EndDate);
+            
+            if (!validAmountOfNights)
+            {
+                return (null, "Ongeldig aantal nachten voor reservering");
+            }
+
+            // customer koppelen aan de reservering
+            campingReservation.Customer = customer;
+
+            // voeg accommodaties toe aan de reservering
+            foreach (var accommodation in accommodations)
+            {
+                campingReservation.AddAccommodation(accommodation); // inheritance (campingReservation gebruikt parent class Reservation methode)
+            }
+
+            // bereken totale prijs met de override method van CampingReservation class
+            campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
+
+
+            // resevering toevoegen aan db
+            _context.Reservations.Add(campingReservation);
+            await _context.SaveChangesAsync();
+
+            // response dto aanmaken en terugsturen naar de controller 
+            var responseDto = new CampingReservationResponseDTO
+            {
+                FirstName = campingReservation.Customer.FirstName,
+                Infix = campingReservation.Customer.Infix,
+                LastName = campingReservation.Customer.LastName,
+                StartDate = campingReservation.StartDate,
+                EndDate = campingReservation.EndDate,
+                AdultsCount = campingReservation.AdultsCount,
+                Children0_7Count = campingReservation.Children0_7Count,
+                Children7_12Count = campingReservation.Children7_12Count,
+                DogsCount = campingReservation.DogsCount,
+                HasElectricity = campingReservation.HasElectricity,
+                ElectricityDays = campingReservation.ElectricityDays,
+                TotalPrice = campingReservation.TotalPrice,
+
+                // linq gebruiken om PlaceNumbers van gekozen accommodaties op te halen
+                AccommodationPlaceNumbers = campingReservation.Accommodations
+                    .Select(a => a.PlaceNumber)
+                    .ToList()
+            };
+
+            return (responseDto, null);
+        }
+
+        private CampingReservation CreateCampingReservationObject(CampingReservationDTO dto)
+        {
+            var campingReservation = new CampingReservation(
+                dto.CustomerId,
+                dto.StartDate,
+                dto.EndDate,
+                dto.AdultsCount,
+                dto.Children0_7Count,
+                dto.Children7_12Count,
+                dto.DogsCount,
+                dto.HasElectricity,
+                dto.ElectricityDays
+            );
+            return campingReservation;
+        }
+
+        private async Task<string?> ValidateAccommodationAvailabilityAsync(DateOnly startDate, DateOnly endDate, List<int> accommodationIds)
         {
             // check gekozen accommodaties voor beschikbaarheid op basis van ingevoerde datum
             foreach (var accommodationId in accommodationIds)
@@ -30,29 +136,27 @@ namespace API.DbServices
                 if (hasOverlap)
                 {
                     var accommodation = await _context.Accommodations.FindAsync(accommodationId);
-                    string errorMessage = $"Accommodatie {accommodation.PlaceNumber} is niet beschikbaar voor de ingevoerde datum";
-                    return errorMessage;
+                    return $"Accommodatie {accommodation.PlaceNumber} is niet beschikbaar voor de ingevoerde datum";
                 }
             }
             return null; // geen conflicten = geen response nodig
         }
 
         // return type namen worden voor tuples toegevoegd om duidelijk te maken wat de functie van beide types zijn (functioneel niet nodig)
-        public async Task<(Customer? customer, string? errorMessage)> GetCustomerAsync(int customerId)
+        private async Task<(Customer? customer, string? errorMessage)> GetCustomerAsync(int customerId)
         {
             // specifieke customer ophalen 
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.CustomerId == customerId);
 
             if (customer == null)
-            {
-                string errorMessage = "Klant niet gevonden";
-                return (null, errorMessage);
+            { 
+                return (null, "Klant niet gevonden");
             }
             return (customer, null);
         }
 
-        public async Task<(List<Accommodation>? accommodations, string? errorMessage)> GetSelectedAccommodationsAsync(List<int> accommodationIds)
+        private async Task<(List<Accommodation>? accommodations, string? errorMessage)> GetSelectedAccommodationsAsync(List<int> accommodationIds)
         {
             // alle geselecteerde accommodaties ophalen
             var accommodations = await _context.Accommodations
@@ -62,14 +166,12 @@ namespace API.DbServices
 
             if (!accommodations.Any())
             {
-                string errorMessage = "Geen accommodaties gevonden";
-                return (null, errorMessage);
+                return (null, "Geen accommodaties gevonden");
             }
             return (accommodations, null);
         }
 
-
-        public async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffsAsync(int accommodationTypeId)
+        private async Task<(List<Tariff>? tariffs, string? errorMessage)> GetCampingTariffsAsync(int accommodationTypeId)
         {
             // haal tarieven op voor camping 
             var tariffs = await _context.Tariffs
@@ -78,19 +180,9 @@ namespace API.DbServices
 
             if (!tariffs.Any())
             {
-                string errorMessage = "Geen tarieven gevonden";
-                return (null, errorMessage);
+                return (null, "Geen tarieven gevonden");
             }
             return (tariffs, null);
-        }
-
-        public async Task<Reservation> AddReservationAsync(Reservation reservation)  // kan voor alle subtypes gebruikt worden 
-        {
-            // resevering toevoegen aan db
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
-
-            return reservation;
         }
 
 
@@ -116,8 +208,7 @@ namespace API.DbServices
 
             if (reservation == null)
             {
-                string errorMessage = "reservering niet gevonden";
-                return (null, errorMessage);
+                return (null, "reservering niet gevonden");
             }
             return (reservation, null);
         }
@@ -129,16 +220,14 @@ namespace API.DbServices
             // check of de ids overeenkomen
             if (id != updatedReservation.ReservationId)
             {
-                string errorMessage = "Reservation ID mismatch";
-                return (false, errorMessage);
+                return (false, "Reservation ID mismatch");
             }
 
             // check of reservering bestaat
             var existingReservation = await _context.Reservations.FindAsync(id);
             if (existingReservation == null)
             {
-                string errorMessage = "Reservering niet gevonden";
-                return (false, errorMessage);
+                return (false, "Reservering niet gevonden");
             }
 
             // query om bestaande reservering te updaten met nieuwe data
@@ -157,8 +246,8 @@ namespace API.DbServices
             // check of reservering is gevonden
             if (reservation == null)
             {
-                string errorMessage = "ReserveringsId niet gevonden";
-                return (false, errorMessage);
+
+                return (false, "ReserveringsId niet gevonden");
             }
 
             _context.Reservations.Remove(reservation);

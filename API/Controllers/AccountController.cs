@@ -81,35 +81,7 @@ namespace API.Controllers
             return account;
         }
 
-        // PUT: api/account
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(int id, Account account)
-        {
-            if (id != account.AccountId)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(account).State = EntityState.Modified;
  
-            await _context.SaveChangesAsync();
-
-            if (!AccountExists(id))
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-
-        // bool voor PUT method
-        private bool AccountExists(int id)
-        {
-            return _context.Accounts.Any(e => e.AccountId == id);
-        }
-
-
         // DELETE: api/account
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]

@@ -213,30 +213,6 @@ namespace API.DbServices
             return (reservation, null);
         }
 
-        // voor PUT /api/reservation/{id}
-
-        public async Task<(bool success, string? errorMessage)> UpdateReservationAsync(int id, Reservation updatedReservation)
-        {
-            // check of de ids overeenkomen
-            if (id != updatedReservation.ReservationId)
-            {
-                return (false, "Reservation ID mismatch");
-            }
-
-            // check of reservering bestaat
-            var existingReservation = await _context.Reservations.FindAsync(id);
-            if (existingReservation == null)
-            {
-                return (false, "Reservering niet gevonden");
-            }
-
-            // query om bestaande reservering te updaten met nieuwe data
-            _context.Entry(existingReservation).CurrentValues.SetValues(updatedReservation);
-
-            await _context.SaveChangesAsync();
-            return (true, null); 
-        }
-
         // voor DELETE /api/reservation/{id}
         public async Task<(bool success, string? errorMessage)> DeleteReservationAsync(int id)
         {

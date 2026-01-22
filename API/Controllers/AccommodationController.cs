@@ -88,7 +88,7 @@ namespace API.Controllers
 
             if (accommodation == null)
             {
-                return NotFound();
+                return NotFound($"Accommodatie met id {id} niet gevonden");
             }
 
             return accommodation;
@@ -98,41 +98,20 @@ namespace API.Controllers
         //  POST: api/accommodation
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Accommodation>> PostAccommodation(Accommodation accommodation)
+        public async Task<ActionResult<Accommodation>> PostAccommodation(PostAccommodationDTO dto)
         {
+            var accommodation = new Accommodation
+            {
+                PlaceNumber = dto.PlaceNumber,
+                Capacity = dto.Capacity,
+                AccommodationTypeId = dto.AccommodationTypeId 
+                                                             
+            };
+
             _context.Accommodations.Add(accommodation);
             await _context.SaveChangesAsync();
 
             return Ok(accommodation);
-        }
-
-
-
-        // PUT: api/accommodation
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccommodation(int id, Accommodation accommodation)
-        {
-            if (id != accommodation.AccommodationId)
-            {
-                return NotFound();
-            }
-
-            if (!AccommodationExists(id))
-            {
-                return NotFound();
-            }
-
-            _context.Entry(accommodation).State = EntityState.Modified;
-            await _context.SaveChangesAsync();  
-
-            return NoContent();
-        }
-
-        // bool voor PUT method
-        private bool AccommodationExists(int id)
-        {
-            return _context.Accommodations.Any(e => e.AccommodationId == id);
         }
 
         // DELETE: api/accommodation

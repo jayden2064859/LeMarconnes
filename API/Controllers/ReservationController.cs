@@ -73,21 +73,6 @@ namespace API.Controllers
 
         }
 
-        // PUT: api/Reservation/{id} - specifieke reservering bewerken
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
-        {
-            var (succesfullyUpdated, errorMessage) = await _dbService.UpdateReservationAsync(id, reservation);
-
-            if (!succesfullyUpdated)
-            {
-                return NotFound(errorMessage);
-            }
-
-            return Ok($"Reservering {id} is succesvol gewijzigd.");
-        }
-
         // DELETE: api/Reservation/{id} - specifieke reservering verwijderen
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
@@ -100,10 +85,6 @@ namespace API.Controllers
                 return NotFound(errorMessage);
             }
             return Ok($"Reservering met id {id} verwijderd.");
-
-
-
-
 
         }
     }

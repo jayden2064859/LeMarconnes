@@ -98,7 +98,7 @@ namespace API.Controllers
         //  POST: api/accommodation
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Accommodation>> PostAccommodation(PostAccommodationDTO dto)
+        public async Task<ActionResult<PostAccommodationResponseDTO>> PostAccommodation(PostAccommodationDTO dto)
         {
             var accommodation = new Accommodation
             {
@@ -111,7 +111,24 @@ namespace API.Controllers
             _context.Accommodations.Add(accommodation);
             await _context.SaveChangesAsync();
 
-            return Ok(accommodation);
+            var createdAccommodation = await _context.Accommodations
+                .Include(a => a.AccommodationType)
+                .FirstOrDefaultAsync(a => a.AccommodationId == accommodation.AccommodationId);
+            if (createdAccommodation == null)
+            {
+                return NotFound("Accommodatie niet gevonden");
+            }
+
+            var responseDto = new PostAccommodationResponseDTO
+            {
+                AccommodationId = createdAccommodation.AccommodationId,
+                PlaceNumber = createdAccommodation.PlaceNumber,
+                Capacity = createdAccommodation.Capacity,
+                AccommodationTypeId = createdAccommodation.AccommodationTypeId,
+                AccommodationTypeName = createdAccommodation.AccommodationType.TypeName
+            };
+
+            return Ok(responseDto);
         }
 
         // DELETE: api/accommodation

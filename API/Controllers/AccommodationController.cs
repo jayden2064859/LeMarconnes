@@ -23,38 +23,38 @@ namespace API.Controllers
         // werkt voor beide Camping en Hotel accommodaties, afhankelijk van het AccommodationType enum dat je meegeeft
         [AllowAnonymous]
         [HttpGet("available-for-dates")]
-        public async Task<ActionResult<List<AvailableAccommodationDTO>>> GetAvailableAccommodationsForDates(
-            int accommodationTypeId,
-            DateOnly startDate,
-            DateOnly endDate)
+        public async Task<ActionResult<List<AvailableForDatesResponseDTO>>> GetAvailableAccommodationsForDates(AvailableForDatesDTO dto)
+
         {
 
-            if (accommodationTypeId != 1 && accommodationTypeId != 2)
+            if (dto.AccommodationTypeId != 1 && dto.AccommodationTypeId != 2)
             {
                 return Conflict("Ongeldig type (1 = Camping, 2 = Hotel)");
             }
-            if (endDate <= startDate)
+            if (dto.EndDate <= dto.StartDate)
             {
                 return Conflict("Einddatum moet minimaal 1 dag na startdatum zijn");
             }
 
             // huidige dag bepalen met datetime, en terug converten naar dateonly om te kunnen vergelijken
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            if (startDate < today || endDate < today.AddDays(1))
+            if (dto.StartDate < today || dto.EndDate < today.AddDays(1))
             {
                 return Conflict("Datums mogen niet in het verleden zijn");
             }
 
             var availableAccommodations = await _context.Accommodations // geef alle accommodaties terug waarvoor geldt:
-                .Where(a => a.AccommodationTypeId == accommodationTypeId &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
+                .Where(a => a.AccommodationTypeId == dto.AccommodationTypeId &&  // accommodatietype (camping of hotel) komt overeen met meegegeven type                                             
                     !_context.Reservations.Any(r => r.Accommodations.Any(ra => ra.AccommodationId == a.AccommodationId) &&  // implicit junction table wordt hier doorzocht 
-                    r.StartDate <= endDate && r.EndDate >= startDate))  // niet gekoppeld aan reserveringen die overlappen met de gevraagde datum periode
-                .Select(a => new AvailableAccommodationDTO // voor elke accommodatie die aan bovenstaande regels voldoet, voeg de gevraagde properties toe aan een Dto
+                    r.StartDate <= dto.EndDate && r.EndDate >= dto.StartDate))  // niet gekoppeld aan reserveringen die overlappen met de gevraagde datum periode
+                .Select(a => new AvailableForDatesResponseDTO // voor elke accommodatie die aan bovenstaande regels voldoet, voeg de gevraagde properties toe aan een Dto
                 {
                     AccommodationId = a.AccommodationId,
                     PlaceNumber = a.PlaceNumber,
                     Capacity = a.Capacity,
-                    AccommodationTypeId = a.AccommodationTypeId
+                    AccommodationTypeId = a.AccommodationTypeId,
+
+                    
 
                 }).ToListAsync();
 

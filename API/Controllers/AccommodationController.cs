@@ -27,7 +27,7 @@ namespace API.Controllers
 
         {
 
-            if (dto.AccommodationTypeId != 1 && dto.AccommodationTypeId != 2)
+            if (dto.AccommodationTypeId != 1 || dto.AccommodationTypeId != 2)
             {
                 return Conflict("Ongeldig type (1 = Camping, 2 = Hotel)");
             }

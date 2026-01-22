@@ -23,11 +23,11 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
-
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      - name: Build API project
+        run: dotnet build API/API.csproj -c Release
+      
+      - name: Publish API project
+        run: dotnet publish API/API.csproj -c Release -o ./publish
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -51,5 +51,6 @@ jobs:
         with:
           app-name: 'bed-api-team5-lemarc'
           slot-name: 'Production'
-          package: .
+          package: ./publish
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_51A05F45794E475CB1CED0B187503B6F }}

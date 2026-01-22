@@ -21,7 +21,8 @@ namespace API.DbServices
         // check of username al bestaat
         private async Task<string?> ValidateUsernameAsync(string username)
         {
-            if (await _context.Accounts.AnyAsync(a => a.Username == username))
+            var usernameExists = await _context.Accounts.AnyAsync(a => a.Username == username);
+            if (usernameExists)
             {
                 return "Username is al geregistreerd";
             }
@@ -31,7 +32,8 @@ namespace API.DbServices
         // check of email al bestaat
         private async Task<string?> ValidateEmailAsync(string email)
         {
-            if (await _context.Customers.AnyAsync(c => c.Email == email))
+            var emailExists = await _context.Customers.AnyAsync(c => c.Email == email);
+            if (emailExists)
             {
                 return "Email is al geregistreerd";
             }
@@ -41,7 +43,8 @@ namespace API.DbServices
         // check of telefoonnummer al bestaat
         private async Task<string?> ValidatePhoneAsync(string phone)
         {
-            if (await _context.Customers.AnyAsync(c => c.Phone == phone))
+            var phoneExists = await _context.Customers.AnyAsync(c => c.Phone == phone);
+            if (phoneExists)
             {
                 return "Telefoonnummer is al geregistreerd";
             }

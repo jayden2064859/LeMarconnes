@@ -1,11 +1,8 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace API.DbServices
 {

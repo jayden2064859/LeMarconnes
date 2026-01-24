@@ -1,5 +1,4 @@
 ﻿using API.DbServices;
-using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +21,7 @@ namespace API.Controllers
         }
 
         // POST: api/reservation/camping - nieuwe reservering aanmaken
-        [Authorize(Roles = "Admin,Customer")] // endpoint is alleen voor klanten bedoelt, maar admin mag nog steeds access
+        [Authorize(Roles = "Customer")] // endpoint is alleen voor klanten bedoelt, maar admin mag nog steeds access
         [HttpPost("camping")]
         public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {

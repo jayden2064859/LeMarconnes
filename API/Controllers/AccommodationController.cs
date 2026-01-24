@@ -1,4 +1,4 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -82,6 +82,7 @@ namespace API.Controllers
         [Authorize(Roles = "Admin,Employee")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Accommodation>> GetAccommodation(int id)
+
         {
             var accommodation = await _context.Accommodations
                 .FirstOrDefaultAsync(c => c.AccommodationId == id);

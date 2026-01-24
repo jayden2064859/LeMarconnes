@@ -1,5 +1,5 @@
 ﻿using API.Services;
-using ClassLibrary.Data;
+using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Identity;

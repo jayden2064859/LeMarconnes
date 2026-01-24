@@ -1,10 +1,7 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using System.Numerics;
 
 namespace API.DbServices
 {

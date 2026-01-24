@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 
-namespace ClassLibrary.Data
+namespace API.Data
 {
     public class LeMarconnesDbContext : DbContext
     {

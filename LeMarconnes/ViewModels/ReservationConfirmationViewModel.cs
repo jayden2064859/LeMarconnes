@@ -30,6 +30,7 @@ namespace ClassLibrary.ViewModels
         public int? DogsCount { get; set; }
         public bool? HasElectricity { get; set; }
         public int? ElectricityDays { get; set; }
+        public int? PersonCount { get; set; }
         public decimal TotalPrice { get; set; }
         public List<string> AccommodationPlaceNumbers { get; set; } = new();
     }

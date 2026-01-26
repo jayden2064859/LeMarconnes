@@ -139,7 +139,7 @@ namespace MVC.Controllers
 
             var (reservation, errorMessage) = await _httpService.CreateHotelReservationAsync(hotelDto, token);
 
-            var viewModel = new HotelReservationConfirmationViewModel
+            var viewModel = new ReservationConfirmationViewModel
             {
                 FirstName = reservation.FirstName,
                 Infix = reservation.Infix,

@@ -88,17 +88,6 @@ namespace API.Controllers
             return Ok(updatedCustomer);
         }
 
-        [HttpPatch("{customerId}")]
-        public async Task<IActionResult> PatchCustomer(int customerId, PatchCustomerDTO dto)
-        {
-            var (customer, error) = await _dbService.PatchCustomerAsync(customerId, dto);
-
-            if (error != null)
-                return BadRequest(error);
-
-            return Ok(customer);
-        }
-
         // DELETE: api/customer/{id} - specifieke customer verwijderen
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]

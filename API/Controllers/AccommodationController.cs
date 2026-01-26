@@ -18,7 +18,7 @@ namespace API.Controllers
             _dbService = dbService;
         }
 
-        // GET: /api/Accommodation/available-for-dates      
+        // GET: /api/Accommodation/available-for-dates - public endpoint
         [AllowAnonymous]
         [HttpGet("available-for-dates")]
         public async Task<ActionResult<List<AvailableForDatesResponseDTO>>> GetAvailableAccommodationsForDates(int accommodationTypeId, DateOnly startDate, DateOnly endDate)

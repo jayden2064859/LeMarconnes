@@ -7,6 +7,6 @@ namespace ClassLibrary.ViewModels
     {
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
-        public List<AvailableAccommodationDTO> AvailableAccommodations { get; set; } = new List<AvailableAccommodationDTO>();
+        public List<AvailableForDatesResponseDTO> AvailableAccommodations { get; set; } = new List<AvailableForDatesResponseDTO>();
     }
 }

@@ -1,4 +1,4 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +26,7 @@ namespace API.DbServices
 
             if (!customerReservations.Any())
             {
-                string error = "Geen reserveringen gevonden";
-                return (null, error);
+                return (null, "Geen reserveringen gevonden");
             }
 
             return (customerReservations, null);
@@ -41,8 +40,7 @@ namespace API.DbServices
 
             if (!customers.Any())
             {
-                string error = "Geen customers gevonden";
-                return (null, error);
+                return (null, "Geen customers gevonden");
             }
             return (customers, null);
         }
@@ -54,8 +52,7 @@ namespace API.DbServices
 
             if (customer == null)
             {
-                string error = $"Customer met id {customerId} niet gevonden";
-                return (null, error);
+                return (null, $"Customer met id {customerId} niet gevonden");
             }
 
             return (customer, null);
@@ -74,14 +71,12 @@ namespace API.DbServices
                 // conflict = voor wanneer de input qua syntax correct is, maar business rules het alsnog niet toelaten
                 if (customerExists.Email == dto.Email)
                 {
-                    string error = "Email is al geregistreerd";
-                    return (null, error);
+                    return (null, "Email is al geregistreerd");
                 }
 
                 if (customerExists.Phone == dto.Phone)
                 {
-                    string error = "Telefoonnummer is al geregistreerd";
-                    return (null, error);
+                    return (null, "Telefoonnummer is al geregistreerd");
                 }
             }
 
@@ -101,30 +96,111 @@ namespace API.DbServices
         }
 
         // voor PUT /api/customer
-        public async Task<(bool success, string? error)> UpdateCustomerAsync(int id, Customer customer)
+        public async Task<(Customer? customer, string? error)> UpdateCustomerAsync(int customerId, UpdateCustomerDTO dto)
         {
-            // ingevoerde id moet overeenkomen met het customerId in het nieuwe customer object 
-            if (id != customer.CustomerId)
+            var emailExists = await ValidateEmailAsync(dto.Email, customerId);
+            if (emailExists)
             {
-                string error = "Customer ID mismatch";
-                return (false, error);
+                return (null, "Email is al geregistreerd");
+            }
+            var phoneExists = await ValidatePhoneAsync(dto.Email, customerId);
+            if (phoneExists)
+            {
+                return (null, "Telefoonnummer is al geregistreerd");
             }
 
             // customer ophalen uit db
-            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == id);
-
-            if (!customerExists)
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            
+            if (customer == null)
             {
-                string error = $"Customer met id {id} niet gevonden";
-                return (false, error);
+                return (null, $"Klant met id {customerId} niet gevonden");
             }
 
-            _context.Entry(customer).State = EntityState.Modified;
+            // update customer met de nieuwe input van de dto
+            customer.FirstName = dto.FirstName;
+            customer.Infix = dto.Infix;
+            customer.LastName = dto.LastName;
+            customer.Email = dto.Email;
+            customer.Phone = dto.Phone;
+
+            // wijzigingen opslaan 
             await _context.SaveChangesAsync();
 
-            return (true, null);
+            // customer ophalen na wijzigingen om terug te laten zien aan de client
+            var updatedCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            // hier zou beter ook een response DTO kunnen worden gebruikt om niet de volledige interne data te tonen,
+            // maar omdat deze endpoint alleen gebruikt wordt door de admin, kan het hier wel zonder groot risico
+
+            return (updatedCustomer, null);
         }
 
+        //voor PATCH /api/customer
+        public async Task<(Customer? customer, string? error)> PatchCustomerAsync(int customerId, PatchCustomerDTO dto)
+        {
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+
+            if (customer == null)
+                return (null, $"Customer met id {customerId} niet gevonden");
+
+            if (!string.IsNullOrEmpty(dto.Email))
+            {
+                var emailExists = await ValidateEmailAsync(dto.Email, customerId);
+                if (emailExists)
+                    return (null, "Email is al geregistreerd");
+                customer.Email = dto.Email;
+            }
+
+            if (!string.IsNullOrEmpty(dto.Phone))
+            {
+                var phoneExists = await ValidatePhoneAsync(dto.Phone, customerId);
+                if (phoneExists)
+                    return (null, "Telefoonnummer is al geregistreerd");
+                customer.Phone = dto.Phone;
+            }
+
+            if (!string.IsNullOrEmpty(dto.FirstName))
+                customer.FirstName = dto.FirstName;
+
+            if (!string.IsNullOrEmpty(dto.Infix))
+                customer.Infix = dto.Infix;
+
+            if (!string.IsNullOrEmpty(dto.LastName))
+                customer.LastName = dto.LastName;
+
+            await _context.SaveChangesAsync();
+
+            return (customer, null);
+        }
+
+
+        // valideren of email en telefoonnummer al bestaan in database bij andere klanten
+        private async Task<bool> ValidateEmailAsync(string email, int customerId)
+        {
+            var emailExists = await _context.Customers
+                .AnyAsync(c => c.Email == email && c.CustomerId != customerId);
+            
+            if (emailExists)
+            {
+                return true;
+            }
+            return false; 
+
+        }
+        private async Task<bool> ValidatePhoneAsync(string phone, int customerId)
+        {
+            var phoneExists = await _context.Customers
+                .AnyAsync(c => c.Phone == phone && c.CustomerId != customerId);
+
+            if (phoneExists)
+            {                
+                return true;
+            }
+            return false; 
+        }
 
         // voor DELETE /api/customer
         public async Task<(bool success, string? error)> DeleteCustomerAsync(int id)

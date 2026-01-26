@@ -1,10 +1,11 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using API.DbServices;
 
 namespace API.Controllers
 {
@@ -13,29 +14,11 @@ namespace API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly LeMarconnesDbContext _context;
+        private readonly AccountDbService _dbService;
 
-        public AccountController(LeMarconnesDbContext context)
+        public AccountController(AccountDbService dbService)
         {
-            _context = context;
-        }
-
-        // GET: api/account/available/{username}
-        [AllowAnonymous] 
-        [HttpGet("available/{username}")]
-        public async Task<IActionResult> CheckUsernameExists(string username)
-        {
-            if (username.Length <= 3 || username.Length > 15 || !username.All(char.IsLetterOrDigit))
-            {
-                return Conflict("Ongeldige usernameinput");
-            }
-            var existingUsername = await _context.Accounts.AnyAsync(a => a.Username == username);
-
-            if (existingUsername)
-            {
-                return Conflict("Gebruikersnaam bestaat al");
-            }
-            return Ok("Gebruikersnaam is beschikbaar");          
+            _dbService = dbService;
         }
 
         // POST: api/account - endpoint voor admins only om handmatig non-customer accounts aan te maken
@@ -43,31 +26,19 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(AccountDTO dto)
         {
-            if (dto.Role == Account.Role.Customer)
-            {
-                return Conflict("Gebruik registratie endpoint om klantaccounts aan te maken");
-            }
-
-            // wachtwoord hashen 
-            var hasher = new PasswordHasher<Account>();
-            var passwordHash = hasher.HashPassword(null, dto.PlainPassword);
-
             try
             {
-                // 2e account constructor gebruiken voor non customers 
-                var account = new Account(
-                    dto.Username,
-                    passwordHash,
-                    dto.Role);
-
-                _context.Accounts.Add(account);
-                await _context.SaveChangesAsync();
+                var account = await _dbService.PostAccountAsync(dto);
 
                 return Ok(account);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) // returned constructor validaties
             {
                 return Conflict(ex.Message);
+            }
+            catch (DbUpdateException) // returned database fouten tijdens opslaan
+            {
+                return StatusCode(500, "Er is een fout opgetreden tijdens het opslaan van het account.");
             }
         }
 
@@ -76,10 +47,8 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
-            var allAccounts = await _context.Accounts
-           .ToListAsync();
-
-            return allAccounts;
+            var accounts = await _dbService.GetAllAccountsAsync();
+            return Ok(accounts);
         }
 
 
@@ -88,62 +57,27 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(int id)
         {
-            var account = await _context.Accounts
-                .FirstOrDefaultAsync(c => c.AccountId == id);
-
+            var (account, errorMessage) =  await _dbService.GetAccountByIdAsync(id);
             if (account == null)
             {
-                return NotFound();
+                return NotFound(errorMessage);
             }
-
             return account;
         }
 
-        // PUT: api/account
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(int id, Account account)
-        {
-            if (id != account.AccountId)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(account).State = EntityState.Modified;
  
-            await _context.SaveChangesAsync();
-
-            if (!AccountExists(id))
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-
-        // bool voor PUT method
-        private bool AccountExists(int id)
-        {
-            return _context.Accounts.Any(e => e.AccountId == id);
-        }
-
-
         // DELETE: api/account
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
-            var account = await _context.Accounts.FindAsync(id);
+            var (succesfullyDeleted, notFoundErrormsg) = await _dbService.DeleteAccountAsync(id);
 
-            if (account == null)
+            if (!succesfullyDeleted)
             {
-                return NotFound();
+                return NotFound(notFoundErrormsg);
             }
-
-            _context.Accounts.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok("Account succesvol verwijderd");
         }
 
 

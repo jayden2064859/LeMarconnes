@@ -1,10 +1,11 @@
 using API.DbServices;
 using API.Services;
-using ClassLibrary.Data;
+using API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net.Http.Headers;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Services.AddScoped<AuthenticateDbService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<RegistrationDbService>();
 builder.Services.AddScoped<CustomerDbService>();
+builder.Services.AddScoped<AccountDbService>();
+builder.Services.AddScoped<AccommodationDbService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -83,11 +86,12 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
 }
 
 app.UseHttpsRedirection();

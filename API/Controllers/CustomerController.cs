@@ -29,7 +29,6 @@ namespace API.Controllers
             {
                 return Conflict(error);
             }
-
             return Ok(customer);
         }
 
@@ -44,7 +43,6 @@ namespace API.Controllers
             {
                 return Conflict(error);
             }
-
             return Ok(customers); 
         }
 
@@ -59,7 +57,6 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok(customer);
         }
 
@@ -74,22 +71,32 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok(reservations);
         }
 
         // PUT: api/customer/{id} - gegevens van specifieke customer bewerken
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, Customer customer)
+        public async Task<ActionResult<Customer>> PutCustomer(int id, UpdateCustomerDTO dto)
         {
-            var (success, error) = await _dbService.UpdateCustomerAsync(id, customer);
+            var (updatedCustomer, notFoundMsg) = await _dbService.UpdateCustomerAsync(id, dto);
 
-            if (!success)
+            if (updatedCustomer == null)
             {
-                return NotFound(error);
+                return NotFound(notFoundMsg);
             }
-            return Ok("Gegevens succesvol gewijzigd");
+            return Ok(updatedCustomer);
+        }
+
+        [HttpPatch("{customerId}")]
+        public async Task<IActionResult> PatchCustomer(int customerId, PatchCustomerDTO dto)
+        {
+            var (customer, error) = await _dbService.PatchCustomerAsync(customerId, dto);
+
+            if (error != null)
+                return BadRequest(error);
+
+            return Ok(customer);
         }
 
         // DELETE: api/customer/{id} - specifieke customer verwijderen
@@ -103,7 +110,6 @@ namespace API.Controllers
             {
                 return NotFound(error);
             }
-
             return Ok("Customer verwijderd");
         }
     }

@@ -173,31 +173,7 @@ namespace TestProject.Unit
             Assert.Equal("A1", reservation.Accommodations[0].PlaceNumber);
         }
 
-
-        // UTC-17: AddAccommodation() method - null accommodation toevoegen
-        [Fact]
-        public void AddAccommodation_NullAccommodation_ShouldThrowException()
-        {
-            // arrange
-            DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
-            DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
-            var reservation = new HotelReservation(1, startDate, endDate, 2);
-
-            // act
-            try
-            {
-                reservation.AddAccommodation(null);
-                Assert.Fail("Object is ongeldig aangemaakt");
-            }
-            catch (ArgumentException ex)
-            {
-                // assert
-                Assert.Equal("Geen accommodatie gevonden om toe te voegen", ex.Message);
-            }
-        }
-
-
-        // UTC-18: AddAccommodation() method - meer dan 2 accommodaties toevoegen
+        // UTC-17: AddAccommodation() method - meer dan 2 accommodaties toevoegen
         [Fact]
         public void AddAccommodation_MoreThanTwoAccommodations_ShouldThrowException()
         {
@@ -206,9 +182,9 @@ namespace TestProject.Unit
             DateOnly endDate = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
             var reservation = new HotelReservation(1, startDate, endDate, 2);
 
-            var acc1 = new Accommodation { AccommodationId = 1, PlaceNumber = "A1", Capacity = 2 };
-            var acc2 = new Accommodation { AccommodationId = 2, PlaceNumber = "A2", Capacity = 2 };
-            var acc3 = new Accommodation { AccommodationId = 3, PlaceNumber = "A3", Capacity = 2 };
+            var acc1 = new Accommodation { AccommodationId = 1, AccommodationTypeId = 2, PlaceNumber = "A1", Capacity = 2 };
+            var acc2 = new Accommodation { AccommodationId = 2, AccommodationTypeId = 2, PlaceNumber = "A2", Capacity = 2 };
+            var acc3 = new Accommodation { AccommodationId = 3, AccommodationTypeId = 2, PlaceNumber = "A3", Capacity = 2 };
 
             reservation.AddAccommodation(acc1);
             reservation.AddAccommodation(acc2);

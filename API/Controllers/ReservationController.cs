@@ -1,5 +1,4 @@
 ﻿using API.DbServices;
-using ClassLibrary.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,99 +21,31 @@ namespace API.Controllers
         }
 
         // POST: api/reservation/camping - nieuwe reservering aanmaken
-        [Authorize(Roles = "Admin,Customer")] // endpoint is alleen voor klanten bedoelt, maar admin mag nog steeds access
+        [Authorize(Roles = "Customer")] // endpoint is alleen voor klanten bedoelt, maar admin mag nog steeds access
         [HttpPost("camping")]
         public async Task<ActionResult<CampingReservationResponseDTO>> PostCampingReservation(CampingReservationDTO dto)
         {
-            // database communicatie is encapsulated in API services
-            // check in de db of er al een reservering bestaat die overlapped in datum
-            var accommodationConflictMessage = await _dbService.ValidateAccommodationAvailabilityAsync(
-            dto.StartDate,
-            dto.EndDate,
-            dto.AccommodationIds);
-
-            if (accommodationConflictMessage != null)
-            {
-                return Conflict(accommodationConflictMessage);
-            }
-
-            // specifieke customer ophalen 
-            var (customer, customerNotFoundMessage) = await _dbService.GetCustomerAsync(dto.CustomerId);
-
-            if (customerNotFoundMessage != null)
-            {
-                return NotFound(customerNotFoundMessage);
-            }
-
-            // geselecteerde accommodaties ophalen
-            var (accommodations, accommodationNotFoundMessage) = await _dbService.GetSelectedAccommodationsAsync(dto.AccommodationIds);
-
-            if (accommodationNotFoundMessage != null)
-            {
-                return NotFound(accommodationNotFoundMessage);
-            }
-
-            // tarieven voor camping ophalen 
-            var (tariffs, tariffsNotFoundMessage) = await _dbService.GetCampingTariffsAsync(1); // 1 = AccommodationTypeId 1 (Camping tarieven)
-
-            if (tariffsNotFoundMessage != null)
-            {
-                return NotFound(tariffsNotFoundMessage);
-            }
-
             try
+            {   // probeer de nieuwe reservering toe te voegen via de service (geeft nullable tuple terug voor reservering object of errormessage)
+                var (reservationResponseDto, errorMessage) = await _dbService.AddCampingReservationAsync(dto);
+
+                if (errorMessage != null)
+                {
+                    return Conflict(errorMessage);
+                }
+                return Ok(reservationResponseDto);
+            }
+
+            catch (ArgumentException ex) // vangt de validations van constructor op
             {
-                // maak nieuwe reservering aan met constructor
-                // var of CampingReservation moet gebruikt worden omdat camping-specifieke properties beschikbaar moeten zijn voor de responseDto
-                var campingReservation = new CampingReservation(
-                    dto.CustomerId,
-                    dto.StartDate,
-                    dto.EndDate,
-                    dto.AdultsCount,
-                    dto.Children0_7Count,
-                    dto.Children7_12Count,
-                    dto.DogsCount,
-                    dto.HasElectricity,
-                    dto.ElectricityDays
-                );
+                return Conflict(ex.Message);
+            }
+            catch (DbUpdateException) // database errors
+            {
+                return StatusCode(500, "Er is een fout opgetreden bij het opslaan van de reservering");
+            }
+        }
 
-                // class method van abstract Reservation wordt gebruikt om aantal overnachtingen te valideren 
-                bool valid = campingReservation.ValidateNumberOfNights(dto.StartDate, dto.EndDate);
-
-                if (!valid)
-                {
-                    return Conflict("Maximaal voor 4 weken reserveren toegestaan");
-                }
-                             
-                // specifieke customer linken aan reservation
-                campingReservation.Customer = customer;
-
-                // voeg accommodaties toe aan de reservering
-                foreach (var accommodation in accommodations)
-                {
-                    campingReservation.AddAccommodation(accommodation); // inheritance (campingReservation gebruikt parent class Reservation methode)
-                }
-
-                // bereken totale prijs met de override method van CampingReservation class
-                campingReservation.TotalPrice = campingReservation.CalculatePrice(tariffs);
-
-
-                var reservationCreated = await _dbService.AddReservationAsync(campingReservation);
-
-                var responseDto = new CampingReservationResponseDTO
-                {
-                    FirstName = campingReservation.Customer.FirstName,
-                    Infix = campingReservation.Customer.Infix,
-                    LastName = campingReservation.Customer.LastName,
-                    StartDate = campingReservation.StartDate,
-                    EndDate = campingReservation.EndDate,
-                    AdultsCount = campingReservation.AdultsCount,
-                    Children0_7Count = campingReservation.Children0_7Count,
-                    Children7_12Count = campingReservation.Children7_12Count,
-                    DogsCount = campingReservation.DogsCount,
-                    HasElectricity = campingReservation.HasElectricity,
-                    ElectricityDays = campingReservation.ElectricityDays,
-                    TotalPrice = campingReservation.TotalPrice,
 
                     // linq gebruiken om PlaceNumbers van gekozen accommodaties op te halen
                     AccommodationPlaceNumbers = campingReservation.Accommodations
@@ -256,22 +187,7 @@ namespace API.Controllers
 
         }
 
-        // PUT: api/Reservation/{id} - specifieke reservering bewerken
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
-        {
-            var (succesfullyUpdated, errorMessage) = await _dbService.UpdateReservationAsync(id, reservation);
-
-            if (!succesfullyUpdated)
-            {
-                return NotFound(errorMessage);
-            }
-
-            return Ok();
-        }
-
-        // DELETE: api/Reservation/5 - specifieke reservering verwijderen
+        // DELETE: api/Reservation/{id} - specifieke reservering verwijderen
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
@@ -282,10 +198,7 @@ namespace API.Controllers
             {
                 return NotFound(errorMessage);
             }
-            return Ok();
-
-
-
+            return Ok($"Reservering met id {id} verwijderd.");
 
         }
     }

@@ -13,12 +13,10 @@ namespace API.Controllers
     {
         
         private readonly AuthenticateDbService _dbService;
-        private readonly JwtService _jwtService;
 
-        public AuthenticateController(AuthenticateDbService dbService, JwtService jwtService)
+        public AuthenticateController(AuthenticateDbService dbService)
         {
             _dbService = dbService;
-            _jwtService = jwtService;
         }
 
         // POST: api/authenticate
@@ -31,36 +29,13 @@ namespace API.Controllers
                 return BadRequest("Ongeldige invoer");
             }
 
-            // zoek account op basis van gebruikersnaam uit Dto
-            var (account, notFoundMessage) = await _dbService.GetAccountByUsernameAsync(dto.Username);
+            var (authenticateResponseDTO, errorMessage) = await _dbService.AuthenticateAsync(dto);
 
-            if (notFoundMessage != null)
+            if (authenticateResponseDTO == null)
             {
-                return NotFound("Gebruikersnaam bestaat niet");
+                return Unauthorized(errorMessage);
             }
-
-            // verify wachtwoord
-            // het wachtwoord in de Dto wordt gehashed en vergeleken met de opgeslagen hash van het matchende account in de database
-            var (isValid, unauthorizedMessage) = await _dbService.VerifyPasswordAsync(account, dto.Password);
-            
-            if (!isValid) // in dit geval is het veiliger om op de boolean specifiek te checken voor authentication ipv errormessage 
-            {
-                return Unauthorized(unauthorizedMessage);
-            }
-
-            // na geldige login wordt een jwt token gegenereerd via de service. Met deze token kan een ingelogde user de endpoints gebruiken
-            var token = _jwtService.GenerateToken(account);
-
-            var response = new AuthenticateResponseDTO
-            {
-                Username = account.Username,
-                Role = account.AccountRole,
-                CustomerId = account.CustomerId,
-                FirstName = account.Customer?.FirstName,
-                Token = token
-            };
-
-            return Ok(response);
+            return Ok(authenticateResponseDTO);
         }
     }
 }

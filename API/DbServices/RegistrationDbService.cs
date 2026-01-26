@@ -1,10 +1,8 @@
-﻿using ClassLibrary.Data;
+﻿using API.Data;
 using ClassLibrary.DTOs;
 using ClassLibrary.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace API.DbServices
 {
@@ -18,9 +16,10 @@ namespace API.DbServices
         }
 
         // check of username al bestaat
-        public async Task<string?> ValidateUsernameAsync(string username)
+        private async Task<string?> ValidateUsernameAsync(string username)
         {
-            if (await _context.Accounts.AnyAsync(a => a.Username == username))
+            var usernameExists = await _context.Accounts.AnyAsync(a => a.Username == username);
+            if (usernameExists)
             {
                 return "Username is al geregistreerd";
             }
@@ -28,9 +27,10 @@ namespace API.DbServices
         }
 
         // check of email al bestaat
-        public async Task<string?> ValidateEmailAsync(string email)
+        private async Task<string?> ValidateEmailAsync(string email)
         {
-            if (await _context.Customers.AnyAsync(c => c.Email == email))
+            var emailExists = await _context.Customers.AnyAsync(c => c.Email == email);
+            if (emailExists)
             {
                 return "Email is al geregistreerd";
             }
@@ -38,9 +38,10 @@ namespace API.DbServices
         }
 
         // check of telefoonnummer al bestaat
-        public async Task<string?> ValidatePhoneAsync(string phone)
+        private async Task<string?> ValidatePhoneAsync(string phone)
         {
-            if (await _context.Customers.AnyAsync(c => c.Phone == phone))
+            var phoneExists = await _context.Customers.AnyAsync(c => c.Phone == phone);
+            if (phoneExists)
             {
                 return "Telefoonnummer is al geregistreerd";
             }
@@ -48,8 +49,33 @@ namespace API.DbServices
         }
 
         // customer + account object aanmaken
-        public async Task CreateUserAsync(RegistrationDTO dto)
+        public async Task<string?> CreateUserAsync(RegistrationDTO dto)
         {
+            // private methods van de class gebruiken voor validatie
+            var usernameErrorMsg = await ValidateUsernameAsync(dto.Username);
+
+            // username validatie
+            if (usernameErrorMsg != null)
+            {
+                return usernameErrorMsg;
+            }
+           
+            // email validatie
+            var emailErrorMsg =  await ValidateEmailAsync(dto.Email);
+            
+            if (emailErrorMsg != null)
+            {
+                return emailErrorMsg;
+            }
+            
+            // telefoonnummer validatie
+            var phoneErrorMsg = await ValidatePhoneAsync(dto.Phone);
+            
+            if (phoneErrorMsg != null)
+            {
+                return phoneErrorMsg;
+            }
+
             // transaction beginnen om ervoor te zorgen dat beide klant EN accountobject succesvol aangemaakt worden. als 1 mislukt, dan wordt niks toegevoegd (rollback)
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -82,6 +108,7 @@ namespace API.DbServices
                 await transaction.RollbackAsync();
                 throw;
             }
+            return null; // null returnen als alles succesvol is verlopen (geen returntype nodig na registratie)
 
 
         }

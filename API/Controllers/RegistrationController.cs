@@ -15,42 +15,28 @@ namespace API.Controllers
 
         public RegistrationController(RegistrationDbService dbService)
         {
-            _dbService = dbService; // constructor injection
+            _dbService = dbService; 
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationDTO dto)
-        {
-            // username check
-            var usernameError = await _dbService.ValidateUsernameAsync(dto.Username);
-            if (usernameError != null)
-            {
-                return Conflict(usernameError);
-            }
-
-            // email check
-            var emailError = await _dbService.ValidateEmailAsync(dto.Email);
-            if (emailError != null)
-            {
-                return Conflict(emailError);
-
-            }
-
-            // telefoonnummer check
-            var phoneError = await _dbService.ValidatePhoneAsync(dto.Phone);
-            if (phoneError != null)
-            {
-                return Conflict(phoneError);
-            }
-              
+        {            
             try
             {
-                await _dbService.CreateUserAsync(dto);
+                var registrationError = await _dbService.CreateUserAsync(dto);
+                if (registrationError != null)
+                {
+                    return Conflict(registrationError);
+                }
                 return Ok("Registratie voltooid");
             }
             catch (ArgumentException ex) // constructor validaties van account + customer object worden hier opgevangen
             {
                 return Conflict(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return StatusCode(500, "Er is een fout opgetreden tijdens het opslaan van de registratie.");
             }
         }
 

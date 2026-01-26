@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 
-namespace ClassLibrary.Data
+namespace API.Data
 {
     public class LeMarconnesDbContext : DbContext
     {
@@ -168,7 +168,6 @@ namespace ClassLibrary.Data
                 .HasForeignKey<Account>(a => a.CustomerId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade); // Als een customer gedelete wordt, wordt het gelinkte account ook ge-delete (anders zijn er accounts in een invalid state)
-
 
             
             modelBuilder.Entity<Reservation>()

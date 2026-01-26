@@ -2,7 +2,7 @@ using MVC.HttpServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var baseAdress = new Uri("https://lemarconnesapi-fmevbzcmbaerffa3.westeurope-01.azurewebsites.net");
+var baseAdress = new Uri("https://bed-api-team5-lemarc-bwbqcuh3ewcwc6et.westeurope-01.azurewebsites.net"); // moet https zijn, anders accepteerd azure de jwt token niet (401 error)
 
 // dependency injection voor service api connecties
 builder.Services.AddHttpClient<LoginHttpService>(client =>

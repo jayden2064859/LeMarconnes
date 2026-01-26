@@ -40,7 +40,7 @@ namespace API.Controllers
             {
                 return Conflict(ex.Message);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException) // database errors
             {
                 return StatusCode(500, "Er is een fout opgetreden bij het opslaan van de reservering");
             }

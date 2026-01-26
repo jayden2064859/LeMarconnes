@@ -42,8 +42,6 @@ namespace API.Controllers
             }
         }
 
-
-
         // GET: api/account
         [Authorize(Roles = "Admin,Employee")] // medewerkers mogen accountgegevens inzien (niet bewerken)
         [HttpGet]
@@ -73,11 +71,11 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
-            var (succesfullyDeleted, errorMessage) = await _dbService.DeleteAccountAsync(id);
+            var (succesfullyDeleted, notFoundErrormsg) = await _dbService.DeleteAccountAsync(id);
 
             if (!succesfullyDeleted)
             {
-                return Conflict(errorMessage);
+                return NotFound(notFoundErrormsg);
             }
             return Ok("Account succesvol verwijderd");
         }

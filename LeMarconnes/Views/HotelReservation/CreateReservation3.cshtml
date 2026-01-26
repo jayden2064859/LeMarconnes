@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Hotel reservering - Stap 3: Details";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Hotelreservering - Stap 3: Details invullen</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="col-md-8 mx-auto">
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="CreateReservation3" asp-controller="HotelReservation" method="post">
+
+                        <div class="mb-4">
+                            <h5>Aantal gasten</h5>
+                            <p class="text-muted small">Geef aan met hoeveel personen u in de kamer(s) verblijft.</p>
+                            <div class="mb-3">
+                                <label class="form-label">Totaal aantal personen *</label>
+                                <input type="number" name="personCount" value="1" min="1" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border small">
+                            <i class="bi bi-info-circle me-2"></i>
+                            De definitieve prijs wordt berekend op basis van het aantal personen en de gekozen kamer(s).
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("CreateReservation2")" class="btn btn-outline-secondary">← Terug</a>
+                            <button type="submit" class="btn btn-success">Reservering afronden</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

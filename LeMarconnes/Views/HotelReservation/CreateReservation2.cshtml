@@ -1,0 +1,76 @@
+﻿@model ClassLibrary.ViewModels.CreateReservation2ViewModel
+@{
+    ViewData["Title"] = "Hotel reservering - Stap 2: Accommodaties";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Hotelreservering - Stap 2: Kamers selecteren</h2>
+
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="alert alert-info" style="max-width:800px;">
+            <strong>Geselecteerde periode:</strong> @Model.StartDate.ToString("dd-MM-yyyy") t/m @Model.EndDate.ToString("dd-MM-yyyy")
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="alert alert-danger" style="max-width:800px;">@TempData["Error"]</div>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (!Model.AvailableAccommodations.Any())
+                    {
+                        <div class="alert alert-warning">
+                            Geen hotelkamers beschikbaar voor deze periode.
+                            <a href="@Url.Action("CreateReservation1")" class="btn btn-sm btn-outline-primary ms-2">
+                                Andere datums kiezen
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="CreateReservation2" asp-controller="HotelReservation" method="post">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Selecteer hotelkamer(s) *</strong></label>
+                                <p class="text-muted">Selecteer de gewenste kamer(s) voor uw verblijf:</p>
+
+                                <div class="row">
+                                    @foreach (var a in Model.AvailableAccommodations)
+                                    {
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check card h-100">
+                                                <div class="card-body">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="accommodationIds" value="@a.AccommodationId"
+                                                           id="acc_@a.AccommodationId" />
+                                                    <label class="form-check-label" for="acc_@a.AccommodationId">
+                                                        <strong>Kamer @a.PlaceNumber</strong><br />
+                                                        <small class="text-muted">Capaciteit: @a.Capacity pers.</small>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="@Url.Action("CreateReservation1")" class="btn btn-outline-secondary">
+                                    ← Terug
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Volgende →
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

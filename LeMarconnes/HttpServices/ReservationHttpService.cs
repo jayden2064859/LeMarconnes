@@ -59,8 +59,29 @@ namespace MVC.HttpServices
             return (responseDto, null);
         }
 
+        // Yassir
+        // hotel POST endpoint call
+        public async Task<(HotelReservationResponseDTO?, string?)> CreateHotelReservationAsync(HotelReservationDTO reservationDto, string? token)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/reservation/hotel");
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
 
-        // hotel POST endpoint call moet hier
+            request.Content = JsonContent.Create(reservationDto);
+            // endpoint call doen met jwt token als header
+            var response = await _httpClient.SendAsync(request);
 
+            // return response
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (null, errorContent);
+            }
+
+            var responseDto = await response.Content.ReadFromJsonAsync<HotelReservationResponseDTO>();
+            return (responseDto, null);
+        }
     }
 }

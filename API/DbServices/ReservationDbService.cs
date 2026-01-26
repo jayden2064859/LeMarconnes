@@ -84,6 +84,21 @@ namespace API.DbServices
             return (tariffs, null);
         }
 
+        // Yassir
+        public async Task<(List<Tariff> tariffs, string errorMessage)> GetHotelTariffsAsync(int accomodationTypeId)
+        {
+            // Haal alle tarieven op die horen bij het hotel (Type 2)
+            var tariffs = await _context.Tariffs
+                .Where(t => t.AccommodationTypeId == 2)
+                .ToListAsync();
+
+            if (!tariffs.Any())
+            {
+                return (null, "Geen tarieven gevonden");
+            }
+
+            return (tariffs, null);
+        }
         public async Task<Reservation> AddReservationAsync(Reservation reservation)  // kan voor alle subtypes gebruikt worden 
         {
             // resevering toevoegen aan db

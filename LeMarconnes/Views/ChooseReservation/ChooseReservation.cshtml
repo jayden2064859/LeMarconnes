@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Kies uw verblijf";
+}
+
+<div class="container text-center mt-5">
+    <h2 class="mb-4">Wat wilt u reserveren bij Le Marconnès?</h2>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body py-5">
+                    <h3>Camping</h3>
+                    <p>Reserveer een plek voor tent, caravan of camper.</p>
+                    <a asp-controller="CampingReservation" asp-action="CreateReservation1" class="btn btn-primary btn-lg w-100">Ga naar Camping</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm border-success">
+                <div class="card-body py-5">
+                    <h3>Hotel</h3>
+                    <p>Reserveer een luxe hotelkamer.</p>
+                    <a asp-controller="HotelReservation" asp-action="CreateReservation1" class="btn btn-success btn-lg w-100">Ga naar Hotel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

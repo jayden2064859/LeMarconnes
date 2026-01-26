@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Hotel reservering - Stap 1: Datums";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Hotelreservering - Stap 1: Datums selecteren</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <form asp-action="CreateReservation1" asp-controller="HotelReservation" method="post">
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">Startdatum *</label>
+                            <input type="date" id="startDate" name="startDate" class="form-control"
+                                   value="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")"
+                                   min="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="endDate" class="form-label">Einddatum *</label>
+                            <input type="date" id="endDate" name="endDate" class="form-control"
+                                   value="@DateOnly.FromDateTime(DateTime.Today.AddDays(1)).ToString("yyyy-MM-dd")"
+                                   min="@DateOnly.FromDateTime(DateTime.Today.AddDays(1)).ToString("yyyy-MM-dd")" />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Volgende →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

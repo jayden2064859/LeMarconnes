@@ -1,0 +1,56 @@
+﻿@model ClassLibrary.ViewModels.HotelReservationConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Hotel reservering Bevestiging";
+}
+
+<div class="container mt-5">
+    <h2>Reservering Bevestigd</h2>
+
+    @if (TempData["ReservationSuccess"] != null)
+    {
+        <div style="color: green; margin-bottom: 20px;">
+            @TempData["ReservationSuccess"]
+        </div>
+    }
+
+    <table style="width: 50%; border-collapse: collapse;">
+        <tr>
+            <th style="text-align: left; padding: 5px;">Klantnaam</th>
+            <td style="padding: 5px;">@Model.FirstName @Model.Infix @Model.LastName</td>
+        </tr>
+        <tr>
+            <th style="text-align: left; padding: 5px;">Startdatum</th>
+            <td style="padding: 5px;">@Model.StartDate.ToString("yyyy-MM-dd")</td>
+        </tr>
+        <tr>
+            <th style="text-align: left; padding: 5px;">Einddatum</th>
+            <td style="padding: 5px;">@Model.EndDate.ToString("yyyy-MM-dd")</td>
+        </tr>
+        <tr>
+            <th style="text-align: left; padding: 5px;">Aantal nachten</th>
+            <td style="padding: 5px;">@(Model.EndDate.DayNumber - Model.StartDate.DayNumber)</td>
+        </tr>
+
+        <tr>
+            <th style="text-align: left; padding: 5px;">Aantal personen</th>
+            <td style="padding: 5px;">@Model.PersonCount</td>
+        </tr>
+
+        <tr>
+            <td colspan="2" style="height: 20px;"></td>
+        </tr>
+        <tr>
+            <th style="text-align: left; padding: 5px;">Gereserveerde kamers</th>
+            <td style="padding: 5px;">@string.Join(", ", Model.AccommodationPlaceNumbers)</td>
+        </tr>
+        <tr>
+            <th style="text-align: left; padding: 5px;">Totaalprijs</th>
+            <td style="padding: 5px;">€@Model.TotalPrice.ToString("0.00")</td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <a href="@Url.Action("Homepage", "Home")" class="btn btn-outline-primary">Terug naar Home</a>
+    </div>
+</div>

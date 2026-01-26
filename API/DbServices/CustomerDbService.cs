@@ -98,15 +98,18 @@ namespace API.DbServices
         // voor PUT /api/customer
         public async Task<(Customer? customer, string? error)> UpdateCustomerAsync(int customerId, UpdateCustomerDTO dto)
         {
-            var emailExists = await ValidateEmailAsync(dto.Email, customerId);
-            if (emailExists)
+            // valideren of email al registreerd is         
+            var emailConflictMsg = await ValidateEmailAsync(dto.Email, customerId);
+            if (emailConflictMsg != null)
             {
-                return (null, "Email is al geregistreerd");
+                throw new ArgumentException(emailConflictMsg);
             }
-            var phoneExists = await ValidatePhoneAsync(dto.Email, customerId);
-            if (phoneExists)
+
+            // valideren of telefoonnummer al registreerd is         
+            var phoneConflictMsg = await ValidatePhoneAsync(dto.Email, customerId);
+            if (phoneConflictMsg != null)
             {
-                return (null, "Telefoonnummer is al geregistreerd");
+                throw new ArgumentException(phoneConflictMsg);
             }
 
             // customer ophalen uit db
@@ -137,69 +140,30 @@ namespace API.DbServices
             return (updatedCustomer, null);
         }
 
-        //voor PATCH /api/customer
-        public async Task<(Customer? customer, string? error)> PatchCustomerAsync(int customerId, PatchCustomerDTO dto)
-        {
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-
-            if (customer == null)
-                return (null, $"Customer met id {customerId} niet gevonden");
-
-            if (!string.IsNullOrEmpty(dto.Email))
-            {
-                var emailExists = await ValidateEmailAsync(dto.Email, customerId);
-                if (emailExists)
-                    return (null, "Email is al geregistreerd");
-                customer.Email = dto.Email;
-            }
-
-            if (!string.IsNullOrEmpty(dto.Phone))
-            {
-                var phoneExists = await ValidatePhoneAsync(dto.Phone, customerId);
-                if (phoneExists)
-                    return (null, "Telefoonnummer is al geregistreerd");
-                customer.Phone = dto.Phone;
-            }
-
-            if (!string.IsNullOrEmpty(dto.FirstName))
-                customer.FirstName = dto.FirstName;
-
-            if (!string.IsNullOrEmpty(dto.Infix))
-                customer.Infix = dto.Infix;
-
-            if (!string.IsNullOrEmpty(dto.LastName))
-                customer.LastName = dto.LastName;
-
-            await _context.SaveChangesAsync();
-
-            return (customer, null);
-        }
-
 
         // valideren of email en telefoonnummer al bestaan in database bij andere klanten
-        private async Task<bool> ValidateEmailAsync(string email, int customerId)
+        private async Task<string?> ValidateEmailAsync(string email, int customerId)
         {
             var emailExists = await _context.Customers
                 .AnyAsync(c => c.Email == email && c.CustomerId != customerId);
             
             if (emailExists)
             {
-                return true;
+                return "Email is al geregistreerd";
             }
-            return false; 
+            return null; 
 
         }
-        private async Task<bool> ValidatePhoneAsync(string phone, int customerId)
+        private async Task<string?> ValidatePhoneAsync(string phone, int customerId)
         {
             var phoneExists = await _context.Customers
                 .AnyAsync(c => c.Phone == phone && c.CustomerId != customerId);
 
             if (phoneExists)
             {                
-                return true;
+                return "Telefoonnummer is al geregistreerd";
             }
-            return false; 
+            return null; 
         }
 
         // voor DELETE /api/customer

@@ -16,6 +16,7 @@ builder.Services.AddScoped<AuthenticateDbService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<RegistrationDbService>();
 builder.Services.AddScoped<CustomerDbService>();
+builder.Services.AddScoped<AccountDbService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

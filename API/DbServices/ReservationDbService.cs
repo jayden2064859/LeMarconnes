@@ -57,7 +57,7 @@ namespace API.DbServices
 
             // Reservation base class method gebruiken om max aantal overnachtingen te valideren
             var validAmountOfNights = campingReservation.ValidateNumberOfNights(dto.StartDate, dto.EndDate);
-            
+
             if (!validAmountOfNights)
             {
                 return (null, "Ongeldig aantal nachten voor reservering");
@@ -105,6 +105,88 @@ namespace API.DbServices
             return (responseDto, null);
         }
 
+        // // Yassir - methode voor het verwerken van een hotelreservering
+        public async Task<(HotelReservationResponseDTO? dto, string? error)> AddHotelReservationAsync(HotelReservationDTO dto)
+        {
+            // 1. controleren of accommodaties beschikbaar zijn voor de ingevoerde datums
+            var conflict = await ValidateAccommodationAvailabilityAsync(dto.StartDate, dto.EndDate, dto.AccommodationIds);
+            if (conflict != null) return (null, conflict);
+
+            // 2. benodigde data ophalen: klant, accommodaties, tarieven
+            var (customer, customerErr) = await GetCustomerAsync(dto.CustomerId);
+            if (customerErr != null) return (null, customerErr);
+
+            var (accommodations, accErr) = await GetSelectedHotelAccommodationsAsync(dto.AccommodationIds);
+            if (accErr != null) return (null, accErr);
+
+            var (tariffs, tariffErr) = await GetHotelTariffsAsync(2); // Type 2 = Hotel
+            if (tariffErr != null) return (null, tariffErr);
+
+            // 3. maak het hotelreservering object aan
+            var hotelReservation = CreateHotelReservationObject(dto);
+
+            // 4. validaties uitvoeren
+            if (!hotelReservation.ValidateNumberOfNights(dto.StartDate, dto.EndDate))
+                return (null, "Maximaal voor 4 weken reserveren toegestaan");
+
+            hotelReservation.Customer = customer;
+
+            foreach (var acc in accommodations)
+            {
+                hotelReservation.AddAccommodation(acc);
+            }
+
+            // 5. capaciteit valideren en prijs berekenen
+            hotelReservation.ValidateCapacity();
+            hotelReservation.TotalPrice = hotelReservation.CalculatePrice(tariffs);
+
+            // 6. resrevering opslaan in de database
+            _context.Reservations.Add(hotelReservation);
+            await _context.SaveChangesAsync();
+
+            // 7. data mappen naar response DTO en terugsturen
+            return (MapToHotelResponseDto(hotelReservation), null);
+        }
+
+        // // Yassir - methode voor het aanmaken van het hotel object
+        private HotelReservation CreateHotelReservationObject(HotelReservationDTO dto)
+        {
+            return new HotelReservation(
+                dto.CustomerId,
+                dto.StartDate,
+                dto.EndDate,
+                dto.PersonCount
+            );
+        }
+
+        // // Yassir - methode voor het ophalen van alleen hotel-accommodaties
+        private async Task<(List<Accommodation>? accommodations, string? errorMessage)> GetSelectedHotelAccommodationsAsync(List<int> accommodationIds)
+        {
+            var accommodations = await _context.Accommodations
+                .Where(a => accommodationIds.Contains(a.AccommodationId))
+                .Where(a => a.AccommodationTypeId == 2) // Type 2 is voor hotelkamers
+                .ToListAsync();
+
+            if (!accommodations.Any()) return (null, "Geen hotelkamers gevonden");
+            return (accommodations, null);
+        }
+
+        // // Yassir - methode voor het mappen naar de response DTO
+        private HotelReservationResponseDTO MapToHotelResponseDto(HotelReservation res)
+        {
+            return new HotelReservationResponseDTO
+            {
+                FirstName = res.Customer.FirstName,
+                Infix = res.Customer.Infix,
+                LastName = res.Customer.LastName,
+                StartDate = res.StartDate,
+                EndDate = res.EndDate,
+                PersonCount = res.PersonCount,
+                TotalPrice = res.TotalPrice,
+                AccommodationPlaceNumbers = res.Accommodations.Select(a => a.PlaceNumber).ToList()
+            };
+        }
+
         private CampingReservation CreateCampingReservationObject(CampingReservationDTO dto)
         {
             var campingReservation = new CampingReservation(
@@ -147,7 +229,7 @@ namespace API.DbServices
                 .FirstOrDefaultAsync(c => c.CustomerId == customerId);
 
             if (customer == null)
-            { 
+            {
                 return (null, "Klant niet gevonden");
             }
             return (customer, null);
@@ -182,7 +264,7 @@ namespace API.DbServices
             return (tariffs, null);
         }
 
-        // Yassir
+        // // Yassir - Hulpmethode voor het ophalen van de hotel-tarieven
         public async Task<(List<Tariff> tariffs, string errorMessage)> GetHotelTariffsAsync(int accomodationTypeId)
         {
             // Haal alle tarieven op die horen bij het hotel (Type 2)
@@ -252,12 +334,5 @@ namespace API.DbServices
 
             return (true, null); // succesvol deleted = true, errorMessage = null
         }
-
     }
 }
-
-
-
-
-
-

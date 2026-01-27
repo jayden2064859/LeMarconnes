@@ -25,16 +25,16 @@ namespace TestProject.Integration
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.RemoveAll<DbContextOptions<LeMarconnesDbContext>>();
+                    services.RemoveAll<DbContextOptions<LeMarconnesDbContext>>(); // bestaande connectionstring naar AzureDb verwijderen
 
                     services.AddDbContext<LeMarconnesDbContext>(options =>
-                        options.UseSqlite(_connection));
+                        options.UseSqlite(_connection)); // nieuwe sqlite in memory db voor de tests
 
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<LeMarconnesDbContext>();
 
-                    db.Database.EnsureCreated();
+                    db.Database.EnsureCreated(); // zorgt ervoor dat alle entities aangemaakt worden
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions
             {

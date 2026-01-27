@@ -1,11 +1,13 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using API.Data;
+﻿using API.Data;
+using ClassLibrary.DTOs;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace TestProject.Integration
 {
@@ -128,6 +130,35 @@ namespace TestProject.Integration
             var response = await _client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
+
+
+        // admin maakt nieuwe accommodatie aan
+        [Fact]
+        public async Task Admin_Creates_NewAccommodation_ReturnsCreated()
+        {
+            // ARRANGE
+            var authentication = await AuthHelper.GetAuthResponse(_client, "Admin", "admin");
+
+            var newAccommodation = new PostAccommodationDTO
+            {
+                PlaceNumber = "5C",
+                Capacity = 4,
+                AccommodationTypeId = 1
+            };
+
+
+            // ACT
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/accommodation");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authentication.Token);
+            request.Content = JsonContent.Create(newAccommodation);
+            var response = await _client.SendAsync(request);
+
+            // ASSERT
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        }
+
     }
 }
   

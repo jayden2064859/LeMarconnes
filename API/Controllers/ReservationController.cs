@@ -77,7 +77,7 @@ namespace API.Controllers
         
 
         // GET: api/reservation - alle reserveringen ophalen
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin,Employee")] 
         [HttpGet]
         public async Task<ActionResult<List<Reservation>>> GetAllReservations()
         {
@@ -87,7 +87,7 @@ namespace API.Controllers
 
 
         // GET: api/reservation/{id} - specifieke reservering ophalen
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin,Employee")] 
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservationById(int id)
         {

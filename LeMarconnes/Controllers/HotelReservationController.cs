@@ -1,9 +1,7 @@
-﻿// Yassir
+﻿// Yassir - Definitieve Fix
 using System.Text.Json;
 using ClassLibrary.DTOs;
-using ClassLibrary.Models;
 using ClassLibrary.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVC.HttpServices;
 
@@ -16,14 +14,14 @@ namespace MVC.Controllers
         {
             _httpService = httpService;
         }
-        // reservering stap 1: datums kiezen
+
         [HttpGet]
         public IActionResult CreateReservation1()
         {
-            var existingToken = HttpContext.Session.GetString("JwtToken"); // bestaat alleen wanneer gebruiker correct geauthenticeerd is
-            if (string.IsNullOrEmpty(existingToken)) // alleen een authencated user met een jwt token mag reserveringen plaatsen
+            var existingToken = HttpContext.Session.GetString("JwtToken");
+            if (string.IsNullOrEmpty(existingToken))
             {
-                return RedirectToAction("Home", "Homepage");
+                return RedirectToAction("Homepage", "Home");
             }
             return View();
         }
@@ -31,28 +29,26 @@ namespace MVC.Controllers
         [HttpPost]
         public IActionResult CreateReservation1(DateOnly startDate, DateOnly endDate)
         {
-            // Sla datums op in de sessie
-            HttpContext.Session.SetString("ReservationStartDate", startDate.ToString());
-            HttpContext.Session.SetString("ReservationEndDate", endDate.ToString());
+            // Sla op met simpele namen voor consistentie
+            HttpContext.Session.SetString("startDate", startDate.ToString("yyyy-MM-dd"));
+            HttpContext.Session.SetString("endDate", endDate.ToString("yyyy-MM-dd"));
 
             return RedirectToAction("CreateReservation2");
         }
 
-        //Hotelamer kiezen
         [HttpGet]
         public async Task<IActionResult> CreateReservation2()
         {
-            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
-            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
+            var startStr = HttpContext.Session.GetString("startDate");
+            var endStr = HttpContext.Session.GetString("endDate");
 
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            if (string.IsNullOrEmpty(startStr) || string.IsNullOrEmpty(endStr))
             {
-                return RedirectToAction("Login", "Login");
+                return RedirectToAction("CreateReservation1");
             }
 
-            // datums terug converteren van string naar DateOnly
-            DateOnly startDate = DateOnly.Parse(startDateStr);
-            DateOnly endDate = DateOnly.Parse(endDateStr);
+            DateOnly startDate = DateOnly.Parse(startStr);
+            DateOnly endDate = DateOnly.Parse(endStr);
 
             var (accommodations, errorMessage) = await _httpService.GetAvailableAccommodationsAsync(startDate, endDate, 2);
 
@@ -62,82 +58,69 @@ namespace MVC.Controllers
                 return RedirectToAction("CreateReservation1");
             }
 
-            // invullen view
-            var viewModel = new CreateReservation2ViewModel
+            return View(new CreateReservation2ViewModel
             {
                 StartDate = startDate,
                 EndDate = endDate,
                 AvailableAccommodations = accommodations
-            };
-            return View(viewModel);
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateReservation2(List<int> accommodationIds)
         {
-            var customerId = HttpContext.Session.GetString("CustomerId");
-
-            if (string.IsNullOrEmpty(customerId))
-            {
-                return RedirectToAction("Login", "Login");
-            }
-
-            // Controleer of er minimaal 1 kamer is gekozen
             if (accommodationIds == null || accommodationIds.Count == 0)
             {
                 TempData["Error"] = "Selecteer minimaal 1 hotelkamer";
                 return RedirectToAction("CreateReservation2");
             }
 
-            // gekozen IDs opslaan in session als json string
             HttpContext.Session.SetString("ReservationAccommodationIds", JsonSerializer.Serialize(accommodationIds));
-
             return RedirectToAction("CreateReservation3");
         }
 
-        // Alleen nog persoonsaantal kiezen
         [HttpGet]
         public IActionResult CreateReservation3()
         {
-            // datum en accommodaties moeten opgehaald worden om sessie validatie uit te voeren
-            var startDateStr = HttpContext.Session.GetString("ReservationStartDate");
-            var endDateStr = HttpContext.Session.GetString("ReservationEndDate");
-
-            if (string.IsNullOrEmpty(startDateStr) || string.IsNullOrEmpty(endDateStr))
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("startDate")))
             {
-                return RedirectToAction("Login", "Login");
+                return RedirectToAction("CreateReservation1");
             }
-
-            // strings weer terug converteren naar DateOnly omdat datum berekening uitgevoerd moet worden
-            DateOnly startDate = DateOnly.Parse(startDateStr);
-            DateOnly endDate = DateOnly.Parse(endDateStr);
-
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateReservation3(int personCount)
         {
-            // Haal alles op uit de sessie om de DTO te vullen
-            var start = DateOnly.Parse(HttpContext.Session.GetString("ResStart")!);
-            var end = DateOnly.Parse(HttpContext.Session.GetString("ResEnd")!);
-            var accIdsJson = HttpContext.Session.GetString("ResAccIds");
-            var accIds = JsonSerializer.Deserialize<List<int>>(accIdsJson!);
-            var customerId = int.Parse(HttpContext.Session.GetString("CustomerId")!);
+            // Regel 122 FIX: Gebruik de juiste namen die in Stap 1 zijn gezet
+            var startStr = HttpContext.Session.GetString("startDate");
+            var endStr = HttpContext.Session.GetString("endDate");
+            var accIdsJson = HttpContext.Session.GetString("ReservationAccommodationIds");
+            var customerIdStr = HttpContext.Session.GetString("CustomerId");
+            var token = HttpContext.Session.GetString("JwtToken");
 
-            // dto aanmaken
+            // Veiligheidscheck: als er iets mist, crash niet maar ga terug
+            if (startStr == null || endStr == null || accIdsJson == null || customerIdStr == null)
+            {
+                return RedirectToAction("CreateReservation1");
+            }
+
             var hotelDto = new HotelReservationDTO
             {
-                CustomerId = customerId,
-                StartDate = start,
-                EndDate = end,
-                AccommodationIds = accIds,
+                CustomerId = int.Parse(customerIdStr),
+                StartDate = DateOnly.Parse(startStr),
+                EndDate = DateOnly.Parse(endStr),
+                AccommodationIds = JsonSerializer.Deserialize<List<int>>(accIdsJson)!,
                 PersonCount = personCount
             };
 
-            var token = HttpContext.Session.GetString("JwtToken");
-
             var (reservation, errorMessage) = await _httpService.CreateHotelReservationAsync(hotelDto, token);
+
+            if (reservation == null)
+            {
+                TempData["Error"] = errorMessage;
+                return RedirectToAction("CreateReservation3");
+            }
 
             var viewModel = new ReservationConfirmationViewModel
             {
@@ -150,7 +133,9 @@ namespace MVC.Controllers
                 TotalPrice = reservation.TotalPrice,
                 AccommodationPlaceNumbers = reservation.AccommodationPlaceNumbers
             };
-            return View("HotelReservationConfirmation", viewModel);
+
+            // Zorg dat deze view in Views/HotelReservation/ staat
+            return View("ReservationConfirmation", viewModel);
         }
     }
 }

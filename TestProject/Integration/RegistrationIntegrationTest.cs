@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Net.Http.Json;
 
-// UC:01 - Registreren als nieuwe klant
 public class RegistrationIntegrationTests : IClassFixture<WebApplicationFactory<Program>> // IClassFicture zorgt voor shared context voor alle tests binnen de class
 {
     // de integratietests hebben httpclient nodig omdat de volledige applicatieflow van client naar server getest wordt 
@@ -44,6 +43,7 @@ public class RegistrationIntegrationTests : IClassFixture<WebApplicationFactory<
         });
     }
 
+    // UC:01 - Registreren als nieuwe klant
     [Fact]
     public async Task Registration_WithValidData_ReturnsOk()
     {
@@ -62,14 +62,73 @@ public class RegistrationIntegrationTests : IClassFixture<WebApplicationFactory<
         // ACT
         var response = await _client.PostAsJsonAsync("/api/registration", dto);
 
-        // DEBUG
-        var responseContent = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Response: {response.StatusCode}");
-        Console.WriteLine($"Content: {responseContent}");
-
         // ASSERT
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 
+    [Fact]
+    public async Task Registration_WithExistingUsername_ReturnsConflict()
+    {
+        // ARRANGE
+        var dto = new RegistrationDTO
+        {
+            Username = "Customer", // bestaande gebruikersnaam
+            Password = "1234",
+            FirstName = "New",
+            Infix = null,
+            LastName = "Customer",
+            Email = "testcustomerr@gmail.com",
+            Phone = "0639536338"
+        };
 
+        // ACT
+        var response = await _client.PostAsJsonAsync("/api/registration", dto);
+
+        // ASSERT
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Registration_WithExistingEmail_ReturnsConflict()
+    {
+        // ARRANGE
+        var dto = new RegistrationDTO
+        {
+            Username = "availableuser",
+            Password = "1234",
+            FirstName = "New",
+            Infix = null,
+            LastName = "Customer",
+            Email = "test.customer@gmail.com", // bestaand emailadres
+            Phone = "064828692"
+        };
+
+        // ACT
+        var response = await _client.PostAsJsonAsync("/api/registration", dto);
+
+        // ASSERT
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Registration_WithExistingPhone_ReturnsConflict()
+    {
+        // ARRANGE
+        var dto = new RegistrationDTO
+        {
+            Username = "availableuser",
+            Password = "1234",
+            FirstName = "New",
+            Infix = null,
+            LastName = "Customer",
+            Email = "validemail@gmail.com",
+            Phone = "0612345678" // bestaand telefoonnummer
+        };
+
+        // ACT
+        var response = await _client.PostAsJsonAsync("/api/registration", dto);
+
+        // ASSERT
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 }

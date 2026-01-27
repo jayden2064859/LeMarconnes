@@ -1,4 +1,4 @@
-﻿// Yassir - Definitieve Fix
+﻿// Yassir 
 using System.Text.Json;
 using ClassLibrary.DTOs;
 using ClassLibrary.ViewModels;
@@ -29,7 +29,7 @@ namespace MVC.Controllers
         [HttpPost]
         public IActionResult CreateReservation1(DateOnly startDate, DateOnly endDate)
         {
-            // Sla op met simpele namen voor consistentie
+            // session opslaan
             HttpContext.Session.SetString("startDate", startDate.ToString("yyyy-MM-dd"));
             HttpContext.Session.SetString("endDate", endDate.ToString("yyyy-MM-dd"));
 
@@ -92,14 +92,14 @@ namespace MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateReservation3(int personCount)
         {
-            // Regel 122 FIX: Gebruik de juiste namen die in Stap 1 zijn gezet
+            // juist ophalen uit session
             var startStr = HttpContext.Session.GetString("startDate");
             var endStr = HttpContext.Session.GetString("endDate");
             var accIdsJson = HttpContext.Session.GetString("ReservationAccommodationIds");
             var customerIdStr = HttpContext.Session.GetString("CustomerId");
             var token = HttpContext.Session.GetString("JwtToken");
 
-            // Veiligheidscheck: als er iets mist, crash niet maar ga terug
+            // veiligheidscheck
             if (startStr == null || endStr == null || accIdsJson == null || customerIdStr == null)
             {
                 return RedirectToAction("CreateReservation1");
@@ -134,7 +134,7 @@ namespace MVC.Controllers
                 AccommodationPlaceNumbers = reservation.AccommodationPlaceNumbers
             };
 
-            // Zorg dat deze view in Views/HotelReservation/ staat
+            
             return View("ReservationConfirmation", viewModel);
         }
     }
